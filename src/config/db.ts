@@ -17,20 +17,10 @@ export const connectDB: () => Promise<void> = async () => {
       useUnifiedTopology: true
     }
   );
-  console.log(`DB Connected: ${(conn.connection as MongooseConnection).host}`);
-};
-
-export const connectTestDB: () => Promise<void> = async () => {
-  const conn: typeof mongoose = await mongoose.connect(
-    process.env.T_DB || 'no-db',
-    {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-      useUnifiedTopology: true
-    }
-  );
   console.log(
-    `TEST DB Connected: ${(conn.connection as MongooseConnection).host}`
+    `${process.env.NODE_ENV} DB Connected: ${
+      (conn.connection as MongooseConnection).host
+    }`
   );
+  console.log(`Staging: ${process.env.STAGING}`);
 };

@@ -45,6 +45,7 @@
     "test": "TESTING=true ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/**/**/*.test.ts --file src/test/utils/teardown.ts",
     "coverage": "nyc --reporter=lcov --reporter=text npm test",
     "start": "NODE_ENV=production ts-node --files src/index",
+    "staging": "NODE_ENV=production STAGING=true ts-node --files src/index",
     "dev": "tsnd --respawn src/index",
     "lint": "eslint --ext .js,.ts src",
     "fix": "eslint --fix . --ext .js,.ts src"

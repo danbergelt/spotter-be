@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import { connectDB, connectTestDB } from './config/db';
+import { connectDB } from './config/db';
 import errorHandler from './middleware/error';
 import helmet from 'helmet';
 import xss from 'xss-clean';
@@ -24,32 +24,33 @@ import Err from './utils/Err';
 
 const whitelist: Array<string> = [];
 
-// Connect to DB and run server
-if (process.env.NODE_ENV === 'development') {
-  connectTestDB();
-  whitelist.push('http://localhost:3000');
-}
-
-if (process.env.NODE_ENV === 'production') {
-  connectDB();
-  whitelist.push('https://getspotter.io');
-}
-
 const app: Express = express();
 
-// CORS
-app.use(
-  cors({
-    origin: (origin, res) => {
-      if (origin && whitelist.includes(origin)) {
-        res(null, true);
-      } else {
-        res(new Err('Not allowed by CORS', 400));
-      }
-    },
-    credentials: true
-  })
-);
+// Connect to DB and run server
+if (process.env.NODE_ENV === 'development') {
+  connectDB();
+}
+
+if (process.env.NODE_ENV === 'production' && Boolean(process.env.STAGING)) {
+  connectDB();
+  app.use(cors());
+} else if (process.env.NODE_ENV === 'production') {
+  connectDB();
+  whitelist.push('https://getspotter.io');
+  // CORS custom config
+  app.use(
+    cors({
+      origin: (origin, res) => {
+        if (origin && whitelist.includes(origin)) {
+          res(null, true);
+        } else {
+          res(new Err('Not allowed by CORS', 400));
+        }
+      },
+      credentials: true
+    })
+  );
+}
 
 // Cookie parser
 app.use(

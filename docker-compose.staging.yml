@@ -1,11 +1,15 @@
 version: '3'
 services:
-  api:
-    container_name: api
+  staging_api:
+    container_name: staging_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        build: staging
     restart: always
     env_file:
       - .env
-    build: .
     ports:
       - '5000:5000'
     depends_on:
