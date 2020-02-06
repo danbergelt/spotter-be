@@ -29,14 +29,10 @@ const app: Express = express();
 // Connect to DB and run server
 if (process.env.NODE_ENV === 'development') {
   connectDB();
-}
-
-if (process.env.NODE_ENV === 'production' && Boolean(process.env.STAGING)) {
-  connectDB();
-  app.use(cors());
 } else if (process.env.NODE_ENV === 'production') {
   connectDB();
   whitelist.push('https://getspotter.io');
+  whitelist.push('https://objective-kepler-45537c.netlify.com');
   // CORS custom config
   app.use(
     cors({
