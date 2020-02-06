@@ -27,17 +27,19 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - '/etc/nginx/vhost.d'
-      - '/usr/share/nginx/html'
-      - '/var/run/docker.sock:/tmp/docker.sock:ro'
-      - '/etc/nginx/certs'
+      - 'nginx:/etc/nginx/vhost.d'
+      - 'nginx:/usr/share/nginx/html'
+      - 'nginx:/var/run/docker.sock:/tmp/docker.sock:ro'
+      - 'nginx:/etc/nginx/certs'
 
   letsencrypt-nginx-proxy-companion:
     image: jrcs/letsencrypt-nginx-proxy-companion
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
-    volumes_from:
-      - 'nginx-proxy'
+      - 'nginx:/etc/nginx/vhost.d'
+      - 'nginx:/usr/share/nginx/html'
+      - 'nginx:/var/run/docker.sock:/tmp/docker.sock:ro'
+      - 'nginx:/etc/nginx/certs'
 
   db:
     container_name: db
@@ -50,3 +52,4 @@ services:
 volumes:
   database:
     external: true
+  nginx:
