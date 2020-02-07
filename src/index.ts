@@ -29,24 +29,26 @@ const app: Express = express();
 // Connect to DB and run server
 if (process.env.NODE_ENV === 'development') {
   connectDB();
+  whitelist.push('http://localhost:3000');
 } else if (process.env.NODE_ENV === 'production') {
   connectDB();
   whitelist.push('https://getspotter.io');
   whitelist.push('https://objective-kepler-45537c.netlify.com');
-  // CORS custom config
-  app.use(
-    cors({
-      origin: (origin, res) => {
-        if (origin && whitelist.includes(origin)) {
-          res(null, true);
-        } else {
-          res(new Err('Not allowed by CORS', 400));
-        }
-      },
-      credentials: true
-    })
-  );
 }
+
+// CORS custom config
+app.use(
+  cors({
+    origin: (origin, res) => {
+      if (origin && whitelist.includes(origin)) {
+        res(null, true);
+      } else {
+        res(new Err('Not allowed by CORS', 400));
+      }
+    },
+    credentials: true
+  })
+);
 
 // Cookie parser
 app.use(
