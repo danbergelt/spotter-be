@@ -21,3 +21,6 @@ before_script:
 
 script:
   - docker-compose -f docker-compose.ci.yml up -d
+
+after_script:
+  - ./health_check.sh
