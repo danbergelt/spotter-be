@@ -21,4 +21,4 @@ before_script:
   - chmod +x health_check.sh
 
 script:
-  - docker-compose -f docker-compose.ci.yml up && docker-compose docker-compose.ci.yml down
+  - docker-compose -f docker-compose.ci.yml up && docker-compose -f docker-compose.ci.yml down
