@@ -7,7 +7,7 @@ node_js:
 
 before_script:
   - cp example.env .env
-  - sed -ri "s@DB@'$DB'@T_DB@'$T_DB'@PORT@$PORT@NODE_ENV@$NODE_ENV@JWT_SECRET@$JWT_SECRET@JWT_EXPIRE@$JWT_EXPIRE@REF_SECRET@$REF_SECRET@MG_DOMAIN@'$MG_DOMAIN'@MG_KEY@'$MG_KEY'@" .env
+  - sed -i "s@DB@$DB@T_DB@$T_DB@PORT@$PORT@NODE_ENV@$NODE_ENV@JWT_SECRET@$JWT_SECRET@JWT_EXPIRE@$JWT_EXPIRE@REF_SECRET@$REF_SECRET@MG_DOMAIN@$MG_DOMAIN@MG_KEY@$MG_KEY@" .env
 
 script:
   - docker-compose -f docker-compose.ci.yml up -d
