@@ -17,6 +17,7 @@ before_script:
   - echo REF_EXPIRE=$REF_EXPIRE >> .env
   - echo MG_DOMAIN=$MG_DOMAIN >> .env
   - echo MG_KEY=$MG_KEY >> .env
+  - docker-compose -f docker-compose.ci.yml up -d
 
 script:
-  - docker-compose -f docker-compose.ci.yml up -d
+  - yarn coverage
