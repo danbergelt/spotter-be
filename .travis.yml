@@ -20,4 +20,7 @@ before_script:
   - echo COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN >> .env
 
 script:
-  - docker-compose -f docker-compose.ci.yml up && docker-compose-f docker-compose.ci.yml down
+  - docker-compose -f docker-compose.ci.yml up
+
+after_script:
+  - docker-compose-f docker-compose.ci.yml down
