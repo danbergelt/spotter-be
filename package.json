@@ -42,8 +42,8 @@
     "xss-clean": "^0.1.1"
   },
   "scripts": {
-    "test": "TESTING=true ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/**/**/*.test.ts --file src/test/utils/teardown.ts",
-    "coverage": "nyc --reporter=lcov --reporter=text npm test",
+    "test": "TESTING=true ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/**/**/*.test.ts --file src/test/utils/teardown.ts --exit",
+    "coverage": "nyc --reporter=lcov --reporter=text npm test | coveralls",
     "start": "NODE_ENV=production ts-node --transpile-only --files src/index",
     "staging": "NODE_ENV=production STAGING=true ts-node --transpile-only --files src/index",
     "dev": "tsnd --respawn src/index",
@@ -64,6 +64,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.3.0",
+    "coveralls": "^3.0.9",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-chai-expect": "^2.1.0",

@@ -5,7 +5,7 @@ require('dotenv').config();
 before(async () => {
   mongoose.Promise = global.Promise;
 
-  await mongoose.connect(process.env.T_DB!, {
+  await mongoose.connect(process.env.DB!, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,

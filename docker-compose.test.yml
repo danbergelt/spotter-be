@@ -1,13 +1,13 @@
 version: '3'
 services:
-  dev_api:
-    container_name: dev_api
+  test_api:
+    container_name: test_api
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        build: dev
-    restart: always
+        build: test
+    restart: 'no'
     env_file:
       - .env
     ports:

@@ -1,0 +1,9 @@
+language: node
+
+services: docker
+
+node_js:
+  - 12
+
+script:
+  - docker-compose -f docker-compose.ci.yml up -d
