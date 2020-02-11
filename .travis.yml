@@ -22,5 +22,5 @@ before_script:
 
 script:
   - docker-compose -f docker-compose.ci.yml up -d
-  - docker exec -it testing_api bash
+  - docker exec -it test_api bash
   - ./health_check.sh
