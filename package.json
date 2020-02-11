@@ -42,8 +42,8 @@
     "xss-clean": "^0.1.1"
   },
   "scripts": {
-    "test": "TESTING=true ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/**/**/*.test.ts --file src/test/utils/teardown.ts --exit",
-    "coverage": "nyc --reporter=lcov --reporter=text npm test | coveralls",
+    "test": "TESTING=true NODE_ENV=test ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/**/**/*.test.ts --file src/test/utils/teardown.ts --exit",
+    "coverage": "TESTING=true NODE_ENV=test nyc --reporter=lcov --reporter=text npm test | coveralls",
     "start": "NODE_ENV=production ts-node --transpile-only --files src/index",
     "staging": "NODE_ENV=production STAGING=true ts-node --transpile-only --files src/index",
     "dev": "tsnd --respawn src/index",
