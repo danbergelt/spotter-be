@@ -1,10 +1,11 @@
 #!/bin/bash
 
-while [ true ]
+while :
 do
-  if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null ; then
-    echo "Running tests..."
-    sleep 3
-  else
-    break
-exit 0
+  echo "Running tests..."
+  netstat -ln | grep ":$PORT " 2>&1 > /dev/null 
+  if [ $? -eq 1 ]; then   
+     break
+  sleep 3
+done
+fi
