@@ -3,7 +3,7 @@ language: node
 services: docker
 
 node_js:
-  - 11
+  - 12
 
 before_script:
   - touch .env

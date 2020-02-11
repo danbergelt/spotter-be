@@ -43,7 +43,7 @@
   },
   "scripts": {
     "test": "TESTING=true NODE_ENV=test ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/**/**/*.test.ts --file src/test/utils/teardown.ts --exit",
-    "coverage": "TESTING=true NODE_ENV=test nyc --reporter=lcov --reporter=text npm test | coveralls",
+    "coverage": "TESTING=true NODE_ENV=test nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "start": "NODE_ENV=production ts-node --transpile-only --files src/index",
     "staging": "NODE_ENV=production STAGING=true ts-node --transpile-only --files src/index",
     "dev": "tsnd --respawn src/index",
@@ -108,6 +108,6 @@
     }
   },
   "engines": {
-    "node": ">=11.0.0"
+    "node": ">=12.0.0"
   }
 }
