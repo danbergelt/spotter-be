@@ -20,4 +20,4 @@ before_script:
   - docker-compose -f docker-compose.ci.yml up -d
 
 script:
-  - yarn coverage
+  - docker-compose -f docker-compose.ci.yml down
