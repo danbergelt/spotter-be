@@ -21,6 +21,4 @@ before_script:
 
 script:
   - docker-compose -f docker-compose.ci.yml up
-
-after_script:
   - docker-compose-f docker-compose.ci.yml down
