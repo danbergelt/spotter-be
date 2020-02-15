@@ -1,6 +1,7 @@
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
-// ts-ignore
-export const rebuild = (req: Request): void => {
+export const rebuild = (req: Request, res: Response): Response => {
   console.log(req);
+
+  return res.status(200);
 };
