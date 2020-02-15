@@ -28,6 +28,7 @@ after_script:
 branches:
   only:
     - master
+    - staging
 
 notifications:
   email: false

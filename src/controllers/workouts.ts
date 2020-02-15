@@ -63,9 +63,11 @@ export const addWorkout = asyncHandler(async (req, res, next) => {
 
   // validate the tag colors
   let colorValidate: Array<Tag | false> = [];
+
   if (req.body.tags && req.body.tags.length) {
     colorValidate = req.body.tags.map((el: Tag) => hex(el.color));
   }
+
   if (colorValidate.includes(false)) {
     return next(new Err('Invalid color detected', 400));
   }
@@ -170,7 +172,7 @@ export const downloadWorkoutData = asyncHandler(async (req, res, next) => {
   await write(absPath, csvWorkouts);
 
   // download the file to the user
-  res.download(absPath, err => {
+  return res.download(absPath, err => {
     if (err) {
       if (res.headersSent) {
         // log the err to the console (this should not happen, should default to the below response)
@@ -181,8 +183,12 @@ export const downloadWorkoutData = asyncHandler(async (req, res, next) => {
     }
 
     // remove the temporary file from the local static path
-    fs.unlink(absPath, () =>
-      next(new Err('Could not download, an error occurred', 500))
-    );
+    fs.unlink(absPath, err => {
+      if (err) {
+        // Occurs after file is downloaded, so no need to send error response
+        // This should not happen: log unlink err to console for debugging purposes
+        console.log(`Unlink error: ${err}`);
+      }
+    });
   });
 });
