@@ -18,8 +18,8 @@ import workouts from './routes/workouts';
 import tags from './routes/tags';
 import templates from './routes/templates';
 import auth from './routes/auth';
+import webhooks from './routes/webhooks';
 import exercises from './routes/exercises';
-import { Server } from 'http';
 import Err from './utils/Err';
 
 const whitelist: Array<string> = [];
@@ -97,13 +97,14 @@ app.use('/api/auth/tags', tags);
 app.use('/api/auth/templates', templates);
 app.use('/api/auth/user', auth);
 app.use('/api/auth/exercises', exercises);
+app.use('/api/auth/webhooks', webhooks);
 
 // Error handling
 app.use(errorHandler);
 
 const port: number = Number(process.env.PORT) || 5000;
 
-const server: Server = app.listen(port, () =>
+const server = app.listen(port, () =>
   console.log(`Server started on port ${port} IN ${process.env.NODE_ENV} mode`)
 );
 
