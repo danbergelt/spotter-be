@@ -23,7 +23,7 @@ describe('change email', () => {
     uId = _id;
     // Check for user
     //@ts-ignore
-    const { email } = await User.findById(_id);
+    const { email } = await User.findById(uId);
     oldEmail = email;
   });
 

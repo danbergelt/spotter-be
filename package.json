@@ -91,7 +91,9 @@
     "exclude": [
       "**/*.test.*",
       "coverage/lcov-report/*.*",
-      "src/test/utils/*.*"
+      "src/test/utils/*.*",
+      "src/types",
+      "src/typings"
     ],
     "check-coverage": true,
     "all": true,
