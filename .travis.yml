@@ -18,12 +18,17 @@ before_script:
   - echo MG_DOMAIN=$MG_DOMAIN >> .env
   - echo MG_KEY=$MG_KEY >> .env
   - echo COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN >> .env
+  - chmod +x deploy.sh
 
 script:
   - docker-compose -f docker-compose.ci.yml up --abort-on-container-exit
 
 after_script:
   - docker-compose -f docker-compose.ci.yml down
+
+deploy:
+  provider: script
+  script: bash deploy.sh
 
 branches:
   only:

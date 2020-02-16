@@ -9,7 +9,6 @@ import helmet from 'helmet';
 import xss from 'xss-clean';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
-import except from './utils/except';
 import mongoSanitize from 'express-mongo-sanitize';
 dotenv.config();
 
@@ -19,7 +18,6 @@ import workouts from './routes/workouts';
 import tags from './routes/tags';
 import templates from './routes/templates';
 import auth from './routes/auth';
-import webhooks from './routes/webhooks';
 import exercises from './routes/exercises';
 import Err from './utils/Err';
 
@@ -39,19 +37,16 @@ if (process.env.NODE_ENV === 'development') {
 
 // CORS custom config
 app.use(
-  except(
-    ['/api/auth/webhooks/rebuild'],
-    cors({
-      origin: (origin, res) => {
-        if (origin && whitelist.includes(origin)) {
-          res(null, true);
-        } else {
-          res(new Err('Not allowed by CORS', 400));
-        }
-      },
-      credentials: true
-    })
-  )
+  cors({
+    origin: (origin, res) => {
+      if (origin && whitelist.includes(origin)) {
+        res(null, true);
+      } else {
+        res(new Err('Not allowed by CORS', 400));
+      }
+    },
+    credentials: true
+  })
 );
 
 // Cookie parser
@@ -101,7 +96,6 @@ app.use('/api/auth/tags', tags);
 app.use('/api/auth/templates', templates);
 app.use('/api/auth/user', auth);
 app.use('/api/auth/exercises', exercises);
-app.use('/api/auth/webhooks', webhooks);
 
 // Error handling
 app.use(errorHandler);
