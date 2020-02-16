@@ -28,13 +28,14 @@ after_script:
   - docker-compose -f docker-compose.ci.yml down
 
 deploy:
-  - skip_cleanup: true
   - provider: script
     script: deploy.sh
+    skip_cleanup: true
     on:
       branch: master
   - provider: script
     script: deploy.staging.sh
+    skip_cleanup: true
     on:
       branch: staging
 
