@@ -37,7 +37,6 @@
     "lint-staged": "^10.0.2",
     "mailgun-js": "^0.22.0",
     "mongoose": "^5.7.4",
-    "path-to-regexp": "^6.1.0",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.4",
     "xss-clean": "^0.1.1"
