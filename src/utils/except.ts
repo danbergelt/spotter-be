@@ -3,7 +3,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 // eslint-disable-next-line
-const pathToRegexp = require('path-to-regexp');
+const { pathToRegexp } = require('path-to-regexp');
 
 // eslint-disable-next-line
 function except(path: string[], fn: Function): any {
