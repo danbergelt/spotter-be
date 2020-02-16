@@ -9,7 +9,7 @@ services:
       args:
         build: start
     restart: always
-    image: danbergelt/prod_api:latest
+    image: danbergelt/spotter_prod_api:latest
     environment:
       VIRTUAL_HOST: api.getspotter.io
       LETSENCRYPT_HOST: api.getspotter.io
