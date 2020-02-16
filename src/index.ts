@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import xss from 'xss-clean';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
+import except from './utils/except';
 import mongoSanitize from 'express-mongo-sanitize';
 dotenv.config();
 
@@ -38,16 +39,19 @@ if (process.env.NODE_ENV === 'development') {
 
 // CORS custom config
 app.use(
-  cors({
-    origin: (origin, res) => {
-      if (origin && whitelist.includes(origin)) {
-        res(null, true);
-      } else {
-        res(new Err('Not allowed by CORS', 400));
-      }
-    },
-    credentials: true
-  })
+  except(
+    ['/api/auth/webhooks/*'],
+    cors({
+      origin: (origin, res) => {
+        if (origin && whitelist.includes(origin)) {
+          res(null, true);
+        } else {
+          res(new Err('Not allowed by CORS', 400));
+        }
+      },
+      credentials: true
+    })
+  )
 );
 
 // Cookie parser
