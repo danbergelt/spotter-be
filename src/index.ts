@@ -32,6 +32,7 @@ if (process.env.NODE_ENV === 'development') {
 } else if (process.env.NODE_ENV === 'production') {
   connectDB();
   whitelist.push('https://getspotter.io');
+  whitelist.push('https://www.getspotter.io');
   whitelist.push('https://objective-kepler-45537c.netlify.com');
 }
 
