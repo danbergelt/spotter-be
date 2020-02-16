@@ -29,12 +29,12 @@ after_script:
 
 deploy:
   - provider: script
-    script: deploy.sh
+    script: './deploy.sh'
     skip_cleanup: true
     on:
       branch: master
   - provider: script
-    script: deploy.staging.sh
+    script: './deploy.staging.sh'
     skip_cleanup: true
     on:
       branch: staging
