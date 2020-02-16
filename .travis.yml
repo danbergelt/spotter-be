@@ -33,6 +33,7 @@ deploy:
 branches:
   only:
     - master
+    - staging
 
 notifications:
   email: false
