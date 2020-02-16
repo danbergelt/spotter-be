@@ -40,7 +40,7 @@ if (process.env.NODE_ENV === 'development') {
 // CORS custom config
 app.use(
   except(
-    ['/api/auth/webhooks/*'],
+    ['/api/auth/webhooks/rebuild'],
     cors({
       origin: (origin, res) => {
         if (origin && whitelist.includes(origin)) {
