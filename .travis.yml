@@ -19,7 +19,6 @@ before_script:
   - echo MG_KEY=$MG_KEY >> .env
   - echo COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN >> .env
   - chmod +x deploy.sh
-  - chmod +x deploy.staging.sh
 
 script:
   - docker-compose -f docker-compose.ci.yml up --abort-on-container-exit
