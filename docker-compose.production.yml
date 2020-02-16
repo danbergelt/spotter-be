@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  prod_api:
+    container_name: prod_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        build: start
+    restart: always
+    image: danbergelt/spotter_prod_api:latest
+    environment:
+      VIRTUAL_HOST: api.getspotter.io
+      LETSENCRYPT_HOST: api.getspotter.io
+      LETSENCRYPT_EMAIL: team@getspotter.io
+      VIRTUAL_PORT: 5000
+    env_file:
+      - .env
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: 'true'
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs:ro
+    restart: always
+
+  letsencrypt-nginx-proxy-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    environment:
+      NGINX_PROXY_CONTAINER: nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs
+    restart: always
+
+  db:
+    container_name: db
+    image: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - database:/data/db
+
+volumes:
+  database:
+    external: true
+  vhost:
+  html:
+  certs:

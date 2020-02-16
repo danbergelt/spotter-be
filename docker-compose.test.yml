@@ -1,0 +1,21 @@
+version: '3'
+services:
+  test_api:
+    container_name: test_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        build: test
+    restart: 'no'
+    env_file:
+      - .env
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: mongo
+    ports:
+      - '27017:27017'
