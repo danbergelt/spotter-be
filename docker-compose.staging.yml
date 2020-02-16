@@ -9,6 +9,7 @@ services:
       args:
         build: staging
     restart: always
+    image: danbergelt/staging_api:latest
     environment:
       VIRTUAL_HOST: staging.getspotter.io
       LETSENCRYPT_HOST: staging.getspotter.io
