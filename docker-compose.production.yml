@@ -11,9 +11,9 @@ services:
     restart: always
     image: danbergelt/spotter_prod_api:latest
     environment:
-      VIRTUAL_HOST: api.getspotter.io
-      LETSENCRYPT_HOST: api.getspotter.io
-      LETSENCRYPT_EMAIL: team@getspotter.io
+      VIRTUAL_HOST:
+      LETSENCRYPT_HOST:
+      LETSENCRYPT_EMAIL:
       VIRTUAL_PORT: 5000
     env_file:
       - .env

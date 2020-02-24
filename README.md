@@ -22,6 +22,30 @@ alternatively, if you have node.js installed on your machine and would only like
 
 this will give you top-level access to all the scripts found in `package.json`. if you plan on making large amounts of changes, this might be preferable to containerizing every service
 
+## 🌍 env
+
+this app relies on certain environment variables. after pulling down to your local environment, run `touch .env` in the root and add the below variables:
+
+`DB=mongodb://<your database name (db by default)>:27017/spotter`
+
+`PORT=<port for server>`
+
+`NODE_ENV=development`
+
+`JWT_SECRET=<your jsonwebtoken secret`
+
+`JWT_EXPIRE=<your jsonwebtoken expiration time (e.g. 1d)`
+
+`REF_SECRET=<your refresh cookie secret>`
+
+`REF_EXPIRE=<your refresh cookie expiration time (e.g. 10d)>`
+
+`MG_DOMAIN=<your mailgun domain>`
+
+`MG_KEY=<your mailgun api key>`
+
+`CODECOV_TOKEN=<your codecov token>`
+
 ## 📜 scripts
 
 #### node
