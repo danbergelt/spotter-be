@@ -7,15 +7,7 @@ import { sendMail, forgotPasswordTemplate } from '../utils/sendMail';
 import { sendToken, refreshToken } from '../utils/tokens';
 import { genToken } from '../utils/tokens';
 
-type TUserDetailKeys =
-  | 'oldEmail'
-  | 'newEmail'
-  | 'confirmEmail'
-  | 'oldPassword'
-  | 'newPassword'
-  | 'confirmPassword';
-
-type TUserDetails = Record<TUserDetailKeys, string>;
+type TUserDetails = Record<string, string>;
 
 // @desc --> change password
 // @route --> PUT /api/auth/user/password
@@ -141,8 +133,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     );
     // if successful, return an object with the user
     return res.status(200).json({
-      success: true,
-      data: user
+      success: true
     });
   } catch (error) {
     // clear the reset field items on this user's document

@@ -46,7 +46,7 @@
     "coverage": "TESTING=true NODE_ENV=test nyc npm test && nyc report --reporter=text-lcov > coverage.lcov && ./node_modules/.bin/codecov",
     "start": "NODE_ENV=production ts-node --transpile-only --files src/index",
     "staging": "NODE_ENV=production STAGING=true ts-node --transpile-only --files src/index",
-    "dev": "tsnd --respawn src/index",
+    "dev": "tsnd --no-deps --respawn --poll --interval 1000 src/index",
     "lint": "eslint --ext .js,.ts src",
     "fix": "eslint --fix . --ext .js,.ts src"
   },
