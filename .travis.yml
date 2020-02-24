@@ -5,6 +5,10 @@ services: docker
 node_js:
   - 12
 
+cache:
+  directories:
+    - node_modules
+
 before_script:
   - touch .env
   - echo DB=$DB >> .env
@@ -42,7 +46,6 @@ deploy:
 branches:
   only:
     - master
-    - staging
 
 notifications:
   email: false
