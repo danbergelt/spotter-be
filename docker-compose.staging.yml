@@ -11,9 +11,9 @@ services:
     restart: always
     image: danbergelt/staging_api:latest
     environment:
-      VIRTUAL_HOST:
-      LETSENCRYPT_HOST:
-      LETSENCRYPT_EMAIL:
+      VIRTUAL_HOST: staging.getspotter.io
+      LETSENCRYPT_HOST: staging.getspotter.io
+      LETSENCRYPT_EMAIL: team@getspotter.io
       VIRTUAL_PORT: 5000
     env_file:
       - .env
