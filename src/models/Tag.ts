@@ -33,11 +33,13 @@ TagSchema.pre('findOneAndUpdate', async function(
   // extract the content in the update
   const { content }: { content: string } = this.getUpdate();
 
-  // open a new update template query, match the id on each template to the specific doc's id
-  await tagCascadeUpdate(doc._id, Template, content);
+  if (content.length <= 20) {
+    // open a new update template query, match the id on each template to the specific doc's id
+    await tagCascadeUpdate(doc._id, Template, content);
 
-  // open a new update workout query, match the id on each workout to the specific doc's id
-  await tagCascadeUpdate(doc._id, Workout, content);
+    // open a new update workout query, match the id on each workout to the specific doc's id
+    await tagCascadeUpdate(doc._id, Workout, content);
+  }
 
   next();
 });
