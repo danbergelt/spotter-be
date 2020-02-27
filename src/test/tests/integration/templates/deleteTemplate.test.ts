@@ -37,7 +37,7 @@ describe('DELETE template by template id', () => {
         should.exist(res);
         res.body.success.should.equal(true);
         res.should.have.status(200);
-        res.body.data.should.equal('Template deleted');
+        res.body.template.should.equal(template);
         done();
       });
   });
