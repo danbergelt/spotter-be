@@ -91,7 +91,7 @@ describe('PR functionality', () => {
       .send({ ...template, exercises: [{ name: eName, weight: 1000 }] });
     await chai
       .request(app)
-      .put(`/api/auth/workouts/${res.body.data._id}`)
+      .put(`/api/auth/workouts/${res.body.workout._id}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...template, exercises: [{ name: eName, weight: 1001 }] });
     const updated = await Exercise.findOne({ name: eName });
@@ -107,7 +107,7 @@ describe('PR functionality', () => {
       .send({ ...template, exercises: [{ name: eName, weight: 999 }] });
     await chai
       .request(app)
-      .put(`/api/auth/workouts/${res.body.data._id}`)
+      .put(`/api/auth/workouts/${res.body.workout._id}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...template, exercises: [{ name: eName, weight: 1 }] });
     const updated = await Exercise.findOne({ name: eName });
@@ -128,7 +128,7 @@ describe('PR functionality', () => {
       .send({ ...template, exercises: [{ name: eName, weight: 1 }] });
     await chai
       .request(app)
-      .delete(`/api/auth/workouts/${res.body.data._id}`)
+      .delete(`/api/auth/workouts/${res.body.workout._id}`)
       .set('Authorization', `Bearer ${token}`);
     const updated = await Exercise.findOne({ name: eName });
     updated!.pr.should.equal(1);
