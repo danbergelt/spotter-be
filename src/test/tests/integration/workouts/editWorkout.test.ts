@@ -38,7 +38,7 @@ describe('PUT edit workout by workout id', () => {
         should.exist(res);
         res.body.success.should.equal(true);
         res.should.have.status(200);
-        res.body.data.title.should.equal('EDITED');
+        res.body.workout.title.should.equal('EDITED');
         done();
       });
   });
@@ -169,7 +169,7 @@ describe('PUT edit workout by workout id', () => {
         should.exist(res);
         res.body.success.should.equal(true);
         res.should.have.status(200);
-        res.body.data.title.should.equal('edited title');
+        res.body.workout.title.should.equal('edited title');
         done();
       });
   });

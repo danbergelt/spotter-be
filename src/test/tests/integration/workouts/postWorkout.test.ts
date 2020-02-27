@@ -32,10 +32,10 @@ describe('POST workouts by user id', () => {
         should.exist(res);
         res.body.success.should.equal(true);
         res.should.have.status(201);
-        res.body.data.user.should.equal(String(template.user!));
-        res.body.data.date.should.equal(String(template.date));
-        res.body.data.title.should.equal(String(template.title));
-        res.body.data.notes.should.equal(String(template.notes));
+        res.body.workout.user.should.equal(String(template.user!));
+        res.body.workout.date.should.equal(String(template.date));
+        res.body.workout.title.should.equal(String(template.title));
+        res.body.workout.notes.should.equal(String(template.notes));
         done();
       });
   });
@@ -150,7 +150,7 @@ describe('POST workouts by user id', () => {
         should.exist(res);
         res.body.success.should.equal(true);
         res.should.have.status(201);
-        res.body.data.title.should.equal('title');
+        res.body.workout.title.should.equal('title');
         done();
       });
   });
