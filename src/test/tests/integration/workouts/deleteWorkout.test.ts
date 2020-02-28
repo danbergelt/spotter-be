@@ -37,7 +37,6 @@ describe('DELETE workout by workout id', () => {
         should.exist(res);
         res.body.success.should.equal(true);
         res.should.have.status(200);
-        res.body.data.should.equal('Workout deleted');
         done();
       });
   });
