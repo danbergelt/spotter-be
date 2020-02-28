@@ -35,7 +35,7 @@ describe('DELETE exercise by exercise id', () => {
       .delete(`/api/auth/exercises/${eId}`)
       .set('Authorization', `Bearer ${token}`);
 
-    res.body.should.have.status(200);
+    res.body.success.should.equal(true);
   });
 
   it('should not delete exercise with bad id', async () => {
