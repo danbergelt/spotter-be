@@ -168,7 +168,8 @@ export const contact = asyncHandler(async (req, res, next) => {
     );
 
     return res.status(200).json({
-      success: true
+      success: true,
+      message: 'Message sent'
     });
   } catch (error) {
     return next(new Err('Error sending message', 500));
