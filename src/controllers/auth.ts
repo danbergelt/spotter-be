@@ -133,7 +133,8 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     );
     // if successful, return an object with the user
     return res.status(200).json({
-      success: true
+      success: true,
+      message: 'Email sent'
     });
   } catch (error) {
     // clear the reset field items on this user's document
