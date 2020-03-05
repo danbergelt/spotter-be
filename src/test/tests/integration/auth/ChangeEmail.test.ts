@@ -13,7 +13,7 @@ import { createUser } from '../../../utils/createUser';
 chai.use(chaiHttp);
 
 describe('change email', () => {
-  let oldEmail: any;
+  let old: any;
   let uId: any;
 
   // create test user
@@ -24,7 +24,7 @@ describe('change email', () => {
     // Check for user
     //@ts-ignore
     const { email } = await User.findById(uId);
-    oldEmail = email;
+    old = email;
   });
 
   const getEmail = async () => {
@@ -40,15 +40,15 @@ describe('change email', () => {
       .put('/api/auth/user/email')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        oldEmail: 'test@email.com',
-        newEmail: 'new@email.com',
-        confirmEmail: 'new@email.com'
+        old: 'test@email.com',
+        new: 'new@email.com',
+        confirm: 'new@email.com'
       });
     should.exist(res);
     res.body.success.should.equal(true);
     res.should.have.status(200);
     const email = await getEmail();
-    email.should.not.equal(oldEmail);
+    email.should.not.equal(old);
     email.should.equal('new@email.com');
   });
 
@@ -71,9 +71,9 @@ describe('change email', () => {
       .put('/api/auth/user/email')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        oldEmail: 'test@email.com',
-        newEmail: 'new@email.com',
-        confirmEmail: 'badnew@email.com'
+        old: 'test@email.com',
+        new: 'new@email.com',
+        confirm: 'badnew@email.com'
       });
     should.exist(res);
     res.body.success.should.equal(false);
@@ -88,9 +88,9 @@ describe('change email', () => {
       .put('/api/auth/user/email')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        oldEmail: 'badtest@email.com',
-        newEmail: 'new@email.com',
-        confirmEmail: 'new@email.com'
+        old: 'badtest@email.com',
+        new: 'new@email.com',
+        confirm: 'new@email.com'
       });
     should.exist(res);
     res.body.success.should.equal(false);
