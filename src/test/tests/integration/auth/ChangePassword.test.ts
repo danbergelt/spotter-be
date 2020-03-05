@@ -40,8 +40,8 @@ describe('can change password', () => {
       .put('/api/auth/user/password')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        oldPassword: 'password',
-        newPassword: 'newPassword',
+        old: 'password',
+        new: 'newPassword',
         confirmPassword: 'newPassword'
       });
     should.exist(res);
@@ -70,8 +70,8 @@ describe('can change password', () => {
       .put('/api/auth/user/password')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        oldPassword: 'password',
-        newPassword: 'newPassword',
+        old: 'password',
+        new: 'newPassword',
         confirmPassword: 'fjwiofjwiof'
       });
     should.exist(res);
@@ -87,8 +87,8 @@ describe('can change password', () => {
       .put('/api/auth/user/password')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        oldPassword: 'badpassword',
-        newPassword: 'newPassword',
+        old: 'badpassword',
+        new: 'newPassword',
         confirmPassword: 'newPassword'
       });
     should.exist(res);
