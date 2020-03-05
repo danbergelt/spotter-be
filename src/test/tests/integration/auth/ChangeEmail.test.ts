@@ -41,7 +41,7 @@ describe('change email', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         old: 'test@email.com',
-        newE: 'new@email.com',
+        new: 'new@email.com',
         confirm: 'new@email.com'
       });
     should.exist(res);
@@ -72,7 +72,7 @@ describe('change email', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         old: 'test@email.com',
-        newE: 'new@email.com',
+        new: 'new@email.com',
         confirm: 'badnew@email.com'
       });
     should.exist(res);
@@ -89,7 +89,7 @@ describe('change email', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         old: 'badtest@email.com',
-        newE: 'new@email.com',
+        new: 'new@email.com',
         confirm: 'new@email.com'
       });
     should.exist(res);

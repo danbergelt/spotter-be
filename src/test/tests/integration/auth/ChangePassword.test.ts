@@ -42,7 +42,7 @@ describe('can change password', () => {
       .send({
         old: 'password',
         new: 'newPassword',
-        confirmPassword: 'newPassword'
+        confirm: 'newPassword'
       });
     should.exist(res);
     res.body.success.should.equal(true);
@@ -72,7 +72,7 @@ describe('can change password', () => {
       .send({
         old: 'password',
         new: 'newPassword',
-        confirmPassword: 'fjwiofjwiof'
+        confirm: 'fjwiofjwiof'
       });
     should.exist(res);
     res.body.success.should.equal(false);
@@ -89,7 +89,7 @@ describe('can change password', () => {
       .send({
         old: 'badpassword',
         new: 'newPassword',
-        confirmPassword: 'newPassword'
+        confirm: 'newPassword'
       });
     should.exist(res);
     res.body.success.should.equal(false);
