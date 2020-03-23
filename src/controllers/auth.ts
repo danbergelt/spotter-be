@@ -89,8 +89,12 @@ export const changePassword = asyncHandler(async (req, res, next) => {
 // @route --> DELETE /api/auth/user/delete
 // @access --> Private
 
-export const deleteAccount = asyncHandler(async (req, res) => {
+export const deleteAccount = asyncHandler(async (req, res, next) => {
   const user: UserInterface | null = await User.findById(req.user._id);
+
+  if (!user) {
+    return next(new Err('User not found', 404));
+  }
 
   // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
   if (user) {
