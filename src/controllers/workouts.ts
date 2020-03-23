@@ -36,7 +36,7 @@ export const getWorkoutsByUserId = asyncHandler(async (req, res) => {
 });
 
 // @desc --> get time sorted list of workouts by user id
-// @route --> GET /api/auth/workouts/range
+// @route --> POST /api/auth/workouts/range
 // @access --> Private
 
 export const workoutRangeByUserId = asyncHandler(async (req, res, next) => {

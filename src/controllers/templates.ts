@@ -49,7 +49,7 @@ export const addTemplate = asyncHandler(async (req, res, next) => {
 
   res.status(201).json({
     success: true,
-    data: template
+    template
   });
 });
 
