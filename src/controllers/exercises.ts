@@ -67,7 +67,7 @@ export const deleteExercise = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: 'Exercise deleted'
+    exercise
   });
 });
 

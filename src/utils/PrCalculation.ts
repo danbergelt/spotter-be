@@ -27,7 +27,9 @@ type TAggregator = (
 const aggregator: TAggregator = async (user, name) => {
   const aggregated: Array<Aggregated> = await Workout.aggregate([
     {
-      $match: { $and: [{ user: user }, { 'exercises.name': name }] }
+      $match: {
+        $and: [{ user: user }, { 'exercises.name': name }]
+      }
     },
     { $unwind: '$exercises' },
     { $project: { exercises: 1, date: 1 } },

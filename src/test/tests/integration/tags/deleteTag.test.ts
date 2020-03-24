@@ -26,8 +26,6 @@ describe('DELETE Tag by tag id', () => {
     uId = _id;
     const { _id: temp } = await createTag(_id);
     tId = temp;
-    //@ts-ignore
-    return uId, tId;
   });
 
   it('successfully deletes tag', done => {
@@ -40,7 +38,7 @@ describe('DELETE Tag by tag id', () => {
         should.exist(res);
         res.body.success.should.equal(true);
         res.should.have.status(200);
-        res.body.data.should.equal('Tag deleted');
+        res.body.tag._id.should.equal(String(tId));
         done();
       });
   });

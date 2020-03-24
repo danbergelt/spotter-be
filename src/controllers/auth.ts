@@ -14,35 +14,35 @@ type TUserDetails = Record<string, string>;
 // @access --> Private
 
 export const changeEmail = asyncHandler(async (req, res, next) => {
-  const { oldEmail, newEmail, confirmEmail }: TUserDetails = req.body;
+  const { old, new: newE, confirm }: TUserDetails = req.body;
 
   // confirm that all fields are present
-  if (!oldEmail || !newEmail || !confirmEmail) {
+  if (!old || !newE || !confirm) {
     return next(new Err('All fields are required', 400));
   }
 
   // confirm that the user confirmed their new email and that the two fields match
-  if (newEmail !== confirmEmail) {
+  if (newE !== confirm) {
     return next(new Err('New email fields must match', 400));
   }
 
   const user: UserInterface | null = await User.findById(req.user._id);
 
   // confirm that the old email field matches the email on record
-  if (oldEmail !== user?.email) {
+  if (old !== user?.email) {
     return next(new Err('Invalid credentials', 400));
   }
 
   // update the user's email
   await User.findByIdAndUpdate(
     req.user._id,
-    { email: confirmEmail },
+    { email: confirm },
     { new: true, runValidators: true }
   );
 
   res.status(200).json({
     success: true,
-    data: 'Email updated'
+    message: 'Email updated'
   });
 });
 
@@ -52,11 +52,11 @@ export const changeEmail = asyncHandler(async (req, res, next) => {
 
 export const changePassword = asyncHandler(async (req, res, next) => {
   // extract the user's input data
-  const { oldPassword, newPassword, confirmPassword }: TUserDetails = req.body;
-  if (!oldPassword || !newPassword || !confirmPassword) {
+  const { old, new: newP, confirm }: TUserDetails = req.body;
+  if (!old || !newP || !confirm) {
     return next(new Err('All fields are required', 400));
   }
-  if (newPassword !== confirmPassword) {
+  if (newP !== confirm) {
     return next(new Err('New password fields must match', 400));
   }
 
@@ -69,19 +69,19 @@ export const changePassword = asyncHandler(async (req, res, next) => {
   }
 
   // Check if password matches
-  const isMatch: boolean = await user.matchPassword(oldPassword);
+  const isMatch: boolean = await user.matchPassword(old);
   if (!isMatch) {
     return next(new Err('Invalid credentials', 400));
   }
 
   // save the password to the user
-  user.password = newPassword;
+  user.password = newP;
   await user.save();
 
   // return a success message after the user is updated
   res.status(200).json({
     success: true,
-    data: 'Password updated'
+    message: 'Password updated'
   });
 });
 
@@ -89,8 +89,12 @@ export const changePassword = asyncHandler(async (req, res, next) => {
 // @route --> DELETE /api/auth/user/delete
 // @access --> Private
 
-export const deleteAccount = asyncHandler(async (req, res) => {
+export const deleteAccount = asyncHandler(async (req, res, next) => {
   const user: UserInterface | null = await User.findById(req.user._id);
+
+  if (!user) {
+    return next(new Err('User not found', 404));
+  }
 
   // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
   if (user) {
@@ -133,7 +137,8 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     );
     // if successful, return an object with the user
     return res.status(200).json({
-      success: true
+      success: true,
+      message: 'Email sent'
     });
   } catch (error) {
     // clear the reset field items on this user's document

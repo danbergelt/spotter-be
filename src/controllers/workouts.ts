@@ -36,7 +36,7 @@ export const getWorkoutsByUserId = asyncHandler(async (req, res) => {
 });
 
 // @desc --> get time sorted list of workouts by user id
-// @route --> GET /api/auth/workouts/range
+// @route --> POST /api/auth/workouts/range
 // @access --> Private
 
 export const workoutRangeByUserId = asyncHandler(async (req, res, next) => {
@@ -78,7 +78,7 @@ export const addWorkout = asyncHandler(async (req, res, next) => {
 
   return res.status(201).json({
     success: true,
-    data: workout
+    workout
   });
 });
 
@@ -113,7 +113,7 @@ export const editWorkout = asyncHandler(async (req, res, next) => {
     await prCalculation(obj);
     return res.status(200).json({
       success: true,
-      data: workout
+      workout
     });
   } else {
     return next(new Err('Workout not found', 404));
@@ -135,7 +135,7 @@ export const deleteWorkout = asyncHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    data: 'Workout deleted'
+    workout
   });
 });
 

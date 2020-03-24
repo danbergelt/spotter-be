@@ -64,7 +64,7 @@ export const deleteTag = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: 'Tag deleted'
+    tag
   });
 });
 

@@ -91,22 +91,6 @@ describe('PUT edit tag by tag id', () => {
       });
   });
 
-  it('should not edit tag to undefined color', done => {
-    const token = genToken(uId);
-    chai
-      .request(app)
-      .put(`/api/auth/tags/${tId}`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ color: '' })
-      .end((_, res) => {
-        should.exist(res);
-        res.body.success.should.equal(false);
-        res.should.have.status(400);
-        res.body.error.should.equal('Please add a tag color');
-        done();
-      });
-  });
-
   it('should not edit tag to long content', done => {
     const token = genToken(uId);
     chai
