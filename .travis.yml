@@ -22,8 +22,6 @@ before_script:
   - echo MG_DOMAIN=$MG_DOMAIN >> .env
   - echo MG_KEY=$MG_KEY >> .env
   - echo CODECOV_TOKEN=$CODECOV_TOKEN >> .env
-  - chmod +x ./scripts/deploy.sh
-  - chmod +x ./scripts/deploy.staging.sh
 
 script:
   - make dciu
