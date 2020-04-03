@@ -22,8 +22,8 @@ before_script:
   - echo MG_DOMAIN=$MG_DOMAIN >> .env
   - echo MG_KEY=$MG_KEY >> .env
   - echo CODECOV_TOKEN=$CODECOV_TOKEN >> .env
-  - chmod +x deploy.sh
-  - chmod +x deploy.staging.sh
+  - chmod +x ./scripts/deploy.sh
+  - chmod +x ./scripts/deploy.staging.sh
 
 script:
   - docker-compose -f docker-compose.ci.yml up --abort-on-container-exit
@@ -33,12 +33,12 @@ after_script:
 
 deploy:
   - provider: script
-    script: './deploy.sh'
+    script: './scripts/deploy.sh'
     skip_cleanup: true
     on:
       branch: master
   - provider: script
-    script: './deploy.staging.sh'
+    script: './scripts/deploy.staging.sh'
     skip_cleanup: true
     on:
       branch: staging
