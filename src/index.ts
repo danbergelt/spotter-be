@@ -104,7 +104,7 @@ app.use(errorHandler);
 const port: number = Number(process.env.PORT) || 5000;
 
 const server = app.listen(port, () =>
-  console.log(`Server started on port ${port} IN ${process.env.NODE_ENV}`)
+  console.log(`Server started on port ${port} IN ${process.env.NODE_ENV}!`)
 );
 
 // Unhandled rejection handling

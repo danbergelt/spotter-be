@@ -26,19 +26,19 @@ before_script:
   - chmod +x ./scripts/deploy.staging.sh
 
 script:
-  - docker-compose -f docker-compose.ci.yml up --abort-on-container-exit
+  - make dciu
 
 after_script:
-  - docker-compose -f docker-compose.ci.yml down
+  - make dcid
 
 deploy:
   - provider: script
-    script: './scripts/deploy.sh'
+    script: make depp
     skip_cleanup: true
     on:
       branch: master
   - provider: script
-    script: './scripts/deploy.staging.sh'
+    script: make deps
     skip_cleanup: true
     on:
       branch: staging
