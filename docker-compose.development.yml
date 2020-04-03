@@ -4,9 +4,9 @@ services:
     container_name: dev_api
     build:
       context: .
-      dockerfile: Dockerfile
-      args:
-        build: dev
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/usr/src/app
     restart: always
     env_file:
       - .env
@@ -16,6 +16,8 @@ services:
       - db
   db:
     container_name: db
+    logging:
+      driver: none
     image: mongo
     ports:
       - '27017:27017'
