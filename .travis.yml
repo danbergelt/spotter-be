@@ -12,7 +12,6 @@ cache:
 before_script:
   - touch .env
   - echo DB=$DB >> .env
-  - echo T_DB=$T_DB >> .env
   - echo PORT=$PORT >> .env
   - echo NODE_ENV=$NODE_ENV >> .env
   - echo JWT_SECRET=$JWT_SECRET >> .env
