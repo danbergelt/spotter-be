@@ -1,6 +1,6 @@
 import Err from '../utils/Err';
 import Exercise from '../models/Exercise';
-import asyncHandler from '../middleware/async';
+import asyncHandler from '../utils/asyncHandler';
 import { Exercise as ExerciseInterface } from '../types/models';
 import { prCalculation } from '../utils/PrCalculation';
 

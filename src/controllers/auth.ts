@@ -1,7 +1,7 @@
 import Err from '../utils/Err';
 import User from '../models/user';
 import crypto from 'crypto';
-import asyncHandler from '../middleware/async';
+import asyncHandler from '../utils/asyncHandler';
 import { User as UserInterface } from '../types/models';
 import { sendMail, forgotPasswordTemplate } from '../utils/sendMail';
 import { sendToken, refreshToken } from '../utils/tokens';

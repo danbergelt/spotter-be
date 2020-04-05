@@ -54,7 +54,7 @@ describe('DELETE exercise by exercise id', () => {
       .delete(`/api/auth/exercises/${eId}`)
       .set('Authorization', `Bearer hjiouhjhj9uh9`);
 
-    res.body.error.should.equal('Connection lost, try refreshing');
+    res.body.error.should.equal('Access denied');
   });
 
   it('should not delete exercise with no token', async () => {
