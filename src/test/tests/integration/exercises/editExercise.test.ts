@@ -57,7 +57,7 @@ describe('DELETE exercise by exercise id', () => {
       .send({ name: 'edited' })
       .set('Authorization', `Bearer jiouj`);
 
-    res.body.error.should.equal('Connection lost, try refreshing');
+    res.body.error.should.equal('Access denied');
   });
 
   it('should not edit with no token', async () => {

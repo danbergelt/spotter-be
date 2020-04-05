@@ -50,6 +50,6 @@ describe('DELETE exercise by exercise id', () => {
       .get(`/api/auth/exercises/`)
       .set('Authorization', `Bearer viorwfj`);
 
-    res.body.error.should.equal('Connection lost, try refreshing');
+    res.body.error.should.equal('Access denied');
   });
 });

@@ -6,15 +6,15 @@ import {
   forgotPassword,
   changeForgottenPassword
 } from '../controllers/auth';
-import { protect } from '../middleware/auth';
+import { protect } from '../middleware/protect';
 
 const router: Router = express.Router();
 
-router.route('/password').put(protect, changePassword);
+router.route('/password').put(protect(), changePassword);
 
-router.route('/email').put(protect, changeEmail);
+router.route('/email').put(protect(), changeEmail);
 
-router.route('/delete').delete(protect, deleteAccount);
+router.route('/delete').delete(protect(), deleteAccount);
 
 router.route('/forgotpassword').post(forgotPassword);
 

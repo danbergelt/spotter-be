@@ -1,6 +1,6 @@
 import Err from '../utils/Err';
 import Tag from '../models/Tag';
-import asyncHandler from '../middleware/async';
+import asyncHandler from '../utils/asyncHandler';
 import { Tag as TagInterface } from 'src/types/models';
 const hex = require('is-hexcolor'); // eslint-disable-line
 

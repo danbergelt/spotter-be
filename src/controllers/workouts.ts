@@ -1,7 +1,7 @@
 const hex = require('is-hexcolor'); // eslint-disable-line
 const stringify = require('csv-stringify'); // eslint-disable-line
 import Workout from '../models/Workout';
-import asyncHandler from '../middleware/async';
+import asyncHandler from '../utils/asyncHandler';
 import { promisify } from 'util';
 import Err from '../utils/Err';
 import fs from 'fs';
