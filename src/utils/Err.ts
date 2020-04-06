@@ -1,12 +1,13 @@
 // utility class that allows for custom error messages
 
 class Err extends Error {
-  statusCode: number;
-  code: number;
-  errors: Array<{ message: string }>;
-  constructor(message: string, statusCode: number) {
+  public status: number;
+  public code: number;
+  public errors: Array<{ message: string }>;
+
+  constructor(message: string, status: number) {
     super(message);
-    this.statusCode = statusCode;
+    this.status = status;
   }
 }
 

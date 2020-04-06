@@ -1,11 +1,11 @@
-import express from 'express';
-import { protect } from '../../../../middleware/protect';
-import errorHandler from '../../../../middleware/error';
-import chaiHttp from 'chai-http';
-import { expect, use, request } from 'chai';
+import { expect, request, use } from 'chai';
 import { genToken } from '../../../..//test/utils/genToken';
 import mongoose from 'mongoose';
 import { createUser } from '../../../../test/utils/createUser';
+import express from 'express';
+import { protect } from '../../../../middleware/protect';
+import chaiHttp from 'chai-http';
+import errorHandler from '../../../../middleware/errorHandler';
 
 use(chaiHttp);
 
