@@ -41,7 +41,7 @@ export const protect = (error = errorFactory): ExpressFn => {
     } catch (err) {
       // if the caught error is a mongoose error, pass in the mongoose error to the errorFactory
       const mongooseError = isMongooseError(err);
-      if (mongooseError) return error(next, mongooseError, 401);
+      if (mongooseError) return error(next, mongooseError.message, 401);
 
       // otherwise, return a generic access denied message
       return error(next, 'Access denied', 401);

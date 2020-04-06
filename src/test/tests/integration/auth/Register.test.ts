@@ -78,7 +78,7 @@ describe('Register new user', () => {
     const users = await User.find({});
     console.log(users);
     res.body.success.should.equal(false);
-    res.should.have.status(400);
+    res.should.have.status(409);
     res.body.should.be.a('object');
     res.body.error.should.equal('Duplicate detected, try again');
   });
