@@ -1,5 +1,5 @@
 import Template from '../models/Template';
-import asyncHandler from '../middleware/async';
+import asyncHandler from '../utils/asyncHandler';
 import Err from '../utils/Err';
 const hex = require('is-hexcolor'); // eslint-disable-line
 import { Template as TemplateInterface, Tag } from 'src/types/models';

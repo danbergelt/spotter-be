@@ -1,23 +1,23 @@
-import express, { Router } from 'express';
+import express from 'express';
 import {
   createExercise,
   updateExercise,
   deleteExercise,
   getExercises
 } from '../controllers/exercises';
-import { protect } from '../middleware/auth';
+import { protect } from '../middleware/protect';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Routes
 router
   .route('/')
-  .post(protect, createExercise)
-  .get(protect, getExercises);
+  .post(protect(), createExercise)
+  .get(protect(), getExercises);
 
 router
   .route('/:id')
-  .put(protect, updateExercise)
-  .delete(protect, deleteExercise);
+  .put(protect(), updateExercise)
+  .delete(protect(), deleteExercise);
 
 export default router;

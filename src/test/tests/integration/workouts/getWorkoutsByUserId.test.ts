@@ -65,7 +65,7 @@ describe('GET workouts by user id', () => {
         should.exist(res);
         res.body.success.should.equal(false);
         res.should.have.status(401);
-        res.body.error.should.equal('Connection lost, try refreshing');
+        res.body.error.should.equal('Access denied');
         done();
       });
   });

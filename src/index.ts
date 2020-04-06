@@ -4,7 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import { connectDB } from './config/db';
-import errorHandler from './middleware/error';
+import errorHandler from './middleware/errorHandler';
 import helmet from 'helmet';
 import xss from 'xss-clean';
 import rateLimit from 'express-rate-limit';

@@ -7,24 +7,23 @@ import {
   workoutRangeByUserId,
   downloadWorkoutData
 } from '../controllers/workouts';
-
-import { protect } from '../middleware/auth';
+import { protect } from '../middleware/protect';
 
 const router: Router = express.Router();
 
 // Routes
 router
   .route('/')
-  .get(protect, getWorkoutsByUserId)
-  .post(protect, addWorkout);
+  .get(protect(), getWorkoutsByUserId)
+  .post(protect(), addWorkout);
 
 router
   .route('/:id')
-  .put(protect, editWorkout)
-  .delete(protect, deleteWorkout);
+  .put(protect(), editWorkout)
+  .delete(protect(), deleteWorkout);
 
-router.route('/range').post(protect, workoutRangeByUserId);
+router.route('/range').post(protect(), workoutRangeByUserId);
 
-router.route('/download').get(protect, downloadWorkoutData);
+router.route('/download').get(protect(), downloadWorkoutData);
 
 export default router;

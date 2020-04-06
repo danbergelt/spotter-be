@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import errorHandler from '../../middleware/error';
+import errorHandler from '../../middleware/errorHandler';
 dotenv.config();
 
 // Route imports

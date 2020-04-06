@@ -1,6 +1,6 @@
 import Err from '../utils/Err';
 import User from '../models/user';
-import asyncHandler from '../middleware/async';
+import asyncHandler from '../utils/asyncHandler';
 import {
   refreshToken,
   genToken,
