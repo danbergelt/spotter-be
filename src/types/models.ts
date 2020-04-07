@@ -18,10 +18,11 @@ export interface ExerciseOnWorkoutSchema {
 }
 
 export interface Workout extends Document {
+  _id: Schema.Types.ObjectId;
   date: string;
   createdAt?: Date;
   title: string;
-  tags: Array<{ content: string; color: string }>;
+  tags: Array<{ content: string; color: string; _id: Schema.Types.ObjectId }>;
   notes: string;
   exercises: Array<ExerciseOnWorkoutSchema>;
   user: Schema.Types.ObjectId;
