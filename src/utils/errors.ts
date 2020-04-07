@@ -1,6 +1,7 @@
 import { NextFunction } from 'express';
 import Err from './Err';
 import { MongooseError } from '../types';
+import codes from 'http-status-codes';
 
 export const isMongooseError = (err: Err): false | MongooseError => {
   // Mongoose malformed Object ID or failed validation
@@ -10,19 +11,19 @@ export const isMongooseError = (err: Err): false | MongooseError => {
 
   if (err.name === 'CastError') {
     message = 'Resource not found';
-    status = 404;
+    status = codes.NOT_FOUND;
     return { message, status };
   }
 
   if (err.name === 'ValidationError') {
     message = String(Object.values(err.errors).map(value => value.message));
-    status = 400;
+    status = codes.BAD_REQUEST;
     return { message, status };
   }
 
   if (err.code === 11000) {
-    message = 'Duplicate detected, try again';
-    status = 409;
+    message = 'Duplicate resource detected';
+    status = codes.CONFLICT;
     return { message, status };
   }
 
@@ -32,7 +33,7 @@ export const isMongooseError = (err: Err): false | MongooseError => {
 export const errorFactory = (
   next: NextFunction,
   err = 'Server error',
-  status = 500
+  status = codes.INTERNAL_SERVER_ERROR
 ): void => {
   return next(new Err(err, status));
 };

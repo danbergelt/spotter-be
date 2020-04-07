@@ -3,6 +3,7 @@ import User from '../models/user';
 import { Token } from '../types/auth';
 import { ExpressFn } from '../types/index';
 import { isMongooseError, errorFactory } from '../utils/errors';
+import codes from 'http-status-codes';
 
 /*== Auth protection middleware =====================================================
 
@@ -24,7 +25,7 @@ export const protect = (error = errorFactory): ExpressFn => {
       token = authorization.split(' ')[1];
 
     // Check the token is not null
-    if (!token) return error(next, 'Access denied', 401);
+    if (!token) return error(next, 'Access denied', codes.UNAUTHORIZED);
 
     try {
       // verify the token with the JWT secret
@@ -33,7 +34,7 @@ export const protect = (error = errorFactory): ExpressFn => {
 
       // once verified, find the user, and attach it to the request body;
       const user = await User.findById(id);
-      if (!user) return error(next, 'User not found', 401);
+      if (!user) return error(next, 'User not found', codes.NOT_FOUND);
       req.user = user;
 
       // continue to the business logic
@@ -41,10 +42,12 @@ export const protect = (error = errorFactory): ExpressFn => {
     } catch (err) {
       // if the caught error is a mongoose error, pass in the mongoose error to the errorFactory
       const mongooseError = isMongooseError(err);
-      if (mongooseError) return error(next, mongooseError.message, 401);
+      if (mongooseError) {
+        return error(next, mongooseError.message, mongooseError.status);
+      }
 
       // otherwise, return a generic access denied message
-      return error(next, 'Access denied', 401);
+      return error(next, 'Access denied', codes.UNAUTHORIZED);
     }
   };
 };

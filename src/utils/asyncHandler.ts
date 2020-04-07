@@ -4,12 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 Description
 */
 
-type C = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-  errorFactory?: Function
-) => Promise<any>; // eslint-disable-line
+type C = (req: Request, res: Response, next: NextFunction) => Promise<any>; // eslint-disable-line
 
 function asyncHandler(fn: C) {
   // eslint-disable-next-line
