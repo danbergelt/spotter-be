@@ -80,7 +80,7 @@ describe('Register new user', () => {
     res.body.success.should.equal(false);
     res.should.have.status(409);
     res.body.should.be.a('object');
-    res.body.error.should.equal('Duplicate detected, try again');
+    res.body.error.should.equal('Duplicate resource detected');
   });
 
   // Invalid password errs

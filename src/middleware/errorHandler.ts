@@ -1,6 +1,7 @@
 import { ErrorRequestHandler } from 'express';
 import Err from '../utils/Err';
 import { isMongooseError } from '../utils/errors';
+import codes from 'http-status-codes';
 
 /*== Global error middleware =====================================================
 
@@ -26,7 +27,7 @@ const errorHandler: ErrorRequestHandler = (err: Err, _req, res, _next) => {
   }
 
   // return the response object. return some generic values if code &/or message are not found
-  return res.status(error.status || 500).json({
+  return res.status(error.status || codes.INTERNAL_SERVER_ERROR).json({
     success: false,
     error: error.message || 'Server error'
   });
