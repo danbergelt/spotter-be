@@ -1,16 +1,22 @@
-import { Request, Response, NextFunction } from 'express';
+import { ExpressFn } from '../types';
 
-/*==  =====================================================
-Description
+/*== async handler =====================================================
+
+this higher order function wraps controllers and allows us to optionally include
+try/catch blocks for async behavior.
+
+since try/catch blocks are a) not DRY and b) tedious, inelegant, and annoying, 
+we can abstract repetitive errs (such as DB validation errors) to the 
+error handling middleware automatically. this allows us to focus on novel, 
+one-off errors that require special care, and greatly cleans up our code
+
 */
 
-type C = (req: Request, res: Response, next: NextFunction) => Promise<any>; // eslint-disable-line
-
-function asyncHandler(fn: C) {
-  // eslint-disable-next-line
-  return function(req: Request, res: Response, next: NextFunction): any {
-    Promise.resolve(fn(req, res, next)).catch(next); // eslint-disable-line
+function asyncHandler(fn: ExpressFn): ExpressFn {
+  const wrapped: ExpressFn = function(req, res, next) {
+    return Promise.resolve(fn(req, res, next)).catch(next); // eslint-disable-line
   };
+  return wrapped;
 }
 
 export default asyncHandler;
