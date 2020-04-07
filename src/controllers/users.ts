@@ -9,7 +9,7 @@ import {
 } from '../utils/tokens';
 import jwt from 'jsonwebtoken';
 import { User as UserInterface } from 'src/types/models';
-import { VerifiedToken } from '../types/auth';
+import { Token } from '../types/auth';
 import { Request, Response } from 'express';
 import {
   sendMail,
@@ -120,7 +120,7 @@ export const refresh = asyncHandler(async (req, res) => {
 
   // refresh token is valid and we can send back new access token
   const user: UserInterface | null = await User.findOne({
-    _id: (payload as VerifiedToken).id
+    _id: (payload as Token).id
   });
 
   if (!user) {
