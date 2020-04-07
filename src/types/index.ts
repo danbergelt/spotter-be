@@ -4,7 +4,7 @@ export type ExpressFn = (
   req: Request,
   res: Response,
   next: NextFunction
-) => any; // eslint-disable-line
+) => Promise<any>; // eslint-disable-line
 
 export interface HttpException extends Error {
   code?: number;
