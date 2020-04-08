@@ -1,6 +1,6 @@
 import { ErrorRequestHandler as ErrorHandler } from 'express';
 import HttpError from '../utils/HttpError';
-import { isMongooseError } from '../utils/errors';
+import { transformMongooseError } from '../utils/transformMongooseError';
 import codes from 'http-status-codes';
 import mongoose from 'mongoose';
 import { AnyError } from '../types';
@@ -21,7 +21,7 @@ const errorHandler: ErrorHandler = (err: AnyError, _req, res, _next) => {
 
   // check if the error is a mongoose error
   if (err instanceof mongoose.Error) {
-    const { message, status } = isMongooseError(err);
+    const { message, status } = transformMongooseError(err);
     error = new HttpError(message, status);
   }
 
