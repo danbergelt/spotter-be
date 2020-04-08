@@ -1,9 +1,7 @@
-import { NextFunction } from 'express';
-import HttpError from './HttpError';
 import { MongooseError, TransformedMongooseError } from '../types';
 import codes from 'http-status-codes';
 
-export const isMongooseError = (
+export const transformMongooseError = (
   err: MongooseError
 ): TransformedMongooseError => {
   // Mongoose malformed Object ID or failed validation
@@ -24,12 +22,4 @@ export const isMongooseError = (
   }
 
   return { message: 'Bad gateway', status: codes.BAD_GATEWAY };
-};
-
-export const errorFactory = (
-  next: NextFunction,
-  err = 'Server error',
-  status = codes.INTERNAL_SERVER_ERROR
-): void => {
-  return next(new HttpError(err, status));
 };

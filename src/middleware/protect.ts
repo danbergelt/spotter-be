@@ -2,7 +2,8 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import { Token } from '../types/auth';
 import { ExpressFn, MongooseError } from '../types/index';
-import { isMongooseError, errorFactory } from '../utils/errors';
+import { errorFactory } from '../utils/errorFactory';
+import { transformMongooseError } from '../utils/transformMongooseError';
 import codes from 'http-status-codes';
 import mongoose from 'mongoose';
 
@@ -43,7 +44,9 @@ export const protect = (error = errorFactory): ExpressFn => {
     } catch (err) {
       // check if the caught error is a mongoose error
       if (err instanceof mongoose.Error) {
-        const { message, status } = isMongooseError(err as MongooseError);
+        const { message, status } = transformMongooseError(
+          err as MongooseError
+        );
         return error(next, message, status);
       }
 
