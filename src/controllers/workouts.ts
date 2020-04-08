@@ -3,7 +3,7 @@ const stringify = require('csv-stringify'); // eslint-disable-line
 import Workout from '../models/Workout';
 import asyncHandler from '../utils/asyncHandler';
 import { promisify } from 'util';
-import Err from '../utils/Err';
+import HttpError from '../utils/HttpError';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -41,7 +41,7 @@ export const getWorkoutsByUserId = asyncHandler(async (req, res) => {
 
 export const workoutRangeByUserId = asyncHandler(async (req, res, next) => {
   if (!req.body.range) {
-    return next(new Err('Please supply a date range', 400));
+    return next(new HttpError('Please supply a date range', 400));
   }
 
   const workouts: Array<WorkoutInterface> = await Workout.find({
@@ -69,7 +69,7 @@ export const addWorkout = asyncHandler(async (req, res, next) => {
   }
 
   if (colorValidate.includes(false)) {
-    return next(new Err('Invalid color detected', 400));
+    return next(new HttpError('Invalid color detected', 400));
   }
 
   const workout: WorkoutInterface = await Workout.create(req.body);
@@ -92,7 +92,8 @@ export const editWorkout = asyncHandler(async (req, res, next) => {
     req.body,
     {
       new: true,
-      runValidators: true
+      runValidators: true,
+      context: 'query'
     }
   );
 
@@ -116,7 +117,7 @@ export const editWorkout = asyncHandler(async (req, res, next) => {
       workout
     });
   } else {
-    return next(new Err('Workout not found', 404));
+    return next(new HttpError('Workout not found', 404));
   }
 });
 
@@ -154,7 +155,7 @@ export const downloadWorkoutData = asyncHandler(async (req, res, next) => {
   try {
     jsonWorkouts = JSON.parse(JSON.stringify(workouts));
   } catch (_) {
-    return next(new Err('Could not download, an error occurred', 500));
+    return next(new HttpError('Could not download, an error occurred', 500));
   }
 
   // constants for saving the file locally
@@ -178,7 +179,9 @@ export const downloadWorkoutData = asyncHandler(async (req, res, next) => {
         // log the err to the console (this should not happen, should default to the below response)
         console.log(err);
       } else {
-        return next(new Err('Could not download, an error occurred', 400));
+        return next(
+          new HttpError('Could not download, an error occurred', 400)
+        );
       }
     }
 

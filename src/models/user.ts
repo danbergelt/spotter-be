@@ -8,6 +8,8 @@ import Exercise from './Exercise';
 import Tag from './Tag';
 import Template from './Template';
 import Workout from './Workout';
+import uniqueValidator from 'mongoose-unique-validator';
+
 // User model
 
 const UserSchema = new Schema<User>({
@@ -17,8 +19,7 @@ const UserSchema = new Schema<User>({
     unique: true,
     required: [true, 'Please add an email'],
     match: [
-      // eslint-disable-next-line
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
       'Please add a valid email'
     ]
   },
@@ -42,7 +43,7 @@ const UserSchema = new Schema<User>({
 });
 
 // Cascade remove all models for this user on remove
-UserSchema.pre('remove', async function(next) {
+UserSchema.pre('remove', async function(this: User, next: NextFunction) {
   // cascade delete every model with this user id attached
   await Exercise.deleteMany({ user: this._id });
   await Tag.deleteMany({ user: this._id });
@@ -52,7 +53,7 @@ UserSchema.pre('remove', async function(next) {
 });
 
 // Encrypt password on save
-UserSchema.pre<User>('save', async function(next: NextFunction) {
+UserSchema.pre<User>('save', async function(this: User, next: NextFunction) {
   if (!this.isModified('password')) {
     next();
   }
@@ -93,5 +94,8 @@ UserSchema.methods.matchPassword = async function(
 ): Promise<boolean> {
   return await bcrypt.compare(pw, this.password);
 };
+
+// transform E11000 errors into validation errors (easier to wrangle)
+UserSchema.plugin(uniqueValidator, { message: 'This email already exists' });
 
 export default mongoose.model<User>('User', UserSchema);

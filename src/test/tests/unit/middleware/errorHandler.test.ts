@@ -2,6 +2,7 @@ import Sinon from 'sinon';
 import errorHandler from '../../../../middleware/errorHandler';
 import { Request } from 'express';
 import { expect } from 'chai';
+import { Error } from 'mongoose';
 
 const utils = (error = {}) => {
   const err = error;
@@ -22,11 +23,9 @@ describe('error handler middleware', () => {
   });
 
   it('returns a mongoose error if passed-in error is a mongoose error', () => {
-    const { err, req, res, next } = utils({ name: 'CastError' });
-    expect(errorHandler(err, req, res, next).error).to.equal(
-      'Resource not found'
-    );
-    expect(res.status.getCall(0).args[0]).to.equal(404);
+    const { err, req, res, next } = utils(new Error('Foobar'));
+    expect(errorHandler(err, req, res, next).error).to.equal('Bad gateway');
+    expect(res.status.getCall(0).args[0]).to.equal(502);
   });
 
   it('returns the error argument', () => {

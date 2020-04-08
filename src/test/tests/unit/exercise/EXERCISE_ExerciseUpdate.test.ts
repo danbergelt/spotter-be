@@ -33,7 +33,7 @@ describe('Exercise model update', () => {
       Exercise.findByIdAndUpdate(
         exercise._id,
         { name: undefined },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add an exercise name');
   });
@@ -52,7 +52,7 @@ describe('Exercise model update', () => {
           name:
             'fjwiofjwiofjwiofjwhbvuyvfgyehughehrguyiwfhwofjpfjpqfjpfjdncveivbeiugvwibvwicwoij'
         },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('25 character max');
   });

@@ -1,4 +1,4 @@
-import Err from '../utils/Err';
+import HttpError from '../utils/HttpError';
 import User from '../models/user';
 import asyncHandler from '../utils/asyncHandler';
 import {
@@ -58,7 +58,7 @@ export const login = asyncHandler(async (req, res, next) => {
 
   // Validate email and password
   if (!email || !password) {
-    return next(new Err('Please provide an email and password', 400));
+    return next(new HttpError('Please provide an email and password', 400));
   }
 
   // Check for user
@@ -67,14 +67,14 @@ export const login = asyncHandler(async (req, res, next) => {
   );
 
   if (!user) {
-    return next(new Err('Invalid credentials', 401));
+    return next(new HttpError('Invalid credentials', 401));
   }
 
   // Check if password matches
   const isMatch: boolean = await user.matchPassword(password);
 
   if (!isMatch) {
-    return next(new Err('Invalid credentials', 401));
+    return next(new HttpError('Invalid credentials', 401));
   }
 
   refreshToken(
@@ -147,7 +147,7 @@ export const contact = asyncHandler(async (req, res, next) => {
   const { name, email, subject, message } = req.body;
 
   if (!name || !email || !subject || !message) {
-    return next(new Err('All fields are required', 400));
+    return next(new HttpError('All fields are required', 400));
   }
 
   try {
@@ -172,6 +172,6 @@ export const contact = asyncHandler(async (req, res, next) => {
       message: 'Message sent'
     });
   } catch (error) {
-    return next(new Err('Error sending message', 500));
+    return next(new HttpError('Error sending message', 500));
   }
 });

@@ -1,4 +1,4 @@
-import Err from '../utils/Err';
+import HttpError from '../utils/HttpError';
 import Exercise from '../models/Exercise';
 import asyncHandler from '../utils/asyncHandler';
 import { Exercise as ExerciseInterface } from '../types/models';
@@ -17,7 +17,7 @@ export const createExercise = asyncHandler(async (req, res, next) => {
   });
 
   if (exercise.length) {
-    return next(new Err('Exercise already exists', 400));
+    return next(new HttpError('Exercise already exists', 400));
   }
 
   const createdExercise: ExerciseInterface = await Exercise.create(req.body);
@@ -40,7 +40,8 @@ export const updateExercise = asyncHandler(async (req, res) => {
     req.body,
     {
       new: true,
-      runValidators: true
+      runValidators: true,
+      context: 'query'
     }
   );
 

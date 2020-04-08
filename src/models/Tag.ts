@@ -46,7 +46,7 @@ TagSchema.pre('findOneAndUpdate', async function(
 });
 
 // cascade delete tags
-TagSchema.pre('remove', async function(next) {
+TagSchema.pre('remove', async function(this: Tag, next: NextFunction) {
   // get the id off of the removed tag
   const id = this._id as Schema.Types.ObjectId;
 

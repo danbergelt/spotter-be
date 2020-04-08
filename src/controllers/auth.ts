@@ -1,4 +1,4 @@
-import Err from '../utils/Err';
+import HttpError from '../utils/HttpError';
 import User from '../models/user';
 import crypto from 'crypto';
 import asyncHandler from '../utils/asyncHandler';
@@ -18,26 +18,26 @@ export const changeEmail = asyncHandler(async (req, res, next) => {
 
   // confirm that all fields are present
   if (!old || !newE || !confirm) {
-    return next(new Err('All fields are required', 400));
+    return next(new HttpError('All fields are required', 400));
   }
 
   // confirm that the user confirmed their new email and that the two fields match
   if (newE !== confirm) {
-    return next(new Err('New email fields must match', 400));
+    return next(new HttpError('New email fields must match', 400));
   }
 
   const user: UserInterface | null = await User.findById(req.user._id);
 
   // confirm that the old email field matches the email on record
   if (old !== user?.email) {
-    return next(new Err('Invalid credentials', 400));
+    return next(new HttpError('Invalid credentials', 400));
   }
 
   // update the user's email
   await User.findByIdAndUpdate(
     req.user._id,
     { email: confirm },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true, context: 'query' }
   );
 
   res.status(200).json({
@@ -54,10 +54,10 @@ export const changePassword = asyncHandler(async (req, res, next) => {
   // extract the user's input data
   const { old, new: newP, confirm }: TUserDetails = req.body;
   if (!old || !newP || !confirm) {
-    return next(new Err('All fields are required', 400));
+    return next(new HttpError('All fields are required', 400));
   }
   if (newP !== confirm) {
-    return next(new Err('New password fields must match', 400));
+    return next(new HttpError('New password fields must match', 400));
   }
 
   // Check for user
@@ -65,13 +65,13 @@ export const changePassword = asyncHandler(async (req, res, next) => {
     '+password'
   );
   if (!user) {
-    return next(new Err('User not found', 404));
+    return next(new HttpError('User not found', 404));
   }
 
   // Check if password matches
   const isMatch: boolean = await user.matchPassword(old);
   if (!isMatch) {
-    return next(new Err('Invalid credentials', 400));
+    return next(new HttpError('Invalid credentials', 400));
   }
 
   // save the password to the user
@@ -93,7 +93,7 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
   const user: UserInterface | null = await User.findById(req.user._id);
 
   if (!user) {
-    return next(new Err('User not found', 404));
+    return next(new HttpError('User not found', 404));
   }
 
   // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
@@ -114,7 +114,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return next(new Err('No user found with that email', 404));
+    return next(new HttpError('No user found with that email', 404));
   }
 
   // get reset token
@@ -146,7 +146,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     user.resetPasswordToken = undefined;
     // save the user, return an error message
     await user.save({ validateBeforeSave: false });
-    return next(new Err('Email could not be sent', 500));
+    return next(new HttpError('Email could not be sent', 500));
   }
 });
 
@@ -163,10 +163,10 @@ export const changeForgottenPassword = asyncHandler(async (req, res, next) => {
 
   // check that passwords match and that both fields exist
   if (!newPassword || !confirmPassword) {
-    return next(new Err('All fields are required', 400));
+    return next(new HttpError('All fields are required', 400));
   }
   if (newPassword !== confirmPassword) {
-    return next(new Err('Fields must match', 400));
+    return next(new HttpError('Fields must match', 400));
   }
 
   // get hashed token
@@ -182,7 +182,7 @@ export const changeForgottenPassword = asyncHandler(async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new Err('Invalid token', 404));
+    return next(new HttpError('Invalid token', 404));
   }
 
   // reset the password, set auth fields to undefined

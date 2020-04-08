@@ -1,4 +1,4 @@
-import Err from '../utils/Err';
+import HttpError from '../utils/HttpError';
 import Tag from '../models/Tag';
 import asyncHandler from '../utils/asyncHandler';
 import { Tag as TagInterface } from 'src/types/models';
@@ -16,7 +16,7 @@ export const createTag = asyncHandler(async (req, res, next) => {
       tag => tag.color === req.body.color && !tag.content
     );
     if (duplicates.length) {
-      return next(new Err('Tag already exists', 400));
+      return next(new HttpError('Tag already exists', 400));
     }
   }
 
@@ -26,18 +26,18 @@ export const createTag = asyncHandler(async (req, res, next) => {
       tag => tag.color === req.body.color && tag.content === req.body.content
     );
     if (duplicates.length) {
-      return next(new Err('Tag already exists', 400));
+      return next(new HttpError('Tag already exists', 400));
     }
   }
 
   // Enforces a 25 tag maximum
   if (tags.length >= 25) {
-    return next(new Err('25 tag maximum', 400));
+    return next(new HttpError('25 tag maximum', 400));
   }
 
   // validates hex code for color, so corrupt code is not rendered on FE
   if (!hex(req.body.color)) {
-    return next(new Err('Invalid color detected', 400));
+    return next(new HttpError('Invalid color detected', 400));
   }
 
   req.body.user = req.user._id;
@@ -78,7 +78,8 @@ export const editTag = asyncHandler(async (req, res) => {
     req.body,
     {
       new: true,
-      runValidators: true
+      runValidators: true,
+      context: 'query'
     }
   );
 

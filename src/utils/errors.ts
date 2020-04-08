@@ -1,9 +1,11 @@
 import { NextFunction } from 'express';
-import Err from './Err';
-import { MongooseError } from '../types';
+import HttpError from './HttpError';
+import { MongooseError, TransformedMongooseError } from '../types';
 import codes from 'http-status-codes';
 
-export const isMongooseError = (err: Err): false | MongooseError => {
+export const isMongooseError = (
+  err: MongooseError
+): TransformedMongooseError => {
   // Mongoose malformed Object ID or failed validation
 
   let message: string;
@@ -21,13 +23,7 @@ export const isMongooseError = (err: Err): false | MongooseError => {
     return { message, status };
   }
 
-  if (err.code === 11000) {
-    message = 'Duplicate resource detected';
-    status = codes.CONFLICT;
-    return { message, status };
-  }
-
-  return false;
+  return { message: 'Bad gateway', status: codes.BAD_GATEWAY };
 };
 
 export const errorFactory = (
@@ -35,5 +31,5 @@ export const errorFactory = (
   err = 'Server error',
   status = codes.INTERNAL_SERVER_ERROR
 ): void => {
-  return next(new Err(err, status));
+  return next(new HttpError(err, status));
 };

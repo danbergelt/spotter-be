@@ -24,7 +24,7 @@ describe('template model edit', () => {
       {
         name: 'Edited Template Name'
       },
-      { runValidators: true }
+      { runValidators: true, context: 'query' }
     );
     const foo = await Template.findOne({ name: 'Edited Template Name' });
     assert(foo !== null);
@@ -37,7 +37,7 @@ describe('template model edit', () => {
       Template.findByIdAndUpdate(
         temp._id,
         { name: undefined },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Give your template a name');
   });
@@ -49,7 +49,7 @@ describe('template model edit', () => {
       Template.findByIdAndUpdate(
         temp._id,
         { name: 'jkiopjiojiohjiojiowjfiojwioghiuwegiuhfoqwjfpqjfp' },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('20 character max');
   });
@@ -64,7 +64,7 @@ describe('template model edit', () => {
           title:
             'jkiopjiojiohjiojiowjfiojwioghiuwegiuhfoqwjfpqjfpfwfoijiojviowchjniojcniownvwiofhqwiofjpqwofjp'
         },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Title cannot be longer than 25 characters');
   });
@@ -80,7 +80,7 @@ describe('template model edit', () => {
             name: 'fjeiowfjiowfjiowjfiowjfiowjfiowjiowjfeiowfjwiofjeiowfjiow'
           }
         },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('25 character max');
   });
@@ -96,7 +96,7 @@ describe('template model edit', () => {
             name: undefined
           }
         },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add an exercise name');
   });
@@ -110,7 +110,7 @@ describe('template model edit', () => {
       Template.findByIdAndUpdate(
         temp._id,
         { exercises: [{ ...template.exercises[0], weight: 2001 }] },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('2000 lb limit');
 
@@ -119,7 +119,7 @@ describe('template model edit', () => {
       Template.findByIdAndUpdate(
         temp._id,
         { exercises: [{ ...template.exercises[0], sets: 2001 }] },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('2000 sets limit');
 
@@ -128,7 +128,7 @@ describe('template model edit', () => {
       Template.findByIdAndUpdate(
         temp._id,
         { exercises: [{ ...template.exercises[0], reps: 2001 }] },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('2000 reps limit');
   });
