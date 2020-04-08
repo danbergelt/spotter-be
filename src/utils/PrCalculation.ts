@@ -55,7 +55,7 @@ const setPr: TSetPr = async (user, exercise) => {
       pr: pr.length ? pr[0].exercises.weight : 0,
       prDate: pr.length ? pr[0].date : undefined
     },
-    { runValidators: true }
+    { runValidators: true, context: 'query' }
   );
 };
 

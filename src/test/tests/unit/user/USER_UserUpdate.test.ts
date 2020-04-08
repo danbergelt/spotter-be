@@ -37,7 +37,7 @@ describe('User model update', () => {
       User.findByIdAndUpdate(
         user._id,
         { email: 'blah' },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add a valid email');
   });

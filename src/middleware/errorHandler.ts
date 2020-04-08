@@ -1,7 +1,9 @@
-import { ErrorRequestHandler } from 'express';
-import Err from '../utils/Err';
+import { ErrorRequestHandler as ErrorHandler } from 'express';
+import HttpError from '../utils/HttpError';
 import { isMongooseError } from '../utils/errors';
 import codes from 'http-status-codes';
+import mongoose from 'mongoose';
+import { AnyError } from '../types';
 
 /*== Global error middleware =====================================================
 
@@ -11,19 +13,16 @@ passed in by a controller and returns it in the response object
 */
 
 // eslint-disable-next-line
-const errorHandler: ErrorRequestHandler = (err: Err, _req, res, _next) => {
+const errorHandler: ErrorHandler = (err: AnyError, _req, res, _next) => {
   // spread the err arg into a clean object, along with the err message
-  let error = { ...err };
+  let error = { ...err } as HttpError;
 
-  // if the error has a message, attach it to our clean object
   if (err.message) error.message = err.message;
 
   // check if the error is a mongoose error
-  const mongooseError = isMongooseError(err);
-
-  // if the error is a mongoose error, use the mongoose error properties in the response object
-  if (mongooseError) {
-    error = new Err(mongooseError.message, mongooseError.status);
+  if (err instanceof mongoose.Error) {
+    const { message, status } = isMongooseError(err);
+    error = new HttpError(message, status);
   }
 
   // return the response object. return some generic values if code &/or message are not found

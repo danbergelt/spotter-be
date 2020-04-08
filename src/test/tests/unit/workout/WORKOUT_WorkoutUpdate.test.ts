@@ -42,7 +42,7 @@ describe('Workout model update functionality', () => {
       Workout.findByIdAndUpdate(
         workout._id,
         { date: undefined },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add a date for this workout');
   });
@@ -54,7 +54,7 @@ describe('Workout model update functionality', () => {
       Workout.findByIdAndUpdate(
         workout._id,
         { date: 'January 1st' },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add a valid date (Mmm DD YYYY)');
   });
@@ -66,7 +66,7 @@ describe('Workout model update functionality', () => {
       Workout.findByIdAndUpdate(
         workout._id,
         { title: undefined },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add a title');
   });
@@ -81,7 +81,7 @@ describe('Workout model update functionality', () => {
           title:
             'jfiowjfiowjfiowjceiowjeiowjfeiwofjewiofjeiwofjeiowfjewiofjeiowfjiowfjiowfjeiowfjwiofjwiofjiowefjiowjfiowfjiowjf'
         },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Title cannot be longer than 25 characters');
   });
@@ -93,7 +93,7 @@ describe('Workout model update functionality', () => {
       Workout.findByIdAndUpdate(
         workout._id,
         { exercises: [{ name: undefined }] },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add an exercise name');
   });
@@ -112,7 +112,7 @@ describe('Workout model update functionality', () => {
             }
           ]
         },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('25 character max');
   });
@@ -126,7 +126,7 @@ describe('Workout model update functionality', () => {
       Workout.findByIdAndUpdate(
         workout._id,
         { exercises: [{ ...template.exercises[0], weight: 2001 }] },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('2000 lb limit');
 
@@ -135,7 +135,7 @@ describe('Workout model update functionality', () => {
       Workout.findByIdAndUpdate(
         workout._id,
         { exercises: [{ ...template.exercises[0], sets: 2001 }] },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('2000 sets limit');
 
@@ -144,7 +144,7 @@ describe('Workout model update functionality', () => {
       Workout.findByIdAndUpdate(
         workout._id,
         { exercises: [{ ...template.exercises[0], reps: 2001 }] },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('2000 reps limit');
   });

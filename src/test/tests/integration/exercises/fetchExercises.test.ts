@@ -14,7 +14,7 @@ import { createExercise } from '../../../utils/createExercise';
 // configure Chai HTTP
 chai.use(chaiHttp);
 
-describe('DELETE exercise by exercise id', () => {
+describe('fetch exercises by exercise id', () => {
   let uId: any;
   let eId: any;
 

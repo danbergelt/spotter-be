@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import { Token } from '../types/auth';
-import { ExpressFn } from '../types/index';
+import { ExpressFn, MongooseError } from '../types/index';
 import { isMongooseError, errorFactory } from '../utils/errors';
 import codes from 'http-status-codes';
+import mongoose from 'mongoose';
 
 /*== Auth protection middleware =====================================================
 
@@ -40,10 +41,10 @@ export const protect = (error = errorFactory): ExpressFn => {
       // continue to the business logic
       next();
     } catch (err) {
-      // if the caught error is a mongoose error, pass in the mongoose error to the errorFactory
-      const mongooseError = isMongooseError(err);
-      if (mongooseError) {
-        return error(next, mongooseError.message, mongooseError.status);
+      // check if the caught error is a mongoose error
+      if (err instanceof mongoose.Error) {
+        const { message, status } = isMongooseError(err as MongooseError);
+        return error(next, message, status);
       }
 
       // otherwise, return a generic access denied message

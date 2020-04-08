@@ -10,6 +10,8 @@ import xss from 'xss-clean';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import mongoSanitize from 'express-mongo-sanitize';
+
+// configure env variables
 dotenv.config();
 
 // Route imports
@@ -19,7 +21,7 @@ import tags from './routes/tags';
 import templates from './routes/templates';
 import auth from './routes/auth';
 import exercises from './routes/exercises';
-import Err from './utils/Err';
+import HttpError from './utils/HttpError';
 
 const whitelist: Array<string> = [];
 
@@ -43,7 +45,7 @@ app.use(
       if (origin && whitelist.includes(origin)) {
         res(null, true);
       } else {
-        res(new Err('Not allowed by CORS', 400));
+        res(new HttpError('Not allowed by CORS', 400));
       }
     },
     credentials: true
