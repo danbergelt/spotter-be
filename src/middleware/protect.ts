@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import { Token } from '../types/auth';
-import { ExpressFn, MongooseError } from '../types/index';
+import { ExpressFn } from '../types/index';
 import { errorFactory } from '../utils/errorFactory';
-import { transformMongooseError } from '../utils/transformMongooseError';
 import codes from 'http-status-codes';
-import mongoose from 'mongoose';
+import asyncHandler from '../utils/asyncHandler';
 
 /*== Auth protection middleware =====================================================
 
@@ -16,42 +15,45 @@ the functionality specific to that controller with no repetitive auth logic
 */
 
 // return a thunk and inject the errorFactory dependency (for mocking purposes)
-export const protect = (error = errorFactory): ExpressFn => {
-  return async (req, _, next): Promise<void> => {
+export const protect = (
+  error = errorFactory,
+  handler = asyncHandler,
+  UserModel = User
+): ExpressFn => {
+  return handler(async (req, _, next) => {
     // the bearer token and authorization header
     let token: string | null = null;
-    const { authorization } = req.headers;
+    const { authorization: auth } = req.headers;
 
     // if the auth header follows OAuth 2.0 syntax, split the token from the string
-    if (authorization?.startsWith('Bearer'))
-      token = authorization.split(' ')[1];
+    if (auth?.startsWith('Bearer')) token = auth.split(' ')[1];
 
     // Check the token is not null
     if (!token) return error(next, 'Access denied', codes.UNAUTHORIZED);
 
+    // verify the token with the JWT secret
+    const secret = process.env.JWT_SECRET as string;
+
+    // the id pulled from the token
+    let id: string;
+
+    // verify the token and decode the id
     try {
-      // verify the token with the JWT secret
-      const secret = process.env.JWT_SECRET as string;
-      const { id } = jwt.verify(token, secret) as Token;
-
-      // once verified, find the user, and attach it to the request body;
-      const user = await User.findById(id);
-      if (!user) return error(next, 'User not found', codes.NOT_FOUND);
-      req.user = user;
-
-      // continue to the business logic
-      next();
-    } catch (err) {
-      // check if the caught error is a mongoose error
-      if (err instanceof mongoose.Error) {
-        const { message, status } = transformMongooseError(
-          err as MongooseError
-        );
-        return error(next, message, status);
-      }
-
-      // otherwise, return a generic access denied message
+      id = (jwt.verify(token, secret) as Token).id;
+    } catch (_) {
       return error(next, 'Access denied', codes.UNAUTHORIZED);
     }
-  };
+
+    // fetch the user from the id
+    const user = await UserModel.findById(id);
+
+    // if no user is found, throw an error
+    if (!user) return error(next, 'User not found', codes.NOT_FOUND);
+
+    // attach the user to the request body and
+    req.user = user;
+
+    // move on to the next operation
+    next();
+  });
 };

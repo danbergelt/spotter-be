@@ -1,4 +1,4 @@
-import { Document, Schema } from 'mongoose';
+import { Document, Schema, Model } from 'mongoose';
 
 export interface Exercise extends Document {
   name: string;
@@ -62,3 +62,12 @@ export interface Template extends Document {
   exercises: Array<ExerciseOnTemplateSchema>;
   user: typeof Schema.Types.ObjectId;
 }
+
+export type AnyDocument = Template | Tag | User | Workout | Exercise;
+
+export type AnyModel =
+  | Model<Template>
+  | Model<Tag>
+  | Model<User>
+  | Model<Workout>
+  | Model<Exercise>;

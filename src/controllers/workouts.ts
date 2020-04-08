@@ -6,13 +6,8 @@ import { promisify } from 'util';
 import HttpError from '../utils/HttpError';
 import fs from 'fs';
 import path from 'path';
-import {
-  Workout as WorkoutInterface,
-  Tag,
-  Exercise as ExerciseInterface
-} from '../types/models';
-import { prCalculation } from '../utils/PrCalculation';
-import Exercise from '../models/Exercise';
+import { Workout as WorkoutInterface, Tag } from '../types/models';
+import { prs } from '../utils/prs';
 
 // @desc --> get all workouts by user id
 // @route --> GET /api/auth/workouts
@@ -49,9 +44,9 @@ export const workoutRangeByUserId = asyncHandler(async (req, res, next) => {
     date: { $in: req.body.range }
   }).sort({ date: 1 });
 
-  return res
-    .status(200)
-    .json({ success: true, count: workouts.length, workouts });
+  res.status(200).json({ success: true, count: workouts.length, workouts });
+
+  next();
 });
 
 // @desc --> add workout
@@ -74,7 +69,7 @@ export const addWorkout = asyncHandler(async (req, res, next) => {
 
   const workout: WorkoutInterface = await Workout.create(req.body);
 
-  await prCalculation(workout);
+  await prs(req.user._id);
 
   return res.status(201).json({
     success: true,
@@ -86,7 +81,7 @@ export const addWorkout = asyncHandler(async (req, res, next) => {
 // @route --> PUT /api/auth/workouts/:id
 // @access --> Private
 
-export const editWorkout = asyncHandler(async (req, res, next) => {
+export const editWorkout = asyncHandler(async (req, res) => {
   const workout: WorkoutInterface | null = await Workout.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -97,28 +92,12 @@ export const editWorkout = asyncHandler(async (req, res, next) => {
     }
   );
 
-  // fetch all exercises, and pass to formula to update all PRs
-  const exercises: Array<ExerciseInterface> = await Exercise.find({
-    user: req.user._id
+  await prs(req.user._id);
+
+  return res.status(200).json({
+    success: true,
+    workout
   });
-
-  const obj: {
-    user: string;
-    exercises: Array<ExerciseInterface>;
-  } = {
-    user: req.user._id,
-    exercises
-  };
-
-  if (workout) {
-    await prCalculation(obj);
-    return res.status(200).json({
-      success: true,
-      workout
-    });
-  } else {
-    return next(new HttpError('Workout not found', 404));
-  }
 });
 
 // @desc --> delete workout
@@ -130,11 +109,9 @@ export const deleteWorkout = asyncHandler(async (req, res) => {
     req.params.id
   );
 
-  if (workout) {
-    await prCalculation(workout);
-  }
+  await prs(req.user._id);
 
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
     workout
   });
