@@ -1,35 +1,13 @@
-import mailgun from 'mailgun-js';
+import mailgun, { Mailgun } from 'mailgun-js';
 const DOMAIN: string | undefined = process.env.MG_DOMAIN;
 const TESTING: string | undefined = process.env.TESTING;
+
 // new mailgun instance
-const mg: mailgun.Mailgun = mailgun({
-  apiKey: process.env.MG_KEY || 'unauthorized',
-  // need to change domain once production domain is purchased and verified in mailgun
-  domain: DOMAIN || 'unauthorized',
+const mg: Mailgun = mailgun({
+  apiKey: String(process.env.MG_KEY),
+  domain: String(DOMAIN),
   testMode: Boolean(TESTING)
 });
-
-// data object that specifies a sender, recipient, email subject, and html template for email
-interface MGData {
-  from: string;
-  to: string;
-  subject: string;
-  html: string;
-}
-const data = (
-  from: string,
-  to: string,
-  subject: string,
-  html: string
-): MGData => {
-  return {
-    // need to change from email once domain is purchased and verified in mailgun
-    from,
-    to,
-    subject,
-    html
-  };
-};
 
 // send mail async function - sends an automated email when called
 type TSendMail = (
@@ -39,7 +17,7 @@ type TSendMail = (
   html: string
 ) => Promise<void>;
 export const sendMail: TSendMail = async (from, to, subject, html) => {
-  await mg.messages().send(data(from, to, subject, html));
+  await mg.messages().send({ from, to, subject, html });
 };
 
 // email template for forgot password

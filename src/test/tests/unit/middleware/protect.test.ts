@@ -14,14 +14,15 @@ const utils = (headers: any, ret = 'Generic error', thrower = false) => {
   const errorFactory = sinon.stub().callsFake(next);
   const handler = sinon.stub().returnsArg(0);
   const UserModel = {} as any;
+  let find: any;
   if (!thrower) {
-    UserModel.findById = sinon.stub().returns('Found!');
+    find = sinon.stub().returns('found');
   }
 
   if (thrower) {
-    UserModel.findById = sinon.stub().returns(null);
+    find = sinon.stub().returns(null);
   }
-  return { req, res, next, errorFactory, handler, UserModel };
+  return { req, res, next, errorFactory, handler, UserModel, find };
 };
 
 describe('protect middleware', () => {
@@ -85,30 +86,17 @@ describe('protect middleware', () => {
     expect(next.returned('Undefined token'));
   });
 
-  it('calls errorFactory when token exists, but is denied as invalid jwt', async () => {
-    const { req, res, next, errorFactory, handler, UserModel } = utils(
-      { authorization: 'Bearer token' },
-      'Rejected token'
-    );
-    const protector = protect(errorFactory, handler, UserModel);
-    await protector(req, res, next);
-
-    expect(next.calledOnce).to.be.true;
-    expect(errorFactory.calledOnce).to.be.true;
-    expect(next.returned('Rejected token'));
-  });
-
-  it('calls errorFactory when token is valid, but user does not exist with the decoded id', async () => {
+  it('calls errorFactory', async () => {
     const id = new mongoose.Types.ObjectId();
 
     const token = genToken(id.toHexString());
 
-    const { req, res, next, errorFactory, handler, UserModel } = utils(
+    const { req, res, next, errorFactory, handler, UserModel, find } = utils(
       { authorization: `Bearer ${token}` },
       'User does not exist',
       true
     );
-    const protector = protect(errorFactory, handler, UserModel);
+    const protector = protect(errorFactory, handler, UserModel, find);
     await protector(req, res, next);
 
     expect(next.calledOnce).to.be.true;
@@ -121,11 +109,11 @@ describe('protect middleware', () => {
 
     const token = genToken(id);
 
-    const { req, res, next, errorFactory, handler, UserModel } = utils(
+    const { req, res, next, errorFactory, handler, UserModel, find } = utils(
       { authorization: `Bearer ${token}` },
       'Success'
     );
-    const protector = protect(errorFactory, handler, UserModel);
+    const protector = protect(errorFactory, handler, UserModel, find);
     await protector(req, res, next);
 
     expect(next.calledOnce).to.be.true;

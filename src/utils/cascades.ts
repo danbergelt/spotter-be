@@ -3,6 +3,7 @@ import {
   DefaultCascadeParams,
   CascadeUpdateParams
 } from '../types/index';
+import { updateMany } from './daos';
 
 /*== cascaders =====================================================
 
@@ -25,25 +26,27 @@ the '$' positional operator. Both operations run as middleware
 */
 
 // cascade update a document when a tag is deleted
-export const cascadeDeleteTag: Cascade<DefaultCascadeParams> = async params => {
+export const cascadeDeleteTag: Cascade<DefaultCascadeParams> = async (
+  params,
+  dbCall = updateMany
+) => {
   const { Model, id } = params;
 
-  await Model.updateMany(
-    { tags: { $elemMatch: { _id: id } } },
-    { $pull: { tags: { _id: id } } }
-  );
+  const $MATCH = { tags: { $elemMatch: { _id: id } } };
+  const $UPDATE = { $pull: { tags: { _id: id } } };
+
+  await dbCall(Model, $MATCH, $UPDATE);
 };
 
 // cascade update a document when a tag is updated
-export const cascadeUpdateTag: Cascade<CascadeUpdateParams> = async params => {
+export const cascadeUpdateTag: Cascade<CascadeUpdateParams> = async (
+  params,
+  dbCall = updateMany
+) => {
   const { Model, id, update } = params;
 
-  await Model.updateMany(
-    { tags: { $elemMatch: { _id: id } } },
-    {
-      $set: {
-        'tags.$.content': update
-      }
-    }
-  );
+  const $MATCH = { tags: { $elemMatch: { _id: id } } };
+  const $UPDATE = { $set: { 'tags.$.content': update } };
+
+  await dbCall(Model, $MATCH, $UPDATE);
 };
