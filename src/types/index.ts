@@ -25,7 +25,7 @@ export interface CascadeUpdateParams extends DefaultCascadeParams {
   update: string;
 }
 
-export type Cascade<T> = (params: T) => Promise<void>;
+export type Cascade<T> = (params: T, dbCall: Function) => Promise<void>;
 
 export type MongooseError = Error.ValidationError | Error.CastError;
 
@@ -36,6 +36,6 @@ export interface TransformedMongooseError {
 
 export type AnyError = HttpError | MongooseError;
 
-export interface WorkoutAggregate extends Pick<Workout, '_id' | 'date'> {
+export interface Pr extends Pick<Workout, '_id' | 'date'> {
   exercises: ExerciseOnWorkoutSchema;
 }

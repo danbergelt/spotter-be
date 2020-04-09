@@ -5,6 +5,7 @@ import { ExpressFn } from '../types/index';
 import { errorFactory } from '../utils/errorFactory';
 import codes from 'http-status-codes';
 import asyncHandler from '../utils/asyncHandler';
+import { findById } from '../utils/daos';
 
 /*== Auth protection middleware =====================================================
 
@@ -18,7 +19,8 @@ the functionality specific to that controller with no repetitive auth logic
 export const protect = (
   error = errorFactory,
   handler = asyncHandler,
-  UserModel = User
+  UserModel = User,
+  findUser = findById
 ): ExpressFn => {
   return handler(async (req, _, next) => {
     // the bearer token and authorization header
@@ -45,7 +47,7 @@ export const protect = (
     }
 
     // fetch the user from the id
-    const user = await UserModel.findById(id);
+    const user = await findUser(UserModel, id);
 
     // if no user is found, throw an error
     if (!user) return error(next, 'User not found', codes.NOT_FOUND);

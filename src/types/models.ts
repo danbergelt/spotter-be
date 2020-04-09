@@ -63,11 +63,4 @@ export interface Template extends Document {
   user: typeof Schema.Types.ObjectId;
 }
 
-export type AnyDocument = Template | Tag | User | Workout | Exercise;
-
-export type AnyModel =
-  | Model<Template>
-  | Model<Tag>
-  | Model<User>
-  | Model<Workout>
-  | Model<Exercise>;
+export type AnyDoc = Template & Tag & User & Workout & Exercise;

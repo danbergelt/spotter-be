@@ -53,6 +53,7 @@ export const changeEmail = asyncHandler(async (req, res, next) => {
 export const changePassword = asyncHandler(async (req, res, next) => {
   // extract the user's input data
   const { old, new: newP, confirm }: TUserDetails = req.body;
+
   if (!old || !newP || !confirm) {
     return next(new HttpError('All fields are required', 400));
   }
@@ -170,7 +171,7 @@ export const changeForgottenPassword = asyncHandler(async (req, res, next) => {
   }
 
   // get hashed token
-  const resetPasswordToken: string = crypto
+  const resetPasswordToken = crypto
     .createHash('sha256')
     .update(req.params.id)
     .digest('hex');
