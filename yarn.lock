@@ -487,7 +487,15 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@types/sinon@^9.0.0":
+"@types/sinon-express-mock@^1.3.8":
+  version "1.3.8"
+  resolved "https://registry.yarnpkg.com/@types/sinon-express-mock/-/sinon-express-mock-1.3.8.tgz#4db9fca024b5355ef5cbee48e1068ed3831e55ef"
+  integrity sha512-aYu0PMH/VLpl5GMqnhYRuosC4KY0d3gi/Jn7k8G+rJIniryPxCweYyUFvZSs12ee0zlyiWvWyGgv+CaKW5DusQ==
+  dependencies:
+    "@types/express" "*"
+    "@types/sinon" "*"
+
+"@types/sinon@*", "@types/sinon@^9.0.0":
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-9.0.0.tgz#5b70a360f55645dd64f205defd2a31b749a59799"
   integrity sha512-v2TkYHkts4VXshMkcmot/H+ERZ2SevKa10saGaJPGCJ8vh3lKrC4u663zYEeRZxep+VbG6YRDtQ6gVqw9dYzPA==
@@ -4556,6 +4564,11 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
   integrity sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
+
+sinon-express-mock@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/sinon-express-mock/-/sinon-express-mock-2.2.1.tgz#245646f06710efd98134dbe15b3fd153ebb0e67e"
+  integrity sha512-z1wqaPMwEnfn0SpigFhVYVS/ObX1tkqyRzRdccX99FgQaLkxGSo4684unr3NCqWeYZ1zchxPw7oFIDfzg1cAjg==
 
 sinon@^9.0.1:
   version "9.0.1"
