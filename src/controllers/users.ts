@@ -11,11 +11,11 @@ import jwt from 'jsonwebtoken';
 import { User as UserInterface } from 'src/types/models';
 import { Token } from '../types/auth';
 import { Request, Response } from 'express';
+import { sendMail } from '../utils/sendMail';
 import {
-  sendMail,
   contactMessageTemplate,
   contactConfirmTemplate
-} from '../utils/sendMail';
+} from '../utils/emailTemplates';
 
 interface UserDetails {
   email: string;

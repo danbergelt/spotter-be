@@ -1,5 +1,13 @@
 import { Request } from 'express';
 
+/*== getToken =====================================================
+
+This helper function strips the authorization header from the request, and validates
+that it conforms to the standard OAuth Bearer token format. It will then return that
+token, which is either null (failed get) or a string (successful get)
+
+*/
+
 export const getToken = (req: Request): string | null => {
   // prepare the bearer token and authorization header
   let token: string | null = null;
