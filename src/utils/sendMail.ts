@@ -23,6 +23,6 @@ const mailgun = mailgunInstance({
 export const sendMail = async (
   metadata: MailMetadata,
   mg = mailgun
-): Promise<void | undefined> => {
+): Promise<void> => {
   await mg.messages().send(metadata);
 };

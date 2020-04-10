@@ -9,7 +9,7 @@ describe('send mail', () => {
     const mg = {} as Mailgun;
     const messages = {} as Messages;
     mg.messages = Sinon.stub().returns(messages);
-    messages.send = Sinon.stub().returnsArg(0);
+    messages.send = Sinon.stub().returnsThis();
 
     await sendMail(metadata, mg);
     expect((mg.messages as any).calledOnce).to.be.true;
