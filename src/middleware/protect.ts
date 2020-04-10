@@ -6,6 +6,7 @@ import { errorFactory } from '../utils/errorFactory';
 import codes from 'http-status-codes';
 import asyncHandler from '../utils/asyncHandler';
 import { findById } from '../utils/daos';
+import { getToken } from './protect.functions';
 
 /*== Auth protection middleware =====================================================
 
@@ -23,25 +24,18 @@ export const protect = (
   findUser = findById
 ): ExpressFn => {
   return handler(async (req, _, next) => {
-    // the bearer token and authorization header
-    let token: string | null = null;
-    const { authorization: auth } = req.headers;
-
-    // if the auth header follows OAuth 2.0 syntax, split the token from the string
-    if (auth?.startsWith('Bearer')) token = auth.split(' ')[1];
+    // strip token from the request
+    const token = getToken(req);
 
     // Check the token is not null
     if (!token) return error(next, 'Access denied', codes.UNAUTHORIZED);
-
-    // verify the token with the JWT secret
-    const secret = process.env.JWT_SECRET as string;
 
     // the id pulled from the token
     let id: string;
 
     // verify the token and decode the id
     try {
-      id = (jwt.verify(token, secret) as Token).id;
+      id = (jwt.verify(token, process.env.JWT_SECRET as string) as Token).id;
     } catch (_) {
       return error(next, 'Access denied', codes.UNAUTHORIZED);
     }

@@ -10,13 +10,12 @@ const mg: Mailgun = mailgun({
 });
 
 // send mail async function - sends an automated email when called
-type TSendMail = (
+export const sendMail = async (
   from: string,
   to: string,
   subject: string,
   html: string
-) => Promise<void>;
-export const sendMail: TSendMail = async (from, to, subject, html) => {
+): Promise<void> => {
   await mg.messages().send({ from, to, subject, html });
 };
 

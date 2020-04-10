@@ -107,7 +107,7 @@ export const updateExercisesWithPrs = async (
   ExerciseModel = Exercise
 ): Promise<void> => {
   // loop through the hash table, updating exercises with their prs
-  for (const name in ht) {
+  for (const name of Object.keys(ht)) {
     const FILTER = { user, name };
     const UPDATE = { pr: ht[name][0], prDate: ht[name][1] };
     await updateExerciseWithPr(ExerciseModel, FILTER, UPDATE);
