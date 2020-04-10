@@ -85,7 +85,7 @@ export const login = asyncHandler(async (req, res, next) => {
 // @access --> Public
 
 export const logout = (_: Request, res: Response): Response => {
-  setRefreshToken(res, '');
+  res.clearCookie('toll');
 
   return res.status(200).json({ success: true, data: 'Logged out' });
 };
