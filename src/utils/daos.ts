@@ -1,6 +1,13 @@
 import { Document, Model } from 'mongoose'; // eslint-disable-line
+import { MongoArg } from '../types';
 
-type MongoArg = Record<string, unknown>;
+/*== **IMPORTANT** =====================================================
+
+Despite being async, these functions are deliberately not caught. This is
+to encourage you to write more explicit error messages at a higher level,
+and to match the relevant context
+
+*/
 
 /*== findById =====================================================
 
@@ -53,7 +60,11 @@ export const updateOne = async <T extends Document>(
   filter: MongoArg,
   update: MongoArg
 ): Promise<T | null> => {
-  return await Model.findOneAndUpdate(filter, update, { new: true });
+  return await Model.findOneAndUpdate(filter, update, {
+    new: true,
+    runValidators: true,
+    context: 'query'
+  });
 };
 
 /*== updateMany =====================================================
@@ -68,5 +79,9 @@ export const updateMany = async <T extends Document>(
   filter: MongoArg,
   update: MongoArg
 ): Promise<MongoArg> => {
-  return await Model.updateMany(filter, update, { new: true });
+  return await Model.updateMany(filter, update, {
+    new: true,
+    runValidators: true,
+    context: 'query'
+  });
 };
