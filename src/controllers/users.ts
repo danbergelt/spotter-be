@@ -152,20 +152,20 @@ export const contact = asyncHandler(async (req, res, next) => {
 
   try {
     // confirmation message that message was sent
-    await sendMail(
-      'no-reply@getspotter.io',
-      email,
-      'Greetings from Spotter',
-      contactConfirmTemplate()
-    );
+    await sendMail({
+      from: 'no-reply@getspotter.io',
+      to: email,
+      subject: 'Greetings from Spotter',
+      html: contactConfirmTemplate()
+    });
 
     // contact message with user's message
-    await sendMail(
-      'contact@getspotter.io',
-      'team@getspotter.io',
+    await sendMail({
+      from: 'contact@getspotter.io',
+      to: 'team@getspotter.io',
       subject,
-      contactMessageTemplate(message, name, email)
-    );
+      html: contactMessageTemplate(message, name, email)
+    });
 
     return res.status(200).json({
       success: true,

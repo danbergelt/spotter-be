@@ -43,3 +43,10 @@ export interface Pr extends Pick<Workout, '_id' | 'date'> {
 export type PrHashTable = Record<string, [number, string | undefined]>;
 
 export type MongoArg = Record<string, unknown>;
+
+export interface MailMetadata {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+}
