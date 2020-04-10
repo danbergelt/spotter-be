@@ -31,7 +31,7 @@
     "xss-clean": "^0.1.1"
   },
   "scripts": {
-    "test": "TESTING=true NODE_ENV=test ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/**/**/*.test.ts --file src/test/utils/teardown.ts --exit",
+    "test": "TESTING=true NODE_ENV=test ts-mocha -p tsconfig.json --file src/test/utils/setup.ts src/test/tests/unit/utils/sendMail.test.ts --file src/test/utils/teardown.ts --exit",
     "coverage": "TESTING=true NODE_ENV=test nyc npm test && nyc report --reporter=text-lcov > coverage.lcov && ./node_modules/.bin/codecov",
     "start": "NODE_ENV=production ts-node --transpile-only --files src/index",
     "staging": "NODE_ENV=production STAGING=true ts-node --transpile-only --files src/index",
