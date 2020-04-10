@@ -5,8 +5,13 @@ import asyncHandler from '../utils/asyncHandler';
 import { User as UserInterface } from '../types/models';
 import { sendMail } from '../utils/sendMail';
 import { forgotPasswordTemplate } from '../utils/emailTemplates';
-import { sendToken, refreshToken } from '../utils/tokens';
-import { genToken } from '../utils/tokens';
+import { setRefreshToken, tokenFactory } from '../utils/tokens';
+import {
+  REFRESH_SECRET,
+  REFRESH_EXPIRY,
+  AUTH_SECRET,
+  AUTH_EXPIRY
+} from '../utils/constants';
 
 type TUserDetails = Record<string, string>;
 
@@ -178,7 +183,7 @@ export const changeForgottenPassword = asyncHandler(async (req, res, next) => {
     .digest('hex');
 
   // check for user with this token and a valid exp. date
-  const user: UserInterface | null = await User.findOne({
+  const user = await User.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() }
   });
@@ -194,14 +199,9 @@ export const changeForgottenPassword = asyncHandler(async (req, res, next) => {
 
   await user.save();
 
-  refreshToken(
-    res,
-    genToken(
-      user._id,
-      process.env.REF_SECRET || 'unauthorized',
-      process.env.REF_EXPIRE || '0d'
-    )
-  );
+  setRefreshToken(res, tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY));
 
-  return sendToken(user, 200, res);
+  const authToken = tokenFactory(user._id, AUTH_SECRET, AUTH_EXPIRY);
+
+  return res.status(200).json({ success: true, token: authToken });
 });

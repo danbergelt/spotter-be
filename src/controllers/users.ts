@@ -1,12 +1,7 @@
 import HttpError from '../utils/HttpError';
 import User from '../models/user';
 import asyncHandler from '../utils/asyncHandler';
-import {
-  refreshToken,
-  genToken,
-  clearRefreshToken,
-  sendToken
-} from '../utils/tokens';
+import { setRefreshToken, tokenFactory } from '../utils/tokens';
 import jwt from 'jsonwebtoken';
 import { User as UserInterface } from 'src/types/models';
 import { Token } from '../types/auth';
@@ -16,6 +11,12 @@ import {
   contactMessageTemplate,
   contactConfirmTemplate
 } from '../utils/emailTemplates';
+import {
+  REFRESH_SECRET,
+  REFRESH_EXPIRY,
+  AUTH_EXPIRY,
+  AUTH_SECRET
+} from '../utils/constants';
 
 interface UserDetails {
   email: string;
@@ -37,16 +38,11 @@ export const register = asyncHandler(async (req, res) => {
     role
   });
 
-  refreshToken(
-    res,
-    genToken(
-      user._id,
-      process.env.REF_SECRET || 'unauthorized',
-      process.env.REF_EXPIRE || '0d'
-    )
-  );
+  setRefreshToken(res, tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY));
 
-  sendToken(user, 201, res);
+  const authToken = tokenFactory(user._id, AUTH_SECRET, AUTH_EXPIRY);
+
+  return res.status(201).json({ success: true, token: authToken });
 });
 
 // @desc --> login user
@@ -77,16 +73,11 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new HttpError('Invalid credentials', 401));
   }
 
-  refreshToken(
-    res,
-    genToken(
-      user._id,
-      process.env.REF_SECRET || 'unauthorized',
-      process.env.REF_EXPIRE || '0d'
-    )
-  );
+  setRefreshToken(res, tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY));
 
-  sendToken(user, 200, res);
+  const authToken = tokenFactory(user._id, AUTH_SECRET, AUTH_EXPIRY);
+
+  return res.status(200).json({ success: true, token: authToken });
 });
 
 // @desc --> logout
@@ -94,7 +85,7 @@ export const login = asyncHandler(async (req, res, next) => {
 // @access --> Public
 
 export const logout = (_: Request, res: Response): Response => {
-  clearRefreshToken(res);
+  res.clearCookie('toll');
 
   return res.status(200).json({ success: true, data: 'Logged out' });
 };
@@ -127,16 +118,11 @@ export const refresh = asyncHandler(async (req, res) => {
     return res.send({ success: false, token: null });
   }
 
-  refreshToken(
-    res,
-    genToken(
-      user._id,
-      process.env.REF_SECRET || 'unauthorized',
-      process.env.REF_EXPIRE || '0d'
-    )
-  );
+  setRefreshToken(res, tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY));
 
-  return sendToken(user, 200, res);
+  const authToken = tokenFactory(user._id, AUTH_SECRET, AUTH_EXPIRY);
+
+  return res.status(200).json({ success: true, token: authToken });
 });
 
 // @desc --> contact

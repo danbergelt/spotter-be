@@ -2,7 +2,6 @@ import { NextFunction } from 'connect';
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { genToken } from '../utils/tokens';
 import { User } from 'src/types/models';
 import Exercise from './Exercise';
 import Tag from './Tag';
@@ -77,15 +76,6 @@ UserSchema.methods.getResetPasswordToken = function(): string {
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
-};
-
-// Sign token and return
-UserSchema.methods.getToken = function(): string {
-  return genToken(
-    this._id,
-    process.env.JWT_SECRET || 'unauthorized',
-    process.env.JWT_EXPIRE || '0d'
-  );
 };
 
 // Match password on login

@@ -1,4 +1,4 @@
-import { Document, Schema, Model } from 'mongoose';
+import { Document, Schema } from 'mongoose';
 
 export interface Exercise extends Document {
   name: string;
