@@ -27,7 +27,12 @@ export interface CascadeUpdateParams extends DefaultCascadeParams {
 
 export type Cascade<T> = (params: T, dbCall?: Function) => Promise<void>;
 
-export type MongooseError = Error.ValidationError | Error.CastError;
+export type MongooseError =
+  | Error.ValidationError
+  | Error.CastError
+  | Error.DocumentNotFoundError
+  | Error.MissingSchemaError
+  | Error.ParallelSaveError;
 
 export interface TransformedMongooseError {
   message: string;

@@ -45,7 +45,7 @@ describe('DELETE exercise by exercise id', () => {
       .delete(`/api/auth/exercises/dj9i12dj129`)
       .set('Authorization', `Bearer ${token}`);
 
-    res.body.error.should.equal('Resource not found');
+    res.body.error.should.equal('Resource not found (Cast error)');
   });
 
   it('should not delete exercise with bad token', async () => {
