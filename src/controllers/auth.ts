@@ -12,41 +12,41 @@ import {
   AUTH_SECRET,
   AUTH_EXPIRY
 } from '../utils/constants';
-
-type TUserDetails = Record<string, string>;
+import {
+  validateBody,
+  validateEmailWithPersistedEmail,
+  mutatePassword
+} from './auth.functions';
+import { findById, updateOne } from '../utils/daos';
+import { ResetUserDetailsBody } from '../types';
+import { errorFactory } from '../utils/errorFactory';
+import { BAD_REQUEST, OK, UNAUTHORIZED } from 'http-status-codes';
 
 // @desc --> change password
-// @route --> PUT /api/auth/user/password
+// @route --> PUT /api/auth/user/email
 // @access --> Private
 
-export const changeEmail = asyncHandler(async (req, res, next) => {
-  const { old, new: newE, confirm }: TUserDetails = req.body;
+export const changeEmail = asyncHandler(async ({ body, id }, res, next) => {
+  // cast the body to match the context
+  const creds = body as ResetUserDetailsBody;
 
-  // confirm that all fields are present
-  if (!old || !newE || !confirm) {
-    return next(new HttpError('All fields are required', 400));
+  // validate the body object contains the proper fields
+  if (!validateBody(creds)) {
+    return errorFactory(next, 'Fields missing or mismatching', BAD_REQUEST);
   }
 
-  // confirm that the user confirmed their new email and that the two fields match
-  if (newE !== confirm) {
-    return next(new HttpError('New email fields must match', 400));
-  }
-
-  const user: UserInterface | null = await User.findById(req.user._id);
+  // find the user with the validated id
+  const user = (await findById(User, id)) as UserInterface;
 
   // confirm that the old email field matches the email on record
-  if (old !== user?.email) {
-    return next(new HttpError('Invalid credentials', 400));
+  if (!validateEmailWithPersistedEmail([creds.old, user.email])) {
+    return errorFactory(next, `Invalid old email`, UNAUTHORIZED);
   }
 
   // update the user's email
-  await User.findByIdAndUpdate(
-    req.user._id,
-    { email: confirm },
-    { new: true, runValidators: true, context: 'query' }
-  );
+  await updateOne(User, { _id: id }, { email: body.confirm });
 
-  res.status(200).json({
+  res.status(OK).json({
     success: true,
     message: 'Email updated'
   });
@@ -56,37 +56,22 @@ export const changeEmail = asyncHandler(async (req, res, next) => {
 // @route --> PUT /api/auth/user/password
 // @access --> Private
 
-export const changePassword = asyncHandler(async (req, res, next) => {
-  // extract the user's input data
-  const { old, new: newP, confirm }: TUserDetails = req.body;
+export const changePassword = asyncHandler(async ({ body, id }, res, next) => {
+  // cast the body to match the context
+  const creds = body as ResetUserDetailsBody;
 
-  if (!old || !newP || !confirm) {
-    return next(new HttpError('All fields are required', 400));
-  }
-  if (newP !== confirm) {
-    return next(new HttpError('New password fields must match', 400));
+  // validate that the body contains the proper fields
+  if (!validateBody(creds)) {
+    return errorFactory(next, 'Fields missing or mismatching', BAD_REQUEST);
   }
 
-  // Check for user
-  const user: UserInterface | null = await User.findById(req.user._id).select(
-    '+password'
-  );
-  if (!user) {
-    return next(new HttpError('User not found', 404));
+  // match the password with the user's stored password
+  if (!(await mutatePassword(id, creds.old, creds.new))) {
+    return errorFactory(next, `Invalid old password`, UNAUTHORIZED);
   }
-
-  // Check if password matches
-  const isMatch: boolean = await user.matchPassword(old);
-  if (!isMatch) {
-    return next(new HttpError('Invalid credentials', 400));
-  }
-
-  // save the password to the user
-  user.password = newP;
-  await user.save();
 
   // return a success message after the user is updated
-  res.status(200).json({
+  res.status(OK).json({
     success: true,
     message: 'Password updated'
   });
@@ -96,18 +81,11 @@ export const changePassword = asyncHandler(async (req, res, next) => {
 // @route --> DELETE /api/auth/user/delete
 // @access --> Private
 
-export const deleteAccount = asyncHandler(async (req, res, next) => {
-  const user: UserInterface | null = await User.findById(req.user._id);
-
-  if (!user) {
-    return next(new HttpError('User not found', 404));
-  }
-
+export const deleteAccount = asyncHandler(async (req, res) => {
   // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
-  if (user) {
-    await user.remove();
-  }
+  await User.findById(req.id).remove();
 
+  // return success to the client
   return res.status(200).json({
     success: true
   });

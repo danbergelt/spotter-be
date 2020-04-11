@@ -20,7 +20,7 @@ export const getWorkoutsByUserId = asyncHandler(async (req, res) => {
   };
 
   const workouts: Array<WorkoutInterface> = await Workout.find({
-    user: req.user._id
+    user: req.id
   })
     .skip(pagination.page * pagination.limit)
     .limit(pagination.limit);
@@ -40,7 +40,7 @@ export const workoutRangeByUserId = asyncHandler(async (req, res, next) => {
   }
 
   const workouts: Array<WorkoutInterface> = await Workout.find({
-    user: req.user._id,
+    user: req.id,
     date: { $in: req.body.range }
   }).sort({ date: 1 });
 
@@ -54,7 +54,7 @@ export const workoutRangeByUserId = asyncHandler(async (req, res, next) => {
 // @access --> Private
 
 export const addWorkout = asyncHandler(async (req, res, next) => {
-  req.body.user = req.user._id;
+  req.body.user = req.id;
 
   // validate the tag colors
   let colorValidate: Array<Tag | false> = [];
@@ -69,7 +69,7 @@ export const addWorkout = asyncHandler(async (req, res, next) => {
 
   const workout: WorkoutInterface = await Workout.create(req.body);
 
-  await prs(req.user._id);
+  await prs(req.id);
 
   return res.status(201).json({
     success: true,
@@ -92,7 +92,7 @@ export const editWorkout = asyncHandler(async (req, res) => {
     }
   );
 
-  await prs(req.user._id);
+  await prs(req.id);
 
   return res.status(200).json({
     success: true,
@@ -109,7 +109,7 @@ export const deleteWorkout = asyncHandler(async (req, res) => {
     req.params.id
   );
 
-  await prs(req.user._id);
+  await prs(req.id);
 
   res.status(200).json({
     success: true,
@@ -124,7 +124,7 @@ export const deleteWorkout = asyncHandler(async (req, res) => {
 export const downloadWorkoutData = asyncHandler(async (req, res, next) => {
   // fetch all workouts by the user id
   const workouts: Array<WorkoutInterface> = await Workout.find({
-    user: req.user._id
+    user: req.id
   });
 
   // convert the workouts to JSON
@@ -136,7 +136,7 @@ export const downloadWorkoutData = asyncHandler(async (req, res, next) => {
   }
 
   // constants for saving the file locally
-  const filename = `download-${req.user._id}-workouts.csv`;
+  const filename = `download-${req.id}-workouts.csv`;
   const absPath: string = path.join(__dirname, '/static/', filename);
 
   // promisify csv converter and FS functions

@@ -9,13 +9,6 @@ export type ExpressFn = (
   next: NextFunction
 ) => Promise<any>; // eslint-disable-line
 
-export interface HttpException extends Error {
-  code?: number;
-  statusCode?: number;
-  message: string;
-  errors: { message: string }[];
-}
-
 export interface DefaultCascadeParams {
   id: Schema.Types.ObjectId;
   Model: Model<Document, {}>;
@@ -54,4 +47,10 @@ export interface MailMetadata {
   to: string;
   subject: string;
   html: string;
+}
+
+export interface ResetUserDetailsBody {
+  old: string;
+  new: string;
+  confirm: string;
 }
