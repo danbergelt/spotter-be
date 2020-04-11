@@ -1,8 +1,8 @@
-import Err from '../utils/Err';
+import HttpError from '../utils/HttpError';
 import Exercise from '../models/Exercise';
 import asyncHandler from '../utils/asyncHandler';
 import { Exercise as ExerciseInterface } from '../types/models';
-import { prCalculation } from '../utils/PrCalculation';
+import { prs } from '../utils/prs';
 
 // @desc --> create exercise
 // @route --> POST /api/auth/exercises
@@ -17,14 +17,14 @@ export const createExercise = asyncHandler(async (req, res, next) => {
   });
 
   if (exercise.length) {
-    return next(new Err('Exercise already exists', 400));
+    return next(new HttpError('Exercise already exists', 400));
   }
 
-  const createdExercise: ExerciseInterface = await Exercise.create(req.body);
+  const createdExercise = await Exercise.create(req.body);
 
-  await prCalculation(createdExercise);
+  await prs(req.user._id);
 
-  res.status(201).json({
+  return res.status(201).json({
     success: true,
     exercise: createdExercise
   });
@@ -40,15 +40,14 @@ export const updateExercise = asyncHandler(async (req, res) => {
     req.body,
     {
       new: true,
-      runValidators: true
+      runValidators: true,
+      context: 'query'
     }
   );
 
-  if (exercise) {
-    await prCalculation(exercise);
-  }
+  await prs(req.user._id);
 
-  res.status(201).json({
+  return res.status(201).json({
     success: true,
     exercise
   });
@@ -61,11 +60,9 @@ export const updateExercise = asyncHandler(async (req, res) => {
 export const deleteExercise = asyncHandler(async (req, res) => {
   const exercise = await Exercise.findByIdAndDelete(req.params.id);
 
-  if (exercise) {
-    await prCalculation(exercise);
-  }
+  await prs(req.user._id);
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     exercise
   });

@@ -27,7 +27,7 @@ describe('Update tag model', () => {
       Tag.findByIdAndUpdate(
         tag._id,
         { color: undefined, content: 'text' },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('Please add a tag color');
   });
@@ -40,7 +40,7 @@ describe('Update tag model', () => {
       Tag.findByIdAndUpdate(
         tag._id,
         { color: 'red', content: 'hjiuhiugiugiugghiugiugiugiugiugiugiu' },
-        { runValidators: true }
+        { runValidators: true, context: 'query' }
       )
     ).to.be.rejectedWith('20 character max');
   });

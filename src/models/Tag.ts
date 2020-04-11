@@ -3,7 +3,7 @@ import Workout from './Workout';
 import Template from './Template';
 import { NextFunction } from 'connect';
 import { Tag } from '../types/models';
-import { tagCascadeDel, tagCascadeUpdate } from '../utils/cascades';
+import { cascadeDeleteTag, cascadeUpdateTag } from '../utils/cascades';
 
 const TagSchema = new Schema<Tag>({
   color: {
@@ -28,32 +28,33 @@ TagSchema.pre('findOneAndUpdate', async function(
   next: NextFunction
 ) {
   // get the specific document tied to the query
-  const doc: Tag = await this.findOne(this.getQuery());
+  const doc = (await this.findOne(this.getQuery())) as Tag;
 
   // extract the content in the update
-  const { content }: { content: string } = this.getUpdate();
+  const { content } = this.getUpdate() as { content: string };
 
   if (content.length <= 20) {
+    const params = { id: doc._id, update: content };
     // open a new update template query, match the id on each template to the specific doc's id
-    await tagCascadeUpdate(doc._id, Template, content);
+    await cascadeUpdateTag({ ...params, Model: Template });
 
     // open a new update workout query, match the id on each workout to the specific doc's id
-    await tagCascadeUpdate(doc._id, Workout, content);
+    await cascadeUpdateTag({ ...params, Model: Workout });
   }
 
   next();
 });
 
 // cascade delete tags
-TagSchema.pre('remove', async function(next) {
+TagSchema.pre('remove', async function(this: Tag, next: NextFunction) {
   // get the id off of the removed tag
-  const tagId: Schema.Types.ObjectId = this._id;
+  const id = this._id as Schema.Types.ObjectId;
 
   // loop through the workouts, pull the tags from the workout
-  await tagCascadeDel(tagId, Workout);
+  await cascadeDeleteTag({ id, Model: Workout });
 
   // loop through the templates, pull the tags from the template
-  await tagCascadeDel(tagId, Template);
+  await cascadeDeleteTag({ id, Model: Template });
 
   next();
 });

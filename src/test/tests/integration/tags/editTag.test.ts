@@ -57,7 +57,7 @@ describe('PUT edit tag by tag id', () => {
         should.exist(res);
         res.body.success.should.equal(false);
         res.should.have.status(404);
-        res.body.error.should.equal('Resource not found');
+        res.body.error.should.equal('Resource not found (Cast error)');
         done();
       });
   });

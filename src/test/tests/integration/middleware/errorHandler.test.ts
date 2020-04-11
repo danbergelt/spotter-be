@@ -3,7 +3,7 @@ import chaiHttp from 'chai-http';
 import express from 'express';
 import errorHandler from '../../../../middleware/errorHandler';
 import User from '../../../../models/user';
-import Err from '../../../../utils/Err';
+import HttpError from '../../../../utils/HttpError';
 
 use(chaiHttp);
 
@@ -20,7 +20,7 @@ app.get('/bar', (_req, _res, next) => {
 });
 
 app.get('/qux', (_req, _res, next) => {
-  return next(new Err('foobar', 400));
+  return next(new HttpError('foobar', 400));
 });
 
 app.use(errorHandler);
@@ -35,7 +35,7 @@ describe('error handler middleware', () => {
   it('returns a mongoose error when error object is a mongoose error', async () => {
     const res = await request(app).get('/bar');
     expect(res.status).to.equal(404);
-    expect(res.body.error).to.equal('Resource not found');
+    expect(res.body.error).to.equal('Resource not found (Cast error)');
   });
 
   it('returns the passed-in error as is', async () => {

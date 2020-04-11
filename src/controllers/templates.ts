@@ -1,6 +1,6 @@
 import Template from '../models/Template';
 import asyncHandler from '../utils/asyncHandler';
-import Err from '../utils/Err';
+import HttpError from '../utils/HttpError';
 const hex = require('is-hexcolor'); // eslint-disable-line
 import { Template as TemplateInterface, Tag } from 'src/types/models';
 
@@ -31,7 +31,7 @@ export const addTemplate = asyncHandler(async (req, res, next) => {
   });
 
   if (templates.length) {
-    return next(new Err('Template already exists', 400));
+    return next(new HttpError('Template already exists', 400));
   }
 
   let colorValidate: Array<Tag | false> = [];
@@ -42,7 +42,7 @@ export const addTemplate = asyncHandler(async (req, res, next) => {
   }
 
   if (colorValidate.includes(false)) {
-    return next(new Err('Invalid color detected', 400));
+    return next(new HttpError('Invalid color detected', 400));
   }
 
   const template: TemplateInterface = await Template.create(req.body);
@@ -63,7 +63,8 @@ export const editTemplate = asyncHandler(async (req, res) => {
     req.body,
     {
       new: true,
-      runValidators: true
+      runValidators: true,
+      context: 'query'
     }
   );
 

@@ -14,7 +14,7 @@ import { createExercise } from '../../../utils/createExercise';
 // configure Chai HTTP
 chai.use(chaiHttp);
 
-describe('DELETE exercise by exercise id', () => {
+describe('edit exercise by exercise id', () => {
   let uId: any;
   let eId: any;
 
@@ -47,7 +47,7 @@ describe('DELETE exercise by exercise id', () => {
       .send({ name: 'edited' })
       .set('Authorization', `Bearer ${token}`);
 
-    res.body.error.should.equal('Resource not found');
+    res.body.error.should.equal('Resource not found (Cast error)');
   });
 
   it('should not edit with bad token', async () => {

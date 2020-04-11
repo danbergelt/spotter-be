@@ -64,23 +64,20 @@ describe('Register new user', () => {
   });
 
   it('cannot create duplicates', async () => {
-    const r = await chai
+    await chai
       .request(app)
       .post('/api/auth/register')
       .send({ email: 'test@email.com', password: 'password' });
-    console.log(r.body.id);
     const res = await chai
       .request(app)
       .post('/api/auth/register')
       .send({ email: 'test@email.com', password: 'password' });
     should.exist(res);
-    console.log(res.body.id);
     const users = await User.find({});
-    console.log(users);
     res.body.success.should.equal(false);
-    res.should.have.status(409);
+    res.should.have.status(400);
     res.body.should.be.a('object');
-    res.body.error.should.equal('Duplicate detected, try again');
+    res.body.error.should.equal('This email already exists');
   });
 
   // Invalid password errs

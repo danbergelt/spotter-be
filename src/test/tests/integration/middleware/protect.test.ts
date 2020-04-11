@@ -49,15 +49,6 @@ describe('protect middleware integration tests', () => {
     expect(res.status).to.equal(401);
   });
 
-  it('errors when decoded token is not a Mongo ObjectId', async () => {
-    const token = genToken('token');
-    const res = await request(app)
-      .get('/')
-      .set('Authorization', `Bearer ${token}`);
-    expect(res.body.error).to.equal('Resource not found');
-    expect(res.status).to.equal(401);
-  });
-
   it('errors when decoded token id is not tied to a user document', async () => {
     const id = new mongoose.Types.ObjectId();
     const token = genToken(id.toHexString());
@@ -65,7 +56,7 @@ describe('protect middleware integration tests', () => {
       .get('/')
       .set('Authorization', `Bearer ${token}`);
     expect(res.body.error).to.equal('User not found');
-    expect(res.status).to.equal(401);
+    expect(res.status).to.equal(404);
   });
 
   it('returns when the user passes authentication', async () => {
