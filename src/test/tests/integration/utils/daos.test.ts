@@ -2,7 +2,8 @@ import {
   findMany,
   aggregate,
   updateOne,
-  updateMany
+  updateMany,
+  getPassword
 } from '../../../../utils/daos';
 import { createUser } from '../../../utils/createUser';
 import { User, Exercise as ExerciseType } from '../../../../types/models';
@@ -53,6 +54,13 @@ describe('mongo query helper functions', () => {
       { user: user._id },
       { name: 'update many' }
     );
+
     expect(details).to.deep.equal({ n: 2, nModified: 2, ok: 1 });
+  });
+
+  it('getPassword returns a user with the password', async () => {
+    const withPassword: any = await getPassword(user._id);
+
+    expect(withPassword.password).to.be.a('string');
   });
 });

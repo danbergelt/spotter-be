@@ -9,7 +9,7 @@ const hex = require('is-hexcolor'); // eslint-disable-line
 // @access --> Private
 
 export const createTag = asyncHandler(async (req, res, next) => {
-  const tags: Array<TagInterface> = await Tag.find({ user: req.user._id });
+  const tags: Array<TagInterface> = await Tag.find({ user: req.id });
   // checks for matches on tags with no content
   if (req.body.color && !req.body.content) {
     const duplicates: Array<TagInterface> = tags.filter(
@@ -40,7 +40,7 @@ export const createTag = asyncHandler(async (req, res, next) => {
     return next(new HttpError('Invalid color detected', 400));
   }
 
-  req.body.user = req.user._id;
+  req.body.user = req.id;
 
   const tag: TagInterface = await Tag.create(req.body);
 
@@ -94,7 +94,7 @@ export const editTag = asyncHandler(async (req, res) => {
 // @access --> Private
 
 export const getTags = asyncHandler(async (req, res) => {
-  const tags: Array<TagInterface> = await Tag.find({ user: req.user._id });
+  const tags: Array<TagInterface> = await Tag.find({ user: req.id });
 
   return res.status(200).json({
     success: true,

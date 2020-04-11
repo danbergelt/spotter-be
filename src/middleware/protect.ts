@@ -47,7 +47,7 @@ export const protect = (
     if (!user) return error(next, 'User not found', codes.NOT_FOUND);
 
     // attach the user to the request body and
-    req.user = user;
+    req.id = user._id;
 
     // move on to the next operation
     next();

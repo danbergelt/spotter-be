@@ -1,5 +1,7 @@
 import { Document, Model } from 'mongoose'; // eslint-disable-line
 import { MongoArg } from '../types';
+import User from '../models/user';
+import { User as UserInterface } from '../types/models';
 
 /*== **IMPORTANT** =====================================================
 
@@ -84,4 +86,16 @@ export const updateMany = async <T extends Document>(
     runValidators: true,
     context: 'query'
   });
+};
+
+/*== getPassword =====================================================
+
+A DAO that fetches a password from a user document
+
+*/
+
+export const getPassword = async (
+  id: string
+): Promise<UserInterface | null> => {
+  return await User.findById(id).select('+password');
 };

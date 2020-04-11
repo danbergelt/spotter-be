@@ -60,7 +60,7 @@ describe('can change password', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('All fields are required');
+    res.body.error.should.equal('Fields missing or mismatching');
   });
 
   it('should not change password with mismatch new password fields', async () => {
@@ -77,7 +77,7 @@ describe('can change password', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('New password fields must match');
+    res.body.error.should.equal('Fields missing or mismatching');
   });
 
   it('should not change password with incorrect old password', async () => {
@@ -93,7 +93,7 @@ describe('can change password', () => {
       });
     should.exist(res);
     res.body.success.should.equal(false);
-    res.should.have.status(400);
-    res.body.error.should.equal('Invalid credentials');
+    res.should.have.status(401);
+    res.body.error.should.equal('Invalid old password');
   });
 });

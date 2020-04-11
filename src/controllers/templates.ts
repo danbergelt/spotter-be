@@ -10,7 +10,7 @@ import { Template as TemplateInterface, Tag } from 'src/types/models';
 
 export const getTemplatesByUserId = asyncHandler(async (req, res) => {
   const templates: Array<TemplateInterface> = await Template.find({
-    user: req.user._id
+    user: req.id
   });
 
   return res
@@ -23,7 +23,7 @@ export const getTemplatesByUserId = asyncHandler(async (req, res) => {
 // @access --> Private
 
 export const addTemplate = asyncHandler(async (req, res, next) => {
-  req.body.user = req.user._id;
+  req.body.user = req.id;
 
   const templates: Array<TemplateInterface> = await Template.find({
     name: req.body.name,

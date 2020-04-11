@@ -52,7 +52,7 @@ UserSchema.pre('remove', async function(this: User, next: NextFunction) {
 });
 
 // Encrypt password on save
-UserSchema.pre<User>('save', async function(this: User, next: NextFunction) {
+UserSchema.pre('save', async function(this: User, next: NextFunction) {
   if (!this.isModified('password')) {
     next();
   }
