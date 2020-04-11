@@ -15,7 +15,7 @@ describe('transform mongoose error', () => {
       new Error.CastError('foo', 'bar', 'baz')
     );
     expect(error.message).to.equal('Resource not found (Cast error)');
-    expect(error.status).to.equal(codes.BAD_REQUEST);
+    expect(error.status).to.equal(codes.NOT_FOUND);
   });
 
   it('returns the transformed validation error', () => {

@@ -35,7 +35,7 @@ describe('error handler middleware', () => {
   it('returns a mongoose error when error object is a mongoose error', async () => {
     const res = await request(app).get('/bar');
     expect(res.status).to.equal(404);
-    expect(res.body.error).to.equal('Resource not found');
+    expect(res.body.error).to.equal('Resource not found (Cast error)');
   });
 
   it('returns the passed-in error as is', async () => {

@@ -47,7 +47,7 @@ describe('edit exercise by exercise id', () => {
       .send({ name: 'edited' })
       .set('Authorization', `Bearer ${token}`);
 
-    res.body.error.should.equal('Resource not found');
+    res.body.error.should.equal('Resource not found (Cast error)');
   });
 
   it('should not edit with bad token', async () => {

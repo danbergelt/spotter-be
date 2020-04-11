@@ -11,7 +11,7 @@ export const transformMongooseError = (
 
   if (err instanceof mongoose.Error.CastError) {
     message = 'Resource not found (Cast error)';
-    status = codes.BAD_REQUEST;
+    status = codes.NOT_FOUND;
     return { message, status };
   }
 
