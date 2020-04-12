@@ -3,15 +3,21 @@ import {
   aggregate,
   updateOne,
   updateMany,
-  getPassword
+  getPassword,
+  deleteOne,
+  findById
 } from '../../../../utils/daos';
 import { createUser } from '../../../utils/createUser';
-import { User, Exercise as ExerciseType } from '../../../../types/models';
+import {
+  User as UserType,
+  Exercise as ExerciseType
+} from '../../../../types/models';
 import Exercise from '../../../../models/Exercise';
 import { expect } from 'chai';
+import User from '../../../../models/user';
 
 describe('mongo query helper functions', () => {
-  let user: User;
+  let user: UserType;
   let e1: ExerciseType;
   let e2: ExerciseType;
 
@@ -21,6 +27,13 @@ describe('mongo query helper functions', () => {
     e2 = new Exercise({ name: 'bar', user: user._id });
     e1 = await e1.save();
     e2 = await e2.save();
+  });
+
+  it('findById returns a document', async () => {
+    const document = await findById(User, user._id);
+    user = user.toJSON();
+    delete user.password;
+    expect(document?.toJSON()).to.deep.equal(user);
   });
 
   it('findMany returns an array of documents', async () => {
@@ -62,5 +75,11 @@ describe('mongo query helper functions', () => {
     const withPassword: any = await getPassword(user._id);
 
     expect(withPassword.password).to.be.a('string');
+  });
+
+  it('deleteOne deletes a document', async () => {
+    await deleteOne(User, user._id);
+    const document = await findById(User, user._id);
+    expect(document).to.be.null;
   });
 });

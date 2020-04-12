@@ -17,10 +17,11 @@ import {
   validateEmailWithPersistedEmail,
   mutatePassword
 } from './auth.functions';
-import { findById, updateOne } from '../utils/daos';
+import { findById, updateOne, deleteOne } from '../utils/daos';
 import { ResetUserDetailsBody } from '../types';
 import { errorFactory } from '../utils/errorFactory';
 import { BAD_REQUEST, OK, UNAUTHORIZED } from 'http-status-codes';
+import { responseFactory } from '../utils/responseFactory';
 
 // @desc --> change password
 // @route --> PUT /api/auth/user/email
@@ -39,17 +40,15 @@ export const changeEmail = asyncHandler(async ({ body, id }, res, next) => {
   const user = (await findById(User, id)) as UserInterface;
 
   // confirm that the old email field matches the email on record
-  if (!validateEmailWithPersistedEmail([creds.old, user.email])) {
+  if (!validateEmailWithPersistedEmail(creds.old, user.email)) {
     return errorFactory(next, `Invalid old email`, UNAUTHORIZED);
   }
 
   // update the user's email
   await updateOne(User, { _id: id }, { email: body.confirm });
 
-  res.status(OK).json({
-    success: true,
-    message: 'Email updated'
-  });
+  // return the response
+  return responseFactory(res, OK, true, { message: 'Email updated' });
 });
 
 // @desc --> change password
@@ -70,25 +69,20 @@ export const changePassword = asyncHandler(async ({ body, id }, res, next) => {
     return errorFactory(next, `Invalid old password`, UNAUTHORIZED);
   }
 
-  // return a success message after the user is updated
-  res.status(OK).json({
-    success: true,
-    message: 'Password updated'
-  });
+  // return the response
+  return responseFactory(res, OK, true, { message: 'Password updated' });
 });
 
 // @desc --> delete account
 // @route --> DELETE /api/auth/user/delete
 // @access --> Private
 
-export const deleteAccount = asyncHandler(async (req, res) => {
-  // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
-  await User.findById(req.id).remove();
+export const deleteAccount = asyncHandler(async ({ id }, res) => {
+  // delete the user
+  await deleteOne(User, id);
 
-  // return success to the client
-  return res.status(200).json({
-    success: true
-  });
+  // return the response
+  return responseFactory(res, OK, true);
 });
 
 // @desc --> forgot password

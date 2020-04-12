@@ -41,14 +41,24 @@ const UserSchema = new Schema<User>({
   resetPasswordExpire: Date
 });
 
-// Cascade remove all models for this user on remove
-UserSchema.pre('remove', async function(this: User, next: NextFunction) {
-  // cascade delete every model with this user id attached
-  await Exercise.deleteMany({ user: this._id });
-  await Tag.deleteMany({ user: this._id });
-  await Template.deleteMany({ user: this._id });
-  await Workout.deleteMany({ user: this._id });
-  next();
+// Cascade remove a user's workouts on account close
+UserSchema.post('findOneAndDelete', ({ _id }, next) => {
+  Workout.deleteMany({ user: _id }, () => next());
+});
+
+// Cascade remove a user's exercises on account close
+UserSchema.post('findOneAndDelete', ({ _id }, next) => {
+  Exercise.deleteMany({ user: _id }, () => next());
+});
+
+// Cascade remove a user's templates on account close
+UserSchema.post('findOneAndDelete', ({ _id }, next) => {
+  Template.deleteMany({ user: _id }, () => next());
+});
+
+// Cascade remove a users' tags on account close
+UserSchema.post('findOneAndDelete', ({ _id }, next) => {
+  Tag.deleteMany({ user: _id }, () => next());
 });
 
 // Encrypt password on save

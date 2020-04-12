@@ -99,3 +99,16 @@ export const getPassword = async (
 ): Promise<UserInterface | null> => {
   return await User.findById(id).select('+password');
 };
+
+/*== deleteOne =====================================================
+
+A DAO that deletes a document by ID
+
+*/
+
+export const deleteOne = async <T extends Document>(
+  Model: Model<T>,
+  id: string
+): Promise<T | null> => {
+  return await Model.findByIdAndDelete(id);
+};
