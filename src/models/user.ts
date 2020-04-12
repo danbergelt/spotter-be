@@ -74,15 +74,15 @@ UserSchema.pre('save', async function(this: User, next: NextFunction) {
 // Generate and hash reset password token
 UserSchema.methods.getResetPasswordToken = function(): string {
   // generate tokens
-  const resetToken: string = crypto.randomBytes(20).toString('hex');
+  const resetToken = crypto.randomBytes(20).toString('hex');
 
-  // hash token and set to field on this user's model
-  (this.resetPasswordToken as string) = crypto
+  // hash token and set it to this document
+  this.resetPasswordToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
 
-  // set expire
+  // set expiry
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
   return resetToken;

@@ -1,6 +1,6 @@
 import HttpError from '../utils/HttpError';
 import Tag from '../models/Tag';
-import asyncHandler from '../utils/asyncHandler';
+import controllerFactory from '../utils/controllerFactory';
 import { Tag as TagInterface } from 'src/types/models';
 const hex = require('is-hexcolor'); // eslint-disable-line
 
@@ -8,7 +8,7 @@ const hex = require('is-hexcolor'); // eslint-disable-line
 // @route --> POST /api/auth/tags
 // @access --> Private
 
-export const createTag = asyncHandler(async (req, res, next) => {
+export const createTag = controllerFactory(async (req, res, next) => {
   const tags: Array<TagInterface> = await Tag.find({ user: req.id });
   // checks for matches on tags with no content
   if (req.body.color && !req.body.content) {
@@ -54,7 +54,7 @@ export const createTag = asyncHandler(async (req, res, next) => {
 // @route --> DELETE /api/auth/tags/:id
 // @access --> Private
 
-export const deleteTag = asyncHandler(async (req, res) => {
+export const deleteTag = controllerFactory(async (req, res) => {
   const tag: TagInterface | null = await Tag.findById(req.params.id);
 
   // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
@@ -72,7 +72,7 @@ export const deleteTag = asyncHandler(async (req, res) => {
 // @route --> PUT /api/auth/tags/:id
 // @access --> Private
 
-export const editTag = asyncHandler(async (req, res) => {
+export const editTag = controllerFactory(async (req, res) => {
   const tag: TagInterface | null = await Tag.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -93,7 +93,7 @@ export const editTag = asyncHandler(async (req, res) => {
 // @route --> GET /api/auth/tags
 // @access --> Private
 
-export const getTags = asyncHandler(async (req, res) => {
+export const getTags = controllerFactory(async (req, res) => {
   const tags: Array<TagInterface> = await Tag.find({ user: req.id });
 
   return res.status(200).json({

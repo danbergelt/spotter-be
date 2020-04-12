@@ -1,6 +1,21 @@
 import { User as UserInterface } from '../types/models';
-import { getPassword } from '../utils/daos';
-import { ResetUserDetailsBody } from '../types';
+import { getPassword, findOne } from '../utils/daos';
+import { ResetUserDetailsBody, UserStagedForPasswordReset } from '../types';
+import { sendMail } from '../utils/sendMail';
+import { forgotPasswordTemplate } from '../utils/emailTemplates';
+import { Response, NextFunction } from 'express';
+import { responseFactory } from '../utils/responseFactory';
+import { OK, INTERNAL_SERVER_ERROR } from 'http-status-codes';
+import { errorFactory } from '../utils/errorFactory';
+import User from '../models/user';
+
+/*== compare =====================================================
+
+Validate's two fields from the request body
+
+*/
+
+export const compare = (a: string, b: string): boolean => a === b;
 
 /*== validateBody =====================================================
 
@@ -14,23 +29,6 @@ must match
 export const validateBody = (body: ResetUserDetailsBody): boolean => {
   if (!body.old || !body.new || !body.confirm) return false;
 
-  if (body.new !== body.confirm) return false;
-
-  return true;
-};
-
-/*== validateEmailWithPersistedEmail =====================================================
-
-Validate's a change password request. Compares a provided password and the
-stored password. If they don't match, then the request is not validated
-
-*/
-
-export const validateEmailWithPersistedEmail = (
-  provided: string,
-  persisted: string
-): boolean => {
-  if (provided !== persisted) return false;
   return true;
 };
 
@@ -62,4 +60,81 @@ export const mutatePassword = async (
   await user.save();
 
   return true;
+};
+
+/*== stageForResetPassword =====================================================
+
+This function stages a user to reset their password. It first validates a user
+by email, and then generates a reset password token to send via email
+
+*/
+
+export const stageForPasswordResetRequest = async (
+  email: string,
+  findUserByEmail = findOne
+): Promise<UserStagedForPasswordReset | false> => {
+  // find the user by email
+  const user = await findUserByEmail(User, { email });
+
+  // if user can't be found, return an error
+  if (!user) return false;
+
+  // get reset token
+  const token = user.getResetPasswordToken();
+
+  // save the reset token to the user
+  await user.save({ validateBeforeSave: false });
+
+  return { user, token };
+};
+
+/*== sendForgotPasswordEmail =====================================================
+
+Send the email to the user who forgot their password. Utilizes the mailgun API to
+send a no-reply email from a spoof email address.
+
+*/
+
+export const sendForgotPasswordEmail = async (
+  email: string,
+  link: string,
+  res: Response,
+  sendingEmail = sendMail
+): Promise<Response> => {
+  // build metadata for sending the email
+  const metadata = {
+    from: 'no-reply@getspotter.io',
+    to: email,
+    subject: 'Spotter - Forgot Password',
+    html: forgotPasswordTemplate(link)
+  };
+
+  // send the message via Mailgun
+  await sendingEmail(metadata);
+
+  // if successful, return an object with the user
+  return responseFactory(res, OK, true, { message: 'Email sent' });
+};
+
+/*== catchForgotPasswordEmail =====================================================
+
+The catch case if the forgot password email fails. Removes the reset items from this
+user's document, saves the user, and returns an error
+
+*/
+
+export const catchForgotPasswordEmail = async (
+  user: UserInterface,
+  next: NextFunction,
+  error = errorFactory
+): Promise<void> => {
+  // clear the reset items on this user's document
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+
+  // save the user with the cleared items
+  await user.save({ validateBeforeSave: false });
+
+  // return an error message
+  return error(next, 'Email could not be sent', INTERNAL_SERVER_ERROR);
 };

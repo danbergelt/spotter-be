@@ -5,7 +5,8 @@ import {
   updateMany,
   getPassword,
   deleteOne,
-  findById
+  findById,
+  findOne
 } from '../../../../utils/daos';
 import { createUser } from '../../../utils/createUser';
 import {
@@ -21,8 +22,10 @@ describe('mongo query helper functions', () => {
   let e1: ExerciseType;
   let e2: ExerciseType;
 
-  before(async () => {
+  beforeEach(async () => {
     user = await createUser();
+    user = user.toJSON();
+    delete user.password;
     e1 = new Exercise({ name: 'foo', user: user._id });
     e2 = new Exercise({ name: 'bar', user: user._id });
     e1 = await e1.save();
@@ -31,8 +34,6 @@ describe('mongo query helper functions', () => {
 
   it('findById returns a document', async () => {
     const document = await findById(User, user._id);
-    user = user.toJSON();
-    delete user.password;
     expect(document?.toJSON()).to.deep.equal(user);
   });
 
@@ -81,5 +82,10 @@ describe('mongo query helper functions', () => {
     await deleteOne(User, user._id);
     const document = await findById(User, user._id);
     expect(document).to.be.null;
+  });
+
+  it('findOne returns a document with an arbitrary filter', async () => {
+    const document = await findOne(User, { email: user.email });
+    expect(document?.toJSON()).to.deep.equal(user);
   });
 });

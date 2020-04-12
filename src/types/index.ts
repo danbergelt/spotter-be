@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Schema, Model, Document, Error } from 'mongoose';
-import HttpError from 'src/utils/HttpError';
-import { Workout, ExerciseOnWorkoutSchema } from './models';
+import HttpError from '../utils/HttpError';
+import { Workout, ExerciseOnWorkoutSchema, User } from './models';
 
 export type ExpressFn = (
   req: Request,
@@ -53,4 +53,9 @@ export interface ResetUserDetailsBody {
   old: string;
   new: string;
   confirm: string;
+}
+
+export interface UserStagedForPasswordReset {
+  user: User;
+  token: string;
 }
