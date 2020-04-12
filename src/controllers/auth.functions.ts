@@ -27,9 +27,10 @@ stored password. If they don't match, then the request is not validated
 */
 
 export const validateEmailWithPersistedEmail = (
-  emails: [string, string]
+  provided: string,
+  persisted: string
 ): boolean => {
-  if (emails[0] !== emails[1]) return false;
+  if (provided !== persisted) return false;
   return true;
 };
 

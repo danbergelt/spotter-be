@@ -42,11 +42,11 @@ describe('auth functions', () => {
   });
 
   it('email validator returns false if the strings do not match', () => {
-    expect(validateEmailWithPersistedEmail(['foo', 'bar'])).to.be.false;
+    expect(validateEmailWithPersistedEmail('foo', 'bar')).to.be.false;
   });
 
   it('email validator returns true if strings match', () => {
-    expect(validateEmailWithPersistedEmail(['foo', 'foo'])).to.be.true;
+    expect(validateEmailWithPersistedEmail('foo', 'foo')).to.be.true;
   });
 
   it('changePassword returns false when passwords do not match', async () => {

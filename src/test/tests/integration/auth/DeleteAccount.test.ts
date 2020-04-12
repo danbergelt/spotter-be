@@ -26,5 +26,7 @@ describe('delete account', () => {
       .set('Authorization', `Bearer ${res.body.token}`);
 
     res2.body.success.should.be.ok;
+    const users = await User.find({});
+    users.length.should.equal(0);
   });
 });
