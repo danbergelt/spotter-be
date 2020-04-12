@@ -26,7 +26,7 @@ describe('Login existing user', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(404);
-    res.body.error.should.equal('No user found with that email');
+    res.body.error.should.equal('User not found');
   });
 
   it('should send email', async () => {

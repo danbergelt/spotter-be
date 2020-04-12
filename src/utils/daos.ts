@@ -112,3 +112,16 @@ export const deleteOne = async <T extends Document>(
 ): Promise<T | null> => {
   return await Model.findByIdAndDelete(id);
 };
+
+/*== findOne =====================================================
+
+A DAO that find's a single document according to a filter
+
+*/
+
+export const findOne = async <T extends Document>(
+  Model: Model<T>,
+  filter: MongoArg
+): Promise<T | null> => {
+  return await Model.findOne(filter);
+};

@@ -12,10 +12,11 @@ mailgun sdk: https://www.npmjs.com/package/mailgun-js
 */
 
 // create a mailgun instance
-const mailgun = mailgunInstance({
+const mailgun = new mailgunInstance({
   apiKey: String(process.env.MG_KEY),
   domain: String(process.env.MG_DOMAIN),
-  testMode: Boolean(process.env.TESTING)
+  testMode: Boolean(process.env.TESTING),
+  testModeLogger: (): void => undefined
 });
 
 // send a piece of mail that contains the passed-in metadata
