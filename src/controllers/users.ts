@@ -1,6 +1,6 @@
 import HttpError from '../utils/HttpError';
 import User from '../models/user';
-import controllerFactory from '../utils/controllerFactory';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { setRefreshToken, tokenFactory } from '../utils/tokens';
 import jwt from 'jsonwebtoken';
 import { User as UserInterface } from 'src/types/models';
@@ -28,7 +28,7 @@ interface UserDetails {
 // @route --> POST /api/auth/register
 // @access --> Public
 
-export const register = controllerFactory(async (req, res) => {
+export const register = asyncExpressFn(async (req, res) => {
   const { email, password, role }: UserDetails = req.body;
 
   // create user
@@ -49,7 +49,7 @@ export const register = controllerFactory(async (req, res) => {
 // @route --> POST /api/auth/login
 // @access --> Public
 
-export const login = controllerFactory(async (req, res, next) => {
+export const login = asyncExpressFn(async (req, res, next) => {
   const { email, password }: Partial<UserDetails> = req.body;
 
   // Validate email and password
@@ -94,7 +94,7 @@ export const logout = (_: Request, res: Response): Response => {
 // @route --> POST /api/auth/refresh
 // @access --> Private
 
-export const refresh = controllerFactory(async (req, res) => {
+export const refresh = asyncExpressFn(async (req, res) => {
   const token: string | null = req.cookies.toll;
 
   if (!token) {
@@ -129,7 +129,7 @@ export const refresh = controllerFactory(async (req, res) => {
 // @route --> POST /api/auth/contact
 // @access --> Public
 
-export const contact = controllerFactory(async (req, res, next) => {
+export const contact = asyncExpressFn(async (req, res, next) => {
   const { name, email, subject, message } = req.body;
 
   if (!name || !email || !subject || !message) {

@@ -1,4 +1,4 @@
-import controllerFactory from '../../../../utils/controllerFactory';
+import asyncExpressFn from '../../../../utils/asyncExpressFn';
 import Sinon from 'sinon';
 import { use, expect } from 'chai';
 import { Request } from 'express';
@@ -16,7 +16,7 @@ const utils = () => {
 
 describe('async handler', () => {
   it('returns the function', () => {
-    const fn = controllerFactory(async (_req, _res, _next) => {
+    const fn = asyncExpressFn(async (_req, _res, _next) => {
       await new Promise((resolve, _reject) => {
         setTimeout(() => resolve('foo'), 0);
       });
@@ -27,7 +27,7 @@ describe('async handler', () => {
 
   it('resolves the promise', async () => {
     const { req, res, next } = utils();
-    const fn = controllerFactory(async (_req, res, _next) => {
+    const fn = asyncExpressFn(async (_req, res, _next) => {
       await new Promise((resolve, _reject) => {
         setTimeout(() => resolve('foo'), 0);
       });
@@ -41,7 +41,7 @@ describe('async handler', () => {
 
   it('rejects the promise', async () => {
     const { req, res, next } = utils();
-    const fn = controllerFactory(async (_req, _res, _next) => {
+    const fn = asyncExpressFn(async (_req, _res, _next) => {
       await new Promise((_resolve, reject) => {
         setTimeout(() => reject('bar'), 0);
       });

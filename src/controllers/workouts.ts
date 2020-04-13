@@ -1,7 +1,7 @@
 const hex = require('is-hexcolor'); // eslint-disable-line
 const stringify = require('csv-stringify'); // eslint-disable-line
 import Workout from '../models/Workout';
-import controllerFactory from '../utils/controllerFactory';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { promisify } from 'util';
 import HttpError from '../utils/HttpError';
 import fs from 'fs';
@@ -13,7 +13,7 @@ import { prs } from '../utils/prs';
 // @route --> GET /api/auth/workouts
 // @access --> Private
 
-export const getWorkoutsByUserId = controllerFactory(async (req, res) => {
+export const getWorkoutsByUserId = asyncExpressFn(async (req, res) => {
   const pagination: { page: number; limit: number } = {
     page: parseInt(req.query.page, 10) || 0,
     limit: parseInt(req.query.limit, 10) || 10
@@ -34,28 +34,26 @@ export const getWorkoutsByUserId = controllerFactory(async (req, res) => {
 // @route --> POST /api/auth/workouts/range
 // @access --> Private
 
-export const workoutRangeByUserId = controllerFactory(
-  async (req, res, next) => {
-    if (!req.body.range) {
-      return next(new HttpError('Please supply a date range', 400));
-    }
-
-    const workouts: Array<WorkoutInterface> = await Workout.find({
-      user: req.id,
-      date: { $in: req.body.range }
-    }).sort({ date: 1 });
-
-    res.status(200).json({ success: true, count: workouts.length, workouts });
-
-    next();
+export const workoutRangeByUserId = asyncExpressFn(async (req, res, next) => {
+  if (!req.body.range) {
+    return next(new HttpError('Please supply a date range', 400));
   }
-);
+
+  const workouts: Array<WorkoutInterface> = await Workout.find({
+    user: req.id,
+    date: { $in: req.body.range }
+  }).sort({ date: 1 });
+
+  res.status(200).json({ success: true, count: workouts.length, workouts });
+
+  next();
+});
 
 // @desc --> add workout
 // @route --> POST /api/auth/workouts
 // @access --> Private
 
-export const addWorkout = controllerFactory(async (req, res, next) => {
+export const addWorkout = asyncExpressFn(async (req, res, next) => {
   req.body.user = req.id;
 
   // validate the tag colors
@@ -83,7 +81,7 @@ export const addWorkout = controllerFactory(async (req, res, next) => {
 // @route --> PUT /api/auth/workouts/:id
 // @access --> Private
 
-export const editWorkout = controllerFactory(async (req, res) => {
+export const editWorkout = asyncExpressFn(async (req, res) => {
   const workout: WorkoutInterface | null = await Workout.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -106,7 +104,7 @@ export const editWorkout = controllerFactory(async (req, res) => {
 // @route --> DELETE /api/auth/workouts/:id
 // @access --> Private
 
-export const deleteWorkout = controllerFactory(async (req, res) => {
+export const deleteWorkout = asyncExpressFn(async (req, res) => {
   const workout: WorkoutInterface | null = await Workout.findByIdAndDelete(
     req.params.id
   );
@@ -123,7 +121,7 @@ export const deleteWorkout = controllerFactory(async (req, res) => {
 // @route --> DELETE /api/auth/workouts/download
 // @access --> Private
 
-export const downloadWorkoutData = controllerFactory(async (req, res, next) => {
+export const downloadWorkoutData = asyncExpressFn(async (req, res, next) => {
   // fetch all workouts by the user id
   const workouts: Array<WorkoutInterface> = await Workout.find({
     user: req.id

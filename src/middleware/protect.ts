@@ -4,7 +4,7 @@ import { Token } from '../types/auth';
 import { ExpressFn } from '../types/index';
 import { errorFactory } from '../utils/errorFactory';
 import codes from 'http-status-codes';
-import controllerFactory from '../utils/controllerFactory';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { findById } from '../utils/daos';
 import { getToken } from './protect.functions';
 
@@ -19,7 +19,7 @@ the functionality specific to that controller with no repetitive auth logic
 // return a thunk and inject the errorFactory dependency (for mocking purposes)
 export const protect = (
   error = errorFactory,
-  handler = controllerFactory,
+  handler = asyncExpressFn,
   UserModel = User,
   findUser = findById
 ): ExpressFn => {

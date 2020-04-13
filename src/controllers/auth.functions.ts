@@ -1,6 +1,6 @@
 import { User as UserInterface } from '../types/models';
 import { getPassword, findOne } from '../utils/daos';
-import { ResetUserDetailsBody, UserStagedForPasswordReset } from '../types';
+import { UserStagedForPasswordReset, Body } from '../types';
 import { sendMail } from '../utils/sendMail';
 import { forgotPasswordTemplate } from '../utils/emailTemplates';
 import { Response, NextFunction } from 'express';
@@ -15,19 +15,20 @@ Validate's two fields from the request body
 
 */
 
-export const compare = (a: string, b: string): boolean => a === b;
+export const compareStrings = (a: string, b: string): boolean => a === b;
 
 /*== validateBody =====================================================
 
-Validates the body of an incoming auth request (i.e. change email or
-change password). Must accept an old credential, a new credential,
-and a confirmed credential. New credential and confirmed credential
-must match
+Validates the body of an incoming request (i.e. change email or
+change password). Accepts an array of keys, iterates over those keys,
+and validates their existence in the body
 
 */
 
-export const validateBody = (body: ResetUserDetailsBody): boolean => {
-  if (!body.old || !body.new || !body.confirm) return false;
+export const validateBody = (body: Body, keys: string[]): boolean => {
+  for (const key of keys) {
+    if (!body[key]) return false;
+  }
 
   return true;
 };
