@@ -1,5 +1,5 @@
 import { Document, Model } from 'mongoose'; // eslint-disable-line
-import { MongoArg } from '../types';
+import { Stage, UpdateManyReturn } from '../types';
 import User from '../models/user';
 import { User as UserInterface } from '../types/models';
 
@@ -46,7 +46,7 @@ A DAO that aggregates a collection according to the provided stages
 
 export const aggregate = async <T extends Document, U>(
   Model: Model<T>,
-  stages: MongoArg[]
+  stages: Stage[]
 ): Promise<U[]> => {
   return await Model.aggregate(stages);
 };
@@ -59,8 +59,8 @@ A DAO that updates a document which matches the provided filter
 
 export const updateOne = async <T extends Document>(
   Model: Model<T>,
-  filter: MongoArg,
-  update: MongoArg
+  filter: Stage,
+  update: Stage
 ): Promise<T | null> => {
   return await Model.findOneAndUpdate(filter, update, {
     new: true,
@@ -78,9 +78,9 @@ provided filter
 
 export const updateMany = async <T extends Document>(
   Model: Model<T>,
-  filter: MongoArg,
-  update: MongoArg
-): Promise<MongoArg> => {
+  filter: Stage,
+  update: Stage
+): Promise<UpdateManyReturn> => {
   return await Model.updateMany(filter, update, {
     new: true,
     runValidators: true,
@@ -121,7 +121,7 @@ A DAO that find's a single document according to a filter
 
 export const findOne = async <T extends Document>(
   Model: Model<T>,
-  filter: MongoArg
+  filter: Stage
 ): Promise<T | null> => {
   return await Model.findOne(filter);
 };

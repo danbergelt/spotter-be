@@ -77,7 +77,7 @@ describe('can change password', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('Confirmed password does not match');
+    res.body.error.should.equal('New and confirm must match');
   });
 
   it('should not change password with incorrect old password', async () => {

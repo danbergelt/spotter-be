@@ -1,5 +1,5 @@
 import Template from '../models/Template';
-import controllerFactory from '../utils/controllerFactory';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import HttpError from '../utils/HttpError';
 const hex = require('is-hexcolor'); // eslint-disable-line
 import { Template as TemplateInterface, Tag } from 'src/types/models';
@@ -8,7 +8,7 @@ import { Template as TemplateInterface, Tag } from 'src/types/models';
 // @route --> GET /api/auth/templates
 // @access --> Private
 
-export const getTemplatesByUserId = controllerFactory(async (req, res) => {
+export const getTemplatesByUserId = asyncExpressFn(async (req, res) => {
   const templates: Array<TemplateInterface> = await Template.find({
     user: req.id
   });
@@ -22,7 +22,7 @@ export const getTemplatesByUserId = controllerFactory(async (req, res) => {
 // @route --> POST /api/auth/template
 // @access --> Private
 
-export const addTemplate = controllerFactory(async (req, res, next) => {
+export const addTemplate = asyncExpressFn(async (req, res, next) => {
   req.body.user = req.id;
 
   const templates: Array<TemplateInterface> = await Template.find({
@@ -57,7 +57,7 @@ export const addTemplate = controllerFactory(async (req, res, next) => {
 // @route --> PUT /api/auth/templates/:id
 // @access --> Private
 
-export const editTemplate = controllerFactory(async (req, res) => {
+export const editTemplate = asyncExpressFn(async (req, res) => {
   const template: TemplateInterface | null = await Template.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -78,7 +78,7 @@ export const editTemplate = controllerFactory(async (req, res) => {
 // @route --> DELETE /api/auth/template/:id
 // @access --> Private
 
-export const deleteTemplate = controllerFactory(async (req, res) => {
+export const deleteTemplate = asyncExpressFn(async (req, res) => {
   const template = await Template.findByIdAndDelete(req.params.id);
 
   res.status(200).json({

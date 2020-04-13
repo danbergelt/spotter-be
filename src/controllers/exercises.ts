@@ -1,6 +1,6 @@
 import HttpError from '../utils/HttpError';
 import Exercise from '../models/Exercise';
-import controllerFactory from '../utils/controllerFactory';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { Exercise as ExerciseInterface } from '../types/models';
 import { prs } from '../utils/prs';
 
@@ -8,7 +8,7 @@ import { prs } from '../utils/prs';
 // @route --> POST /api/auth/exercises
 // @access --> Private
 
-export const createExercise = controllerFactory(async (req, res, next) => {
+export const createExercise = asyncExpressFn(async (req, res, next) => {
   req.body.user = req.id;
 
   const exercise: Array<ExerciseInterface> = await Exercise.find({
@@ -34,7 +34,7 @@ export const createExercise = controllerFactory(async (req, res, next) => {
 // @route --> PUT /api/auth/exercises/:id
 // @access --> Private
 
-export const updateExercise = controllerFactory(async (req, res) => {
+export const updateExercise = asyncExpressFn(async (req, res) => {
   const exercise: ExerciseInterface | null = await Exercise.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -57,7 +57,7 @@ export const updateExercise = controllerFactory(async (req, res) => {
 // @route --> DELETE /api/auth/exercises/:id
 // @access --> Private
 
-export const deleteExercise = controllerFactory(async (req, res) => {
+export const deleteExercise = asyncExpressFn(async (req, res) => {
   const exercise = await Exercise.findByIdAndDelete(req.params.id);
 
   await prs(req.id);
@@ -72,7 +72,7 @@ export const deleteExercise = controllerFactory(async (req, res) => {
 // @route --> GET /api/auth/exercises
 // @access --> Private
 
-export const getExercises = controllerFactory(async (req, res) => {
+export const getExercises = asyncExpressFn(async (req, res) => {
   const exercises: Array<ExerciseInterface> = await Exercise.find({
     user: req.id
   });

@@ -1,6 +1,6 @@
 import { ExpressFn } from '../types';
 
-/*== controllerFactory =====================================================
+/*== asyncExpressFn =====================================================
 
 this higher order function wraps controllers and allows us to optionally include
 try/catch blocks for async behavior.
@@ -12,10 +12,10 @@ one-off errors that require special care, and greatly cleans up our code
 
 */
 
-function controllerFactory(fn: ExpressFn): ExpressFn {
+function asyncExpressFn(fn: ExpressFn): ExpressFn {
   return function(req, res, next) {
     return Promise.resolve(fn(req, res, next)).catch(next); // eslint-disable-line
   } as ExpressFn;
 }
 
-export default controllerFactory;
+export default asyncExpressFn;

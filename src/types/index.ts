@@ -40,7 +40,13 @@ export interface Pr extends Pick<Workout, '_id' | 'date'> {
 
 export type PrHashTable = Record<string, [number, string | undefined]>;
 
-export type MongoArg = Record<string, unknown>;
+export interface Stage {
+  [stage: string]: unknown;
+}
+
+export interface Body {
+  [key: string]: string;
+}
 
 export interface MailMetadata {
   from: string;
@@ -49,13 +55,12 @@ export interface MailMetadata {
   html: string;
 }
 
-export interface ResetUserDetailsBody {
-  old: string;
-  new: string;
-  confirm: string;
-}
-
 export interface UserStagedForPasswordReset {
   user: User;
   token: string;
+}
+
+export interface UpdateManyReturn {
+  n: number;
+  nModified: number;
 }

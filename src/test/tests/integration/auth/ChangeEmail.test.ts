@@ -78,7 +78,7 @@ describe('change email', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('Confirmed email does not match');
+    res.body.error.should.equal('New and confirm must match');
   });
 
   it('should not change email with incorrect old email', async () => {

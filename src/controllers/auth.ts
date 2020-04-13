@@ -1,7 +1,7 @@
 import HttpError from '../utils/HttpError';
 import User from '../models/user';
 import crypto from 'crypto';
-import controllerFactory from '../utils/controllerFactory';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { User as UserInterface } from '../types/models';
 import { setRefreshToken, tokenFactory } from '../utils/tokens';
 import {
@@ -13,13 +13,13 @@ import {
 import {
   validateBody,
   mutatePassword,
-  compare,
+  compareStrings,
   sendForgotPasswordEmail,
   catchForgotPasswordEmail,
   stageForPasswordResetRequest
 } from './auth.functions';
 import { findById, updateOne, deleteOne } from '../utils/daos';
-import { ResetUserDetailsBody } from '../types';
+import { Body } from '../types';
 import { errorFactory } from '../utils/errorFactory';
 import { BAD_REQUEST, OK, UNAUTHORIZED, NOT_FOUND } from 'http-status-codes';
 import { responseFactory } from '../utils/responseFactory';
@@ -32,31 +32,29 @@ PUT /api/auth/user/email
 
 */
 
-export const changeEmail = controllerFactory(
-  async ({ body, id }, res, next) => {
-    const creds = body as ResetUserDetailsBody;
+export const changeEmail = asyncExpressFn(async ({ body, id }, res, next) => {
+  const creds = body as Body;
 
-    if (!validateBody(creds)) {
-      return errorFactory(next, 'All fields required', BAD_REQUEST);
-    }
-
-    if (!compare(creds.new, creds.confirm)) {
-      return errorFactory(next, 'Confirmed email does not match', BAD_REQUEST);
-    }
-
-    // find the user with the validated id
-    const user = (await findById(User, id)) as UserInterface;
-
-    // confirm that the old email field matches the email on record
-    if (!compare(creds.old, user.email)) {
-      return errorFactory(next, `Unauthorized`, UNAUTHORIZED);
-    }
-
-    await updateOne(User, { _id: id }, { email: body.confirm });
-
-    return responseFactory(res, OK, true, { message: 'Email updated' });
+  if (!validateBody(creds, ['old', 'new', 'confirm'])) {
+    return errorFactory(next, 'All fields required', BAD_REQUEST);
   }
-);
+
+  if (!compareStrings(creds.new, creds.confirm)) {
+    return errorFactory(next, 'New and confirm must match', BAD_REQUEST);
+  }
+
+  // find the user with the validated id
+  const user = (await findById(User, id)) as UserInterface;
+
+  // confirm that the old email field matches the email on record
+  if (!compareStrings(creds.old, user.email)) {
+    return errorFactory(next, `Unauthorized`, UNAUTHORIZED);
+  }
+
+  await updateOne(User, { _id: id }, { email: body.confirm });
+
+  return responseFactory(res, OK, true, { message: 'Email updated' });
+});
 
 /*== changePassword =====================================================
 
@@ -66,21 +64,17 @@ PUT /api/auth/user/password
 
 */
 
-export const changePassword = controllerFactory(
+export const changePassword = asyncExpressFn(
   async ({ body, id }, res, next) => {
-    const creds = body as ResetUserDetailsBody;
+    const creds = body as Body;
 
-    if (!validateBody(creds)) {
+    if (!validateBody(creds, ['old', 'new', 'confirm'])) {
       return errorFactory(next, 'All fields required', BAD_REQUEST);
     }
 
     // confirm the new password and confirmed password do not match
-    if (!compare(creds.new, creds.confirm)) {
-      return errorFactory(
-        next,
-        'Confirmed password does not match',
-        BAD_REQUEST
-      );
+    if (!compareStrings(creds.new, creds.confirm)) {
+      return errorFactory(next, 'New and confirm must match', BAD_REQUEST);
     }
 
     // attempt to change the user's password. if it fails, return an error
@@ -100,7 +94,7 @@ DELETE /api/auth/user/delete
 
 */
 
-export const deleteAccount = controllerFactory(async ({ id }, res) => {
+export const deleteAccount = asyncExpressFn(async ({ id }, res) => {
   // delete the user
   await deleteOne(User, id);
 
@@ -116,7 +110,7 @@ POST /api/auth/user/forgotpassword
 
 */
 
-export const forgotPassword = controllerFactory(
+export const forgotPassword = asyncExpressFn(
   async ({ body, protocol, hostname }, res, next) => {
     const email = body.email as string;
 
@@ -143,7 +137,7 @@ export const forgotPassword = controllerFactory(
 // @route --> PUT /api/auth/user/forgotpassword/:id
 // @access --> Public
 
-export const changeForgottenPassword = controllerFactory(
+export const changeForgottenPassword = asyncExpressFn(
   async (req, res, next) => {
     // extract new password fields from body
     const {

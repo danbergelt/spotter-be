@@ -1,56 +1,35 @@
 import {
   validateBody,
-  compare,
+  compareStrings,
   mutatePassword,
   stageForPasswordResetRequest,
   sendForgotPasswordEmail,
   catchForgotPasswordEmail
 } from '../../../../controllers/auth.functions';
-import {
-  ResetUserDetailsBody,
-  UserStagedForPasswordReset
-} from '../../../../types';
+import { UserStagedForPasswordReset, Body } from '../../../../types';
 import { expect } from 'chai';
 import Sinon from 'sinon';
 import { mockRes } from 'sinon-express-mock';
 
 describe('validateBody', () => {
   it('validateBody returns false if not all keys are present', () => {
-    const one = {} as ResetUserDetailsBody;
-    expect(validateBody(one)).to.be.false;
-
-    const two = { old: 'foo' } as ResetUserDetailsBody;
-    expect(validateBody(two)).to.be.false;
-
-    const three = { old: 'foo', new: 'bar' } as ResetUserDetailsBody;
-    expect(validateBody(three)).to.be.false;
-
-    const four = { old: 'foo', confirm: 'bar' } as ResetUserDetailsBody;
-    expect(validateBody(four)).to.be.false;
-
-    const five = { new: 'bar', confirm: 'bar' } as ResetUserDetailsBody;
-    expect(validateBody(five)).to.be.false;
-
-    const six = { new: 'bar' } as ResetUserDetailsBody;
-    expect(validateBody(six)).to.be.false;
-
-    const seven = { confirm: 'bar' } as ResetUserDetailsBody;
-    expect(validateBody(seven)).to.be.false;
+    const body = { foo: 'bar', bar: 'qux' } as Body;
+    expect(validateBody(body, ['foo', 'baz'])).to.be.false;
   });
 
   it('returns true if all conditions pass', () => {
-    const body = { old: 'foo', new: 'bar', confirm: 'bar' };
-    expect(validateBody(body)).to.be.true;
+    const body = { foo: 'bar', baz: 'qux' };
+    expect(validateBody(body, ['foo', 'baz'])).to.be.true;
   });
 });
 
 describe('compare', () => {
   it('compare returns false if the strings do not match', () => {
-    expect(compare('foo', 'bar')).to.be.false;
+    expect(compareStrings('foo', 'bar')).to.be.false;
   });
 
   it('compare returns true if strings match', () => {
-    expect(compare('foo', 'foo')).to.be.true;
+    expect(compareStrings('foo', 'foo')).to.be.true;
   });
 });
 
