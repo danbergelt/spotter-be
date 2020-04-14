@@ -4,6 +4,7 @@ import { transformMongooseError } from '../utils/transformMongooseError';
 import codes from 'http-status-codes';
 import mongoose from 'mongoose';
 import { AnyError } from '../types';
+import { responseFactory } from '../utils/responseFactory';
 
 /*== Global error middleware =====================================================
 
@@ -15,21 +16,21 @@ passed in by a controller and returns it in the response object
 // eslint-disable-next-line
 const errorHandler: ErrorHandler = (err: AnyError, _req, res, _next) => {
   // spread the err arg into a clean object, along with the err message
-  let error = { ...err } as HttpError;
+  let transformedError = { ...err } as HttpError;
 
-  if (err.message) error.message = err.message;
+  if (err.message) transformedError.message = err.message;
 
   // check if the error is a mongoose error
   if (err instanceof mongoose.Error) {
     const { message, status } = transformMongooseError(err);
-    error = new HttpError(message, status);
+    transformedError = new HttpError(message, status);
   }
 
+  const status = transformedError.status || codes.INTERNAL_SERVER_ERROR;
+  const error = transformedError.message || 'Server error';
+
   // return the response object. return some generic values if code &/or message are not found
-  return res.status(error.status || codes.INTERNAL_SERVER_ERROR).json({
-    success: false,
-    error: error.message || 'Server error'
-  });
+  return responseFactory(res, status, false, { error });
 };
 
 export default errorHandler;

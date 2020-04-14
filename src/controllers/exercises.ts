@@ -1,6 +1,6 @@
 import HttpError from '../utils/HttpError';
 import Exercise from '../models/Exercise';
-import asyncHandler from '../utils/asyncHandler';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { Exercise as ExerciseInterface } from '../types/models';
 import { prs } from '../utils/prs';
 
@@ -8,12 +8,12 @@ import { prs } from '../utils/prs';
 // @route --> POST /api/auth/exercises
 // @access --> Private
 
-export const createExercise = asyncHandler(async (req, res, next) => {
-  req.body.user = req.user._id;
+export const createExercise = asyncExpressFn(async (req, res, next) => {
+  req.body.user = req.id;
 
   const exercise: Array<ExerciseInterface> = await Exercise.find({
     name: req.body.name,
-    user: req.user._id
+    user: req.id
   });
 
   if (exercise.length) {
@@ -22,7 +22,7 @@ export const createExercise = asyncHandler(async (req, res, next) => {
 
   const createdExercise = await Exercise.create(req.body);
 
-  await prs(req.user._id);
+  await prs(req.id);
 
   return res.status(201).json({
     success: true,
@@ -34,7 +34,7 @@ export const createExercise = asyncHandler(async (req, res, next) => {
 // @route --> PUT /api/auth/exercises/:id
 // @access --> Private
 
-export const updateExercise = asyncHandler(async (req, res) => {
+export const updateExercise = asyncExpressFn(async (req, res) => {
   const exercise: ExerciseInterface | null = await Exercise.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -45,7 +45,7 @@ export const updateExercise = asyncHandler(async (req, res) => {
     }
   );
 
-  await prs(req.user._id);
+  await prs(req.id);
 
   return res.status(201).json({
     success: true,
@@ -57,10 +57,10 @@ export const updateExercise = asyncHandler(async (req, res) => {
 // @route --> DELETE /api/auth/exercises/:id
 // @access --> Private
 
-export const deleteExercise = asyncHandler(async (req, res) => {
+export const deleteExercise = asyncExpressFn(async (req, res) => {
   const exercise = await Exercise.findByIdAndDelete(req.params.id);
 
-  await prs(req.user._id);
+  await prs(req.id);
 
   return res.status(200).json({
     success: true,
@@ -72,9 +72,9 @@ export const deleteExercise = asyncHandler(async (req, res) => {
 // @route --> GET /api/auth/exercises
 // @access --> Private
 
-export const getExercises = asyncHandler(async (req, res) => {
+export const getExercises = asyncExpressFn(async (req, res) => {
   const exercises: Array<ExerciseInterface> = await Exercise.find({
-    user: req.user._id
+    user: req.id
   });
 
   return res.status(200).json({

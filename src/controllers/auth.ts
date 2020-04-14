@@ -1,10 +1,6 @@
-import HttpError from '../utils/HttpError';
 import User from '../models/user';
-import crypto from 'crypto';
-import asyncHandler from '../utils/asyncHandler';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { User as UserInterface } from '../types/models';
-import { sendMail } from '../utils/sendMail';
-import { forgotPasswordTemplate } from '../utils/emailTemplates';
 import { setRefreshToken, tokenFactory } from '../utils/tokens';
 import {
   REFRESH_SECRET,
@@ -12,196 +8,164 @@ import {
   AUTH_SECRET,
   AUTH_EXPIRY
 } from '../utils/constants';
+import {
+  validateBody,
+  mutatePassword,
+  compareStrings,
+  sendForgotPasswordEmail,
+  catchForgotPasswordEmail,
+  stageForPasswordResetRequest,
+  resetPassword,
+  clearDocumentsOfDeletedUser
+} from './auth.functions';
+import { findById, updateOne, deleteOne } from '../utils/daos';
+import { Body } from '../types';
+import { errorFactory } from '../utils/errorFactory';
+import { BAD_REQUEST, OK, UNAUTHORIZED, NOT_FOUND } from 'http-status-codes';
+import { responseFactory } from '../utils/responseFactory';
 
-type TUserDetails = Record<string, string>;
+/*== changeEmail =====================================================
 
-// @desc --> change password
-// @route --> PUT /api/auth/user/password
-// @access --> Private
+Allows an auth'd user to change their email
 
-export const changeEmail = asyncHandler(async (req, res, next) => {
-  const { old, new: newE, confirm }: TUserDetails = req.body;
+PUT /api/auth/user/email
 
-  // confirm that all fields are present
-  if (!old || !newE || !confirm) {
-    return next(new HttpError('All fields are required', 400));
+*/
+
+export const changeEmail = asyncExpressFn(async ({ body, id }, res, next) => {
+  const creds = body as Body;
+
+  if (!validateBody(creds, ['old', 'new', 'confirm'])) {
+    return errorFactory(next, 'All fields required', BAD_REQUEST);
   }
 
-  // confirm that the user confirmed their new email and that the two fields match
-  if (newE !== confirm) {
-    return next(new HttpError('New email fields must match', 400));
+  if (!compareStrings(creds.new, creds.confirm)) {
+    return errorFactory(next, 'New and confirm must match', BAD_REQUEST);
   }
 
-  const user: UserInterface | null = await User.findById(req.user._id);
+  // find the user with the validated id
+  const user = (await findById(User, id)) as UserInterface;
 
   // confirm that the old email field matches the email on record
-  if (old !== user?.email) {
-    return next(new HttpError('Invalid credentials', 400));
+  if (!compareStrings(creds.old, user.email)) {
+    return errorFactory(next, `Unauthorized`, UNAUTHORIZED);
   }
 
-  // update the user's email
-  await User.findByIdAndUpdate(
-    req.user._id,
-    { email: confirm },
-    { new: true, runValidators: true, context: 'query' }
-  );
+  await updateOne(User, { _id: id }, { email: body.confirm });
 
-  res.status(200).json({
-    success: true,
-    message: 'Email updated'
-  });
+  return responseFactory(res, OK, true, { message: 'Email updated' });
 });
 
-// @desc --> change password
-// @route --> PUT /api/auth/user/password
-// @access --> Private
+/*== changePassword =====================================================
 
-export const changePassword = asyncHandler(async (req, res, next) => {
-  // extract the user's input data
-  const { old, new: newP, confirm }: TUserDetails = req.body;
+Allow's an auth'd user to change their password
 
-  if (!old || !newP || !confirm) {
-    return next(new HttpError('All fields are required', 400));
+PUT /api/auth/user/password
+
+*/
+
+export const changePassword = asyncExpressFn(
+  async ({ body, id }, res, next) => {
+    const creds = body as Body;
+
+    if (!validateBody(creds, ['old', 'new', 'confirm'])) {
+      return errorFactory(next, 'All fields required', BAD_REQUEST);
+    }
+
+    // confirm the new password and confirmed password do not match
+    if (!compareStrings(creds.new, creds.confirm)) {
+      return errorFactory(next, 'New and confirm must match', BAD_REQUEST);
+    }
+
+    // attempt to change the user's password. if it fails, return an error
+    if (!(await mutatePassword(id, creds.old, creds.new))) {
+      return errorFactory(next, `Unauthorized`, UNAUTHORIZED);
+    }
+
+    return responseFactory(res, OK, true, { message: 'Password updated' });
   }
-  if (newP !== confirm) {
-    return next(new HttpError('New password fields must match', 400));
-  }
+);
 
-  // Check for user
-  const user: UserInterface | null = await User.findById(req.user._id).select(
-    '+password'
-  );
-  if (!user) {
-    return next(new HttpError('User not found', 404));
-  }
+/*== deleteAccount =====================================================
 
-  // Check if password matches
-  const isMatch: boolean = await user.matchPassword(old);
-  if (!isMatch) {
-    return next(new HttpError('Invalid credentials', 400));
-  }
+Allows an auth'd user to permanently delete their account
 
-  // save the password to the user
-  user.password = newP;
-  await user.save();
+DELETE /api/auth/user/delete
 
-  // return a success message after the user is updated
-  res.status(200).json({
-    success: true,
-    message: 'Password updated'
-  });
+*/
+
+export const deleteAccount = asyncExpressFn(async ({ id }, res) => {
+  // delete the user
+  await deleteOne(User, id);
+
+  // delete every document that contains the user as a foreign key
+  await clearDocumentsOfDeletedUser(id);
+
+  return responseFactory(res, OK, true);
 });
 
-// @desc --> delete account
-// @route --> DELETE /api/auth/user/delete
-// @access --> Private
+/*== forgotPassword =====================================================
 
-export const deleteAccount = asyncHandler(async (req, res, next) => {
-  const user: UserInterface | null = await User.findById(req.user._id);
+Stages a forgot password process for an unauth'd user. Sends an email
+that contains next steps
 
-  if (!user) {
-    return next(new HttpError('User not found', 404));
+POST /api/auth/user/forgotpassword
+
+*/
+
+export const forgotPassword = asyncExpressFn(
+  async ({ body, protocol, hostname }, res, next) => {
+    const email = body.email as string;
+
+    // return a validated user and reset password token
+    const data = await stageForPasswordResetRequest(email);
+
+    // if the user could not be validated, return an error
+    if (!data) return errorFactory(next, 'User not found', NOT_FOUND);
+
+    const { user, token } = data;
+
+    // create reset url
+    const link = `${protocol}://${hostname}/-/${token}`;
+
+    try {
+      return await sendForgotPasswordEmail(body.email, link, res);
+    } catch (_) {
+      return catchForgotPasswordEmail(user, next);
+    }
   }
-
-  // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
-  if (user) {
-    await user.remove();
-  }
-
-  return res.status(200).json({
-    success: true
-  });
-});
-
-// @desc --> forgot password
-// @route --> POST /api/auth/user/forgotpassword
-// @access --> Public
-
-export const forgotPassword = asyncHandler(async (req, res, next) => {
-  const user = await User.findOne({ email: req.body.email });
-
-  if (!user) {
-    return next(new HttpError('No user found with that email', 404));
-  }
-
-  // get reset token
-  const resetToken = user.getResetPasswordToken();
-  await user.save({ validateBeforeSave: false });
-
-  // create reset url
-  const resetUrl: string =
-    process.env.NODE_ENV === 'production'
-      ? `https://www.getspotter.io/-/${resetToken}`
-      : `http://localhost:3000/-/${resetToken}`;
-
-  try {
-    // send the message via Mailgun
-    await sendMail({
-      from: 'no-reply@getspotter.io',
-      to: req.body.email,
-      subject: 'Spotter - Forgot Password',
-      html: forgotPasswordTemplate(resetUrl)
-    });
-    // if successful, return an object with the user
-    return res.status(200).json({
-      success: true,
-      message: 'Email sent'
-    });
-  } catch (error) {
-    // clear the reset field items on this user's document
-    user.resetPasswordExpire = undefined;
-    user.resetPasswordToken = undefined;
-    // save the user, return an error message
-    await user.save({ validateBeforeSave: false });
-    return next(new HttpError('Email could not be sent', 500));
-  }
-});
+);
 
 // @desc --> change forgotten password
 // @route --> PUT /api/auth/user/forgotpassword/:id
 // @access --> Public
 
-export const changeForgottenPassword = asyncHandler(async (req, res, next) => {
-  // extract new password fields from body
-  const {
-    newPassword,
-    confirmPassword
-  }: { newPassword: string; confirmPassword: string } = req.body;
+export const changeForgottenPassword = asyncExpressFn(
+  async ({ body, params: { id } }, res, next) => {
+    const passwords = body as Body;
 
-  // check that passwords match and that both fields exist
-  if (!newPassword || !confirmPassword) {
-    return next(new HttpError('All fields are required', 400));
+    // validate the body and confirm that the new password matches the confirm password
+    if (!validateBody(passwords, ['newPassword', 'confirmPassword'])) {
+      return errorFactory(next, 'All fields required', BAD_REQUEST);
+    }
+
+    if (!compareStrings(passwords.newPassword, passwords.confirmPassword)) {
+      return errorFactory(next, 'New and confirm must match', BAD_REQUEST);
+    }
+
+    // reset the password. if this fails, return an error
+    const user = await resetPassword(id, passwords.newPassword);
+
+    if (!user) {
+      return errorFactory(next, 'Invalid request', BAD_REQUEST);
+    }
+
+    // set a refresh token
+    const refreshToken = tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY);
+    setRefreshToken(res, refreshToken);
+
+    // set an auth token and return a response
+    const authToken = tokenFactory(user._id, AUTH_SECRET, AUTH_EXPIRY);
+    return responseFactory(res, OK, true, { token: authToken });
   }
-  if (newPassword !== confirmPassword) {
-    return next(new HttpError('Fields must match', 400));
-  }
-
-  // get hashed token
-  const resetPasswordToken = crypto
-    .createHash('sha256')
-    .update(req.params.id)
-    .digest('hex');
-
-  // check for user with this token and a valid exp. date
-  const user = await User.findOne({
-    resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() }
-  });
-
-  if (!user) {
-    return next(new HttpError('Invalid token', 404));
-  }
-
-  // reset the password, set auth fields to undefined
-  user.password = newPassword;
-  user.resetPasswordExpire = undefined;
-  user.resetPasswordExpire = undefined;
-
-  await user.save();
-
-  setRefreshToken(res, tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY));
-
-  const authToken = tokenFactory(user._id, AUTH_SECRET, AUTH_EXPIRY);
-
-  return res.status(200).json({ success: true, token: authToken });
-});
+);

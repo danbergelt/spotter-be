@@ -2,24 +2,40 @@ import {
   findMany,
   aggregate,
   updateOne,
-  updateMany
+  updateMany,
+  getPassword,
+  deleteOne,
+  findById,
+  findOne,
+  deleteMany
 } from '../../../../utils/daos';
 import { createUser } from '../../../utils/createUser';
-import { User, Exercise as ExerciseType } from '../../../../types/models';
+import {
+  User as UserType,
+  Exercise as ExerciseType
+} from '../../../../types/models';
 import Exercise from '../../../../models/Exercise';
 import { expect } from 'chai';
+import User from '../../../../models/user';
 
 describe('mongo query helper functions', () => {
-  let user: User;
+  let user: UserType;
   let e1: ExerciseType;
   let e2: ExerciseType;
 
-  before(async () => {
+  beforeEach(async () => {
     user = await createUser();
+    user = user.toJSON();
+    delete user.password;
     e1 = new Exercise({ name: 'foo', user: user._id });
     e2 = new Exercise({ name: 'bar', user: user._id });
     e1 = await e1.save();
     e2 = await e2.save();
+  });
+
+  it('findById returns a document', async () => {
+    const document = await findById(User, user._id);
+    expect(document?.toJSON()).to.deep.equal(user);
   });
 
   it('findMany returns an array of documents', async () => {
@@ -53,6 +69,31 @@ describe('mongo query helper functions', () => {
       { user: user._id },
       { name: 'update many' }
     );
+
     expect(details).to.deep.equal({ n: 2, nModified: 2, ok: 1 });
+  });
+
+  it('getPassword returns a user with the password', async () => {
+    const withPassword: any = await getPassword(user._id);
+
+    expect(withPassword.password).to.be.a('string');
+  });
+
+  it('deleteOne deletes a document', async () => {
+    await deleteOne(User, user._id);
+    const document = await findById(User, user._id);
+    expect(document).to.be.null;
+  });
+
+  it('findOne returns a document with an arbitrary filter', async () => {
+    const document = await findOne(User, { email: user.email });
+    expect(document?.toJSON()).to.deep.equal(user);
+  });
+
+  it('deleteMany deletes many documents', async () => {
+    const results = await deleteMany(Exercise, { user: user._id });
+    expect(results.n).to.equal(2);
+    expect(results.ok).to.equal(1);
+    expect(results.deletedCount).to.equal(2);
   });
 });

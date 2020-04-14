@@ -61,7 +61,7 @@ describe('change email', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('All fields are required');
+    res.body.error.should.equal('All fields required');
   });
 
   it('should not change email with mismatch new email fields', async () => {
@@ -78,7 +78,7 @@ describe('change email', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('New email fields must match');
+    res.body.error.should.equal('New and confirm must match');
   });
 
   it('should not change email with incorrect old email', async () => {
@@ -94,7 +94,7 @@ describe('change email', () => {
       });
     should.exist(res);
     res.body.success.should.equal(false);
-    res.should.have.status(400);
-    res.body.error.should.equal('Invalid credentials');
+    res.should.have.status(401);
+    res.body.error.should.equal(`Unauthorized`);
   });
 });

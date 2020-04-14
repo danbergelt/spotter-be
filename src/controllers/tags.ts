@@ -1,6 +1,6 @@
 import HttpError from '../utils/HttpError';
 import Tag from '../models/Tag';
-import asyncHandler from '../utils/asyncHandler';
+import asyncExpressFn from '../utils/asyncExpressFn';
 import { Tag as TagInterface } from 'src/types/models';
 const hex = require('is-hexcolor'); // eslint-disable-line
 
@@ -8,8 +8,8 @@ const hex = require('is-hexcolor'); // eslint-disable-line
 // @route --> POST /api/auth/tags
 // @access --> Private
 
-export const createTag = asyncHandler(async (req, res, next) => {
-  const tags: Array<TagInterface> = await Tag.find({ user: req.user._id });
+export const createTag = asyncExpressFn(async (req, res, next) => {
+  const tags: Array<TagInterface> = await Tag.find({ user: req.id });
   // checks for matches on tags with no content
   if (req.body.color && !req.body.content) {
     const duplicates: Array<TagInterface> = tags.filter(
@@ -40,7 +40,7 @@ export const createTag = asyncHandler(async (req, res, next) => {
     return next(new HttpError('Invalid color detected', 400));
   }
 
-  req.body.user = req.user._id;
+  req.body.user = req.id;
 
   const tag: TagInterface = await Tag.create(req.body);
 
@@ -54,7 +54,7 @@ export const createTag = asyncHandler(async (req, res, next) => {
 // @route --> DELETE /api/auth/tags/:id
 // @access --> Private
 
-export const deleteTag = asyncHandler(async (req, res) => {
+export const deleteTag = asyncExpressFn(async (req, res) => {
   const tag: TagInterface | null = await Tag.findById(req.params.id);
 
   // was not able to implement pre-hooks with deleteOne, so opting for remove() instead
@@ -72,7 +72,7 @@ export const deleteTag = asyncHandler(async (req, res) => {
 // @route --> PUT /api/auth/tags/:id
 // @access --> Private
 
-export const editTag = asyncHandler(async (req, res) => {
+export const editTag = asyncExpressFn(async (req, res) => {
   const tag: TagInterface | null = await Tag.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -93,8 +93,8 @@ export const editTag = asyncHandler(async (req, res) => {
 // @route --> GET /api/auth/tags
 // @access --> Private
 
-export const getTags = asyncHandler(async (req, res) => {
-  const tags: Array<TagInterface> = await Tag.find({ user: req.user._id });
+export const getTags = asyncExpressFn(async (req, res) => {
+  const tags: Array<TagInterface> = await Tag.find({ user: req.id });
 
   return res.status(200).json({
     success: true,
