@@ -3,6 +3,12 @@ import { Schema, Model, Document, Error } from 'mongoose';
 import HttpError from '../utils/HttpError';
 import { Workout, ExerciseOnWorkoutSchema, User } from './models';
 
+export type Middleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => void;
+
 export type ExpressFn = (
   req: Request,
   res: Response,
@@ -60,7 +66,15 @@ export interface UserStagedForPasswordReset {
   token: string;
 }
 
-export interface UpdateManyReturn {
-  n: number;
-  nModified: number;
+interface MutateMany {
+  n?: number | undefined;
+  ok?: number | undefined;
+}
+
+export interface UpdateMany extends MutateMany {
+  nModified?: number | undefined;
+}
+
+export interface DeleteMany extends MutateMany {
+  deletedCount?: number | undefined;
 }

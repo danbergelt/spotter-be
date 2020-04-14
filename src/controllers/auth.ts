@@ -1,6 +1,4 @@
-import HttpError from '../utils/HttpError';
 import User from '../models/user';
-import crypto from 'crypto';
 import asyncExpressFn from '../utils/asyncExpressFn';
 import { User as UserInterface } from '../types/models';
 import { setRefreshToken, tokenFactory } from '../utils/tokens';
@@ -16,7 +14,9 @@ import {
   compareStrings,
   sendForgotPasswordEmail,
   catchForgotPasswordEmail,
-  stageForPasswordResetRequest
+  stageForPasswordResetRequest,
+  resetPassword,
+  clearDocumentsOfDeletedUser
 } from './auth.functions';
 import { findById, updateOne, deleteOne } from '../utils/daos';
 import { Body } from '../types';
@@ -98,6 +98,9 @@ export const deleteAccount = asyncExpressFn(async ({ id }, res) => {
   // delete the user
   await deleteOne(User, id);
 
+  // delete every document that contains the user as a foreign key
+  await clearDocumentsOfDeletedUser(id);
+
   return responseFactory(res, OK, true);
 });
 
@@ -138,51 +141,31 @@ export const forgotPassword = asyncExpressFn(
 // @access --> Public
 
 export const changeForgottenPassword = asyncExpressFn(
-  async (req, res, next) => {
-    // extract new password fields from body
-    const {
-      newPassword,
-      confirmPassword
-    }: { newPassword: string; confirmPassword: string } = req.body;
+  async ({ body, params: { id } }, res, next) => {
+    const passwords = body as Body;
 
-    // check that passwords match and that both fields exist
-    if (!newPassword || !confirmPassword) {
-      return next(new HttpError('All fields are required', 400));
-    }
-    if (newPassword !== confirmPassword) {
-      return next(new HttpError('Fields must match', 400));
+    // validate the body and confirm that the new password matches the confirm password
+    if (!validateBody(passwords, ['newPassword', 'confirmPassword'])) {
+      return errorFactory(next, 'All fields required', BAD_REQUEST);
     }
 
-    // get hashed token
-    const resetPasswordToken = crypto
-      .createHash('sha256')
-      .update(req.params.id)
-      .digest('hex');
+    if (!compareStrings(passwords.newPassword, passwords.confirmPassword)) {
+      return errorFactory(next, 'New and confirm must match', BAD_REQUEST);
+    }
 
-    // check for user with this token and a valid exp. date
-    const user = await User.findOne({
-      resetPasswordToken,
-      resetPasswordExpire: { $gt: Date.now() }
-    });
+    // reset the password. if this fails, return an error
+    const user = await resetPassword(id, passwords.newPassword);
 
     if (!user) {
-      return next(new HttpError('Invalid token', 404));
+      return errorFactory(next, 'Invalid request', BAD_REQUEST);
     }
 
-    // reset the password, set auth fields to undefined
-    user.password = newPassword;
-    user.resetPasswordExpire = undefined;
-    user.resetPasswordExpire = undefined;
+    // set a refresh token
+    const refreshToken = tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY);
+    setRefreshToken(res, refreshToken);
 
-    await user.save();
-
-    setRefreshToken(
-      res,
-      tokenFactory(user._id, REFRESH_SECRET, REFRESH_EXPIRY)
-    );
-
+    // set an auth token and return a response
     const authToken = tokenFactory(user._id, AUTH_SECRET, AUTH_EXPIRY);
-
-    return res.status(200).json({ success: true, token: authToken });
+    return responseFactory(res, OK, true, { token: authToken });
   }
 );

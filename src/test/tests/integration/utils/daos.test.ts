@@ -6,7 +6,8 @@ import {
   getPassword,
   deleteOne,
   findById,
-  findOne
+  findOne,
+  deleteMany
 } from '../../../../utils/daos';
 import { createUser } from '../../../utils/createUser';
 import {
@@ -87,5 +88,12 @@ describe('mongo query helper functions', () => {
   it('findOne returns a document with an arbitrary filter', async () => {
     const document = await findOne(User, { email: user.email });
     expect(document?.toJSON()).to.deep.equal(user);
+  });
+
+  it('deleteMany deletes many documents', async () => {
+    const results = await deleteMany(Exercise, { user: user._id });
+    expect(results.n).to.equal(2);
+    expect(results.ok).to.equal(1);
+    expect(results.deletedCount).to.equal(2);
   });
 });
