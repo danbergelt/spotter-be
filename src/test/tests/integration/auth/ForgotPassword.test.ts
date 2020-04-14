@@ -1,7 +1,7 @@
 const app = require('../../../utils/index');
 import { describe, it } from 'mocha';
 import chaiHttp from 'chai-http';
-import chai from 'chai';
+import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { createUser } from '../../../utils/createUser';
 import User from '../../../../models/user';
@@ -51,7 +51,7 @@ describe('Login existing user', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('All fields are required');
+    res.body.error.should.equal('All fields required');
   });
 
   it("should error out when fields don't match", async () => {
@@ -62,7 +62,7 @@ describe('Login existing user', () => {
     should.exist(res);
     res.body.success.should.equal(false);
     res.should.have.status(400);
-    res.body.error.should.equal('Fields must match');
+    res.body.error.should.equal('New and confirm must match');
   });
 
   it('should error out with bad token', async () => {
@@ -72,8 +72,8 @@ describe('Login existing user', () => {
       .send({ newPassword: 'foo', confirmPassword: 'foo' });
     should.exist(res);
     res.body.success.should.equal(false);
-    res.should.have.status(404);
-    res.body.error.should.equal('Invalid token');
+    res.should.have.status(400);
+    res.body.error.should.equal('Invalid request');
   });
 
   it('password validation fails with short passwords', async () => {
@@ -103,6 +103,7 @@ describe('Login existing user', () => {
       .send({ newPassword: 'newpassword', confirmPassword: 'newpassword' });
     should.exist(res);
     res.body.success.should.equal(true);
+    assert.isAbove(res.header['set-cookie'][0].split(/=|;/)[1].length, 0);
     res.should.have.status(200);
     res.body.should.have.property('token');
     await User.deleteMany({});

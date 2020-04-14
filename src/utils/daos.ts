@@ -1,5 +1,5 @@
 import { Document, Model } from 'mongoose'; // eslint-disable-line
-import { Stage, UpdateManyReturn } from '../types';
+import { Stage, UpdateMany, DeleteMany } from '../types';
 import User from '../models/user';
 import { User as UserInterface } from '../types/models';
 
@@ -80,7 +80,7 @@ export const updateMany = async <T extends Document>(
   Model: Model<T>,
   filter: Stage,
   update: Stage
-): Promise<UpdateManyReturn> => {
+): Promise<UpdateMany> => {
   return await Model.updateMany(filter, update, {
     new: true,
     runValidators: true,
@@ -124,4 +124,17 @@ export const findOne = async <T extends Document>(
   filter: Stage
 ): Promise<T | null> => {
   return await Model.findOne(filter);
+};
+
+/*== deleteMany =====================================================
+
+A DAO that deletes many documents according to a filter
+
+*/
+
+export const deleteMany = async <T extends Document>(
+  Model: Model<T>,
+  filter: Stage
+): Promise<DeleteMany> => {
+  return await Model.deleteMany(filter);
 };

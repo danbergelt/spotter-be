@@ -1,5 +1,5 @@
 import { User as UserInterface } from '../types/models';
-import { getPassword, findOne } from '../utils/daos';
+import { getPassword, findOne, deleteMany } from '../utils/daos';
 import { UserStagedForPasswordReset, Body } from '../types';
 import { sendMail } from '../utils/sendMail';
 import { forgotPasswordTemplate } from '../utils/emailTemplates';
@@ -8,6 +8,8 @@ import { responseFactory } from '../utils/responseFactory';
 import { OK, INTERNAL_SERVER_ERROR } from 'http-status-codes';
 import { errorFactory } from '../utils/errorFactory';
 import User from '../models/user';
+import crypto from 'crypto';
+import { modelNames, model } from 'mongoose';
 
 /*== compare =====================================================
 
@@ -130,12 +132,69 @@ export const catchForgotPasswordEmail = async (
   error = errorFactory
 ): Promise<void> => {
   // clear the reset items on this user's document
-  user.resetPasswordExpire = undefined;
   user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
 
   // save the user with the cleared items
   await user.save({ validateBeforeSave: false });
 
   // return an error message
   return error(next, 'Email could not be sent', INTERNAL_SERVER_ERROR);
+};
+
+/*== resetPassword =====================================================
+
+Reset a user's password
+
+*/
+
+export const resetPassword = async (
+  id: string,
+  newPassword: string,
+  findUser = findOne
+): Promise<false | UserInterface> => {
+  // create a reset token with id arg to compare with the saved reset token
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(id)
+    .digest('hex');
+
+  // validate user by token and expiry
+  const FILTER = {
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() }
+  };
+
+  const user = await findUser(User, FILTER);
+
+  if (!user) return false;
+
+  // reset the password, set auth fields to undefined
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  // return the user
+  return user;
+};
+
+/*== clearDocumentsOfDeletedUser =====================================================
+
+Deletes all documents that are tied to a user when a user's account gets deleted
+
+*/
+
+export const clearDocumentsOfDeletedUser = async (
+  user: string,
+  getModelNames = modelNames,
+  deleteDocs = deleteMany,
+  getModel = model
+): Promise<void> => {
+  // get all the model names from the current mongoose instance
+  for (const modelName of getModelNames()) {
+    // iterate over them, and delete all documents tied to user
+    await deleteDocs(getModel(modelName), { user });
+  }
 };

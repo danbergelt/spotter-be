@@ -4,12 +4,15 @@ import {
   mutatePassword,
   stageForPasswordResetRequest,
   sendForgotPasswordEmail,
-  catchForgotPasswordEmail
+  catchForgotPasswordEmail,
+  resetPassword,
+  clearDocumentsOfDeletedUser
 } from '../../../../controllers/auth.functions';
 import { UserStagedForPasswordReset, Body } from '../../../../types';
 import { expect } from 'chai';
 import Sinon from 'sinon';
 import { mockRes } from 'sinon-express-mock';
+import { User } from '../../../../types/models';
 
 describe('validateBody', () => {
   it('validateBody returns false if not all keys are present', () => {
@@ -108,5 +111,40 @@ describe('catchForgotPasswordEmail', () => {
     await catchForgotPasswordEmail(user, next, error);
 
     expect(error.calledWith(next, 'Email could not be sent', 500)).to.be.true;
+  });
+});
+
+describe('resetPassword', () => {
+  it('returns false if user is not authorized to reset password', async () => {
+    const findUser = Sinon.stub().returns(null);
+    const result = await resetPassword('foo', 'bar', findUser);
+    expect(result).to.be.false;
+  });
+
+  it("returns the user if the user's password is changed", async () => {
+    const user = {
+      save: Sinon.stub(),
+      resetPasswordToken: 'foo',
+      resetPasswordExpire: 'bar',
+      password: 'old'
+    };
+    const findUser = Sinon.stub().returns(user);
+    const result = await resetPassword('foo', 'bar', findUser);
+    expect((result as User).password).to.equal('bar');
+  });
+});
+
+describe('cascade delete docs of deleted user', () => {
+  it('calls the delete function N times for N models', async () => {
+    const getModelNames = Sinon.stub().returns([1, 2, 3]);
+    const deleteDocs = Sinon.stub();
+    const getModel = Sinon.stub();
+    await clearDocumentsOfDeletedUser(
+      'foo',
+      getModelNames,
+      deleteDocs,
+      getModel
+    );
+    expect(deleteDocs.calledThrice).to.be.true;
   });
 });

@@ -3,10 +3,6 @@ import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { User } from 'src/types/models';
-import Exercise from './Exercise';
-import Tag from './Tag';
-import Template from './Template';
-import Workout from './Workout';
 import uniqueValidator from 'mongoose-unique-validator';
 
 // User model
@@ -39,26 +35,6 @@ const UserSchema = new Schema<User>({
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date
-});
-
-// Cascade remove a user's workouts on account close
-UserSchema.post('findOneAndDelete', ({ _id }, next) => {
-  Workout.deleteMany({ user: _id }, () => next());
-});
-
-// Cascade remove a user's exercises on account close
-UserSchema.post('findOneAndDelete', ({ _id }, next) => {
-  Exercise.deleteMany({ user: _id }, () => next());
-});
-
-// Cascade remove a user's templates on account close
-UserSchema.post('findOneAndDelete', ({ _id }, next) => {
-  Template.deleteMany({ user: _id }, () => next());
-});
-
-// Cascade remove a users' tags on account close
-UserSchema.post('findOneAndDelete', ({ _id }, next) => {
-  Tag.deleteMany({ user: _id }, () => next());
 });
 
 // Encrypt password on save
