@@ -1,8 +1,6 @@
 FROM node:12
 
-ARG build
-
-ENV B=${build}
+RUN yarn global add ts-node-dev
 
 WORKDIR /app
 
@@ -14,4 +12,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "yarn ${B}"]
+CMD ["yarn", "dev"]

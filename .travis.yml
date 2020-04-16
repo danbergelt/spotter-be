@@ -5,10 +5,13 @@ services: docker
 node_js:
   - 12
 
+cache:
+  directories:
+    - node_modules
+
 before_script:
   - touch .env
   - echo DB=$DB >> .env
-  - echo T_DB=$T_DB >> .env
   - echo PORT=$PORT >> .env
   - echo NODE_ENV=$NODE_ENV >> .env
   - echo JWT_SECRET=$JWT_SECRET >> .env
@@ -17,24 +20,22 @@ before_script:
   - echo REF_EXPIRE=$REF_EXPIRE >> .env
   - echo MG_DOMAIN=$MG_DOMAIN >> .env
   - echo MG_KEY=$MG_KEY >> .env
-  - echo COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN >> .env
-  - chmod +x deploy.sh
-  - chmod +x deploy.staging.sh
+  - echo CODECOV_TOKEN=$CODECOV_TOKEN >> .env
 
 script:
-  - docker-compose -f docker-compose.ci.yml up --abort-on-container-exit
+  - make dciu
 
 after_script:
-  - docker-compose -f docker-compose.ci.yml down
+  - make dcid
 
 deploy:
   - provider: script
-    script: './deploy.sh'
+    script: make depp
     skip_cleanup: true
     on:
       branch: master
   - provider: script
-    script: './deploy.staging.sh'
+    script: make deps
     skip_cleanup: true
     on:
       branch: staging
