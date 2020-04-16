@@ -1,5 +1,7 @@
-import { Error } from './e.types';
+import { E } from './e.types';
 
-export const e = (msg: string, status: number): Error => {
+// default error object, returning a message and an http status
+
+export const e = (msg: string, status: number): E => {
   return { msg, status };
 };
