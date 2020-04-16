@@ -6,7 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     volumes:
-      - .:/usr/src/app
+      - .:/app
+      - /app/node_modules
     restart: always
     env_file:
       - .env

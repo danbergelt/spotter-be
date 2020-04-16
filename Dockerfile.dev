@@ -2,7 +2,7 @@ FROM node:12
 
 RUN yarn global add ts-node-dev
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 

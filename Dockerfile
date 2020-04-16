@@ -4,7 +4,7 @@ ARG build
 
 ENV B=${build}
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 

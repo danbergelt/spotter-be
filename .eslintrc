@@ -1,13 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "mocha",
-    "prettier",
-    "@typescript-eslint",
-    "chai-expect",
-    "chai-friendly",
-    "promise"
-  ],
+  "plugins": ["mocha", "prettier", "@typescript-eslint", "chai-expect", "chai-friendly", "promise"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -23,7 +16,8 @@
   "rules": {
     "prettier/prettier": "error",
     "no-nested-ternary": 2,
-    "@typescript-eslint/unbound-method": "off"
+    "@typescript-eslint/unbound-method": "off",
+    "max-len": "off"
   },
   "parserOptions": {
     "ecmaVersion": 2020,
