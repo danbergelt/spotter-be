@@ -1,22 +1,26 @@
-import express from 'express';
+import express, { json } from 'express';
 import dotenv from 'dotenv';
 import fns from './index.functions';
-import { useMongo } from './config/mongo';
-
-// configure env variables
+import users from './controllers/users';
+import { db } from './middleware/db';
+import { Server } from 'http';
+import cookies from 'cookie-parser';
 dotenv.config();
 
-const { PORT, DB } = process.env;
+const { success, logRejection, closeServer, inject } = fns;
 
-const db = useMongo(String(DB));
+const { PORT } = process.env;
 
-const app = express();
+const server = ((): Server => {
+  const app = express();
 
-const server = app.listen(Number(PORT) || 5000, () => fns.success());
+  // inject N number of middleware into our app
+  inject(app)(db(), cookies(), json(), users);
+
+  return app.listen(Number(PORT), () => success());
+})();
 
 process.on('unhandledRejection', rejection => {
-  fns.logRejection(rejection);
-  fns.closeServer(server, process);
+  logRejection(rejection);
+  closeServer(server, process);
 });
-
-export default db;

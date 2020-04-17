@@ -1,4 +1,4 @@
-export interface Error {
+export interface E {
   msg: string;
   status: number;
 }
