@@ -25,7 +25,7 @@ describe('index helper functions', () => {
   it('injects N middleware', () => {
     const a = { use: Sinon.stub() } as any;
     const mw = [1, 2, 3] as any;
-    fns.inject(a, mw);
+    fns.inject(a)(mw);
     expect(a.use.calledThrice).to.be.true;
   });
 });
