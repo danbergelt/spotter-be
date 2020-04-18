@@ -1,8 +1,7 @@
 import { pipe, andThen, otherwise } from 'ramda';
 
-// try/catch wrapper that automatically calls next on a failure
-// the "tup" is an error override tuple that contains a custom error message and status
-// if no overrides are required, pass null to the tuple
+// declarative try/catch replacement. calls a thenable, which then pipes the resolved promise
+// into the andThen function, or pipes the error into the otherwise function
 
 export const tc = <T>(thenable: () => Promise<T>) => <U>(cb: (e: string) => U): Promise<T | U> =>
   pipe(
