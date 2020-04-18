@@ -5,6 +5,5 @@ const { USERS } = COLLECTIONS;
 
 export const register: Fn = async ({ body }, res, next) => {
   const user = await res.locals.db(USERS).insertOne({ email: 'foo', password: 'bar' });
-  console.log(user);
   next();
 };

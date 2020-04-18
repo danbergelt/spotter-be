@@ -1,4 +1,4 @@
 export interface E {
-  msg: string;
+  message: string;
   status: number;
 }
