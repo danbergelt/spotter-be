@@ -1,8 +1,7 @@
 import * as TE from 'fp-ts/lib/TaskEither';
+import { e } from './e';
+import { E } from './e.types';
 
-export const tc = <T>(tryer: () => Promise<T>): TE.TaskEither<Error, T> => {
-  return TE.tryCatch<Error, T>(
-    () => tryer(),
-    reason => reason as Error
-  );
+export const tc = <T>(status: number, tryer: () => Promise<T>): TE.TaskEither<E, T> => {
+  return TE.tryCatch<E, T>(tryer, error => e((error as Error).message, status));
 };
