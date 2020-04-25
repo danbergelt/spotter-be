@@ -1,12 +1,13 @@
 import { COLLECTIONS } from '../db/mongo.constants';
-import * as TE from 'fp-ts/lib/TaskEither';
-import { Params } from './createUser.types';
 import { tc } from '../utils/tc';
 import { InsertOneWriteOpResult } from 'mongodb';
+import { Agent } from '../db/mongo.types';
+import { Res } from '../types';
+import { BAD_GATEWAY } from 'http-status-codes';
 
 const { USERS } = COLLECTIONS;
 
-export const createUser = (params: Params): TE.TaskEither<Error, InsertOneWriteOpResult<any>> => {
-  const { db, email } = params;
-  return tc(async () => await db(USERS).insertOne({ email }));
+// eslint-disable-next-line
+export const createUser = (db: Agent, email: string): Res<InsertOneWriteOpResult<any>> => {
+  return tc(BAD_GATEWAY, async () => await db(USERS).insertOne({ email }));
 };
