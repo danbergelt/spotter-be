@@ -23,7 +23,7 @@ r.post(
   vdate(schema(USERS)),
   wrap(async (req, res, next) => {
     const { email, password } = req.body;
-    const { db } = res.locals;
+    const { db } = req.app.locals;
 
     // business logic pipeline
     return await pipe(

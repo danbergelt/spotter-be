@@ -16,7 +16,7 @@ const server = ((): Server => {
   const app = express();
 
   // inject N number of middleware into our app
-  inject(app)(db(), cookies(), json(), users, error);
+  inject(app)(db(app), cookies(), json(), users, error);
 
   return app.listen(Number(PORT), () => success());
 })();
