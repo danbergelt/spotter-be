@@ -9,5 +9,5 @@ const { USERS } = COLLECTIONS;
 
 // eslint-disable-next-line
 export const createUser = (db: Agent, email: string): Res<InsertOneWriteOpResult<any>> => {
-  return tc(BAD_GATEWAY, async () => await db(USERS).insertOne({ email }));
+  return tc(async () => await db(USERS).insertOne({ email }))(BAD_GATEWAY);
 };
