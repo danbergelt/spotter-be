@@ -5,9 +5,9 @@ import { success } from '../utils/success';
 import { vdate } from '../middleware/vdate';
 import { schema, SCHEMAS } from '../validators/users';
 import { createUser } from '../services/createUser';
-import * as P from 'fp-ts/lib/pipeable';
-import * as TE from 'fp-ts/lib/TaskEither';
-import * as T from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { chain, fold } from 'fp-ts/lib/TaskEither';
+import { of } from 'fp-ts/lib/Task';
 import { createPw } from '../services/createPw';
 import { cookie } from '../utils/cookie';
 import { token } from '../utils/token';
@@ -26,17 +26,17 @@ r.post(
     const { db } = res.locals;
 
     // business logic pipeline
-    return await P.pipe(
+    return await pipe(
       createUser(db, email),
-      TE.chain(({ insertedId: id }) => createPw(db, id, password)),
-      TE.fold(
-        error => T.of(next(error)),
+      chain(({ insertedId }) => createPw(db, insertedId, password)),
+      fold(
+        error => of(next(error)),
         id => {
           res
             .cookie(...cookie(id))
             .status(OK)
             .json(success({ token: token(id) }));
-          return T.of(undefined);
+          return of(undefined);
         }
       )
     )();
