@@ -24,16 +24,15 @@ const server = ((): Server => {
     // TODO --> ping Sentry
     if (err) throw err;
 
-    // all users must have unique emails
     client.db(URI).createIndex(USERS, { email: 1 }, { unique: true });
 
-    // inject an 'agent' into express (allows one to query specific collections)
+    // inject an 'agent' into express stack (single client for db connections)
     app.locals.db = (collection => client.db(URI).collection(collection)) as Agent;
 
     return;
   });
 
-  // inject N number of middleware into our app
+  // inject N middleware into our app
   inject(app)(cookies(), json(), users, error);
 
   return app.listen(Number(PORT), () => success());

@@ -2,8 +2,8 @@ import express from 'express';
 import { path } from '../utils/path';
 import { OK } from 'http-status-codes';
 import { success } from '../utils/success';
-import { vdate } from '../middleware/vdate';
-import { schema, SCHEMAS } from '../validators/users';
+import { validate } from '../middleware/validate';
+import { schema, SCHEMAS } from '../validators';
 import { createUser } from '../services/createUser';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain, fold } from 'fp-ts/lib/TaskEither';
@@ -14,18 +14,16 @@ import { token } from '../utils/token';
 import { wrap } from '../utils/wrap';
 
 const r = express.Router();
-const p = path('/users');
+const userPath = path('/users');
 const { USERS } = SCHEMAS;
 
-// register a new user, complete with validation, and piped business logic
 r.post(
-  p('/registration'),
-  vdate(schema(USERS)),
+  userPath('/registration'),
+  validate(schema(USERS)),
   wrap(async (req, res, next) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
-    // business logic pipeline
     return await pipe(
       createUser(db, email),
       chain(({ insertedId }) => createPw(db, insertedId, password)),
