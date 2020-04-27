@@ -2,21 +2,39 @@ import express, { json } from 'express';
 import dotenv from 'dotenv';
 import fns from './index.functions';
 import users from './controllers/users';
-import { db } from './middleware/db';
 import { Server } from 'http';
 import cookies from 'cookie-parser';
 import { error } from './middleware/error';
+import { MongoClient } from 'mongodb';
+import { CONFIG, URI, COLLECTIONS } from './utils/constants';
+import { Agent } from './index.types';
 dotenv.config();
 
 const { success, logRejection, closeServer, inject } = fns;
 
-const { PORT } = process.env;
+const { PORT, DB } = process.env;
+
+const { USERS } = COLLECTIONS;
 
 const server = ((): Server => {
   const app = express();
 
+  MongoClient.connect(String(DB), CONFIG, (err, client) => {
+    // bubble a failed connection --> want server to shut down in this case
+    // TODO --> ping Sentry
+    if (err) throw err;
+
+    // all users must have unique emails
+    client.db(URI).createIndex(USERS, { email: 1 }, { unique: true });
+
+    // inject an 'agent' into express (allows one to query specific collections)
+    app.locals.db = (collection => client.db(URI).collection(collection)) as Agent;
+
+    return;
+  });
+
   // inject N number of middleware into our app
-  inject(app)(db(), cookies(), json(), users, error);
+  inject(app)(cookies(), json(), users, error);
 
   return app.listen(Number(PORT), () => success());
 })();

@@ -1,8 +1,8 @@
 import { ObjectSchema } from 'yup';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status-codes';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { tc } from '../utils/tc';
 import { wrap } from '../utils/wrap';
 import { Fn } from '../utils/wrap.types';
