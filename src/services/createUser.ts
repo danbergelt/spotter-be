@@ -1,7 +1,7 @@
 import { COLLECTIONS } from '../utils/constants';
 import { tc } from '../utils/tc';
 import { InsertOneWriteOpResult } from 'mongodb';
-import { Agent } from '../middleware/db.types';
+import { Agent } from '../index.types';
 import { HTTPEither } from '../types';
 import { BAD_GATEWAY } from 'http-status-codes';
 

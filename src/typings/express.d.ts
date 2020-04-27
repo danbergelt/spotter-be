@@ -1,4 +1,4 @@
-import { Agent } from '../middleware/db.types';
+import { Agent } from '../index.types';
 import { User } from '../services/user.types';
 
 declare module 'express' {
