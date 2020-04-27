@@ -126,7 +126,7 @@ export const forgotPassword = asyncExpressFn(
     const { user, token } = data;
 
     // create reset url
-    const link = `${protocol}://${hostname}/-/${token}`;
+    const link = `https://${hostname}/-/${token}`;
 
     try {
       return await sendForgotPasswordEmail(body.email, link, res);
