@@ -1,4 +1,4 @@
-import { success } from '../../utils/success';
+import { success } from '../../../utils/success';
 import { expect } from 'chai';
 
 describe('default success message for 200 http responses', () => {

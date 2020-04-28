@@ -11,7 +11,9 @@ import { of } from 'fp-ts/lib/Task';
 import { createPw } from '../services/createPw';
 import { cookie } from '../utils/cookie';
 import { token } from '../utils/token';
-import { wrap } from '../utils/wrap';
+import { resolver } from '../utils/resolver';
+import jwt from 'jsonwebtoken';
+import { COOKIE_OPTIONS } from '../utils/constants';
 
 const r = express.Router();
 const userPath = path('/users');
@@ -20,7 +22,7 @@ const { USERS } = SCHEMAS;
 r.post(
   userPath('/registration'),
   validate(schema(USERS)),
-  wrap(async (req, res, next) => {
+  resolver(async (req, res, next) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
@@ -31,7 +33,7 @@ r.post(
         error => of(next(error)),
         id => {
           res
-            .cookie(...cookie(id))
+            .cookie(...cookie(id, jwt, COOKIE_OPTIONS))
             .status(OK)
             .json(success({ token: token(id) }));
           return of(undefined);

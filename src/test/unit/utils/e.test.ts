@@ -1,4 +1,4 @@
-import { e } from '../../utils/e';
+import { e } from '../../../utils/e';
 import { expect } from 'chai';
 
 describe('error object', () => {
