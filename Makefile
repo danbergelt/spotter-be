@@ -3,7 +3,9 @@ du:
 dd:
 	docker-compose -f docker-compose.development.yml down
 dt:
+	docker exec db mongo --eval db.getSiblingDB"('spotter')".dropDatabase"()"
 	docker-compose -f docker-compose.development.yml run --rm dev_api yarn test
+	docker exec db mongo --eval db.getSiblingDB"('spotter')".dropDatabase"()"
 dciu:
 	docker-compose -f docker-compose.development.yml run --rm dev_api yarn coverage
 dcid:
