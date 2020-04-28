@@ -1,7 +1,7 @@
 import Sinon from 'sinon';
 import { expect } from 'chai';
 import { mockReq, mockRes } from 'sinon-express-mock';
-import { wrap } from '../../utils/wrap';
+import { resolver } from '../../../utils/resolver';
 
 const utils = () => {
   const req = mockReq();
@@ -13,7 +13,7 @@ const utils = () => {
 
 describe('async handler', () => {
   it('returns the function', () => {
-    const fn = wrap(async (_req, _res, _next) => {
+    const fn = resolver(async (_req, _res, _next) => {
       await new Promise((resolve, _reject) => {
         setTimeout(() => resolve('foo'), 0);
       });
@@ -24,7 +24,7 @@ describe('async handler', () => {
 
   it('resolves the promise', async () => {
     const { req, res, next } = utils();
-    const fn = wrap(async (_req, res, _next) => {
+    const fn = resolver(async (_req, res, _next) => {
       await new Promise((resolve, _reject) => {
         setTimeout(() => resolve('foo'), 0);
       });
@@ -38,7 +38,7 @@ describe('async handler', () => {
 
   it('rejects the promise', async () => {
     const { req, res, next } = utils();
-    const fn = wrap(async (_req, _res, _next) => {
+    const fn = resolver(async (_req, _res, _next) => {
       await new Promise((_resolve, reject) => {
         setTimeout(() => reject('bar'), 0);
       });

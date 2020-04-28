@@ -4,4 +4,4 @@ import { Collection } from 'mongodb';
 
 export type MW = RequestHandler | ErrorRequestHandler;
 
-export type Agent = (collection: COLLECTION) => Collection;
+export type DAO = (collection: COLLECTION) => Collection;

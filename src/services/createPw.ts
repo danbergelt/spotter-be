@@ -1,22 +1,26 @@
 import { COLLECTIONS } from '../utils/constants';
-import { tc } from '../utils/tc';
-import { Agent } from '../index.types';
+import { DAO } from '../index.types';
 import { HTTPEither } from '../types';
 import { BAD_GATEWAY } from 'http-status-codes';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { chain } from 'fp-ts/lib/TaskEither';
-import { hash } from '../utils/hash';
+import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
+import { encrypt } from '../utils/encrypt';
+import { e } from '../utils/e';
+import { MongoError } from 'mongodb';
 
 const { PASSWORDS } = COLLECTIONS;
 
-export const createPw = (db: Agent, user: string, pw: string, h = hash): HTTPEither<string> => {
+export const createPw = (db: DAO, user: string, pw: string, ec = encrypt): HTTPEither<string> => {
   return pipe(
-    h(pw),
+    ec(pw),
     chain(password =>
-      tc(async () => {
-        await db(PASSWORDS).insertOne({ password, user });
-        return user;
-      })(BAD_GATEWAY)
+      tryCatch(
+        async () => {
+          await db(PASSWORDS).insertOne({ password, user });
+          return user;
+        },
+        error => e((error as MongoError).message, BAD_GATEWAY)
+      )
     )
   );
 };

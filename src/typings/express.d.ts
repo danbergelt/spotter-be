@@ -1,4 +1,4 @@
-import { Agent } from '../index.types';
+import { DAO } from '../index.types';
 import { User } from '../services/user.types';
 
 declare module 'express' {
@@ -6,7 +6,7 @@ declare module 'express' {
     body: User;
     app: {
       locals: {
-        db: Agent;
+        db: DAO;
       };
     };
   }
