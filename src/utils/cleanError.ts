@@ -1,22 +1,17 @@
 import { pipe } from 'fp-ts/lib/pipeable';
-import { right, left, fold } from 'fp-ts/lib/Either';
 
 // pattern matching + cleaning http error message
 
-export const cleanError = (err: string): string => {
-  return pipe(
-    err.startsWith('E11000')
-      ? left(
-          `${err
-            .split('index:')[1]
-            .split('dup key')[0]
-            .split('_')[0]
-            .trim()} already exists, try again`
-        )
-      : right(err),
-    fold(
-      err => err,
-      err => err
-    )
-  );
+export const cleanError = (e: string): string => {
+  return e.startsWith('E11000')
+    ? pipe(
+        e
+          .split('index:')[1]
+          .split('dup key')[0]
+          .split('_')[0]
+          .trim(),
+        e => e[0].toUpperCase() + e.slice(1),
+        e => `${e} already exists, try again`
+      )
+    : e;
 };
