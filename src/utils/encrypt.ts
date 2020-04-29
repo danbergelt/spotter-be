@@ -12,6 +12,6 @@ export const encrypt = (s: string, bc = bcrypt): HTTPEither<string> => {
       const salt = await bc.genSalt(12);
       return await bc.hash(s, salt);
     },
-    error => e((error as Error).message, INTERNAL_SERVER_ERROR)
+    () => e('Server error', INTERNAL_SERVER_ERROR)
   );
 };
