@@ -10,14 +10,16 @@ import { validateEncryption } from '../utils/validateEncryption';
 
 const { PASSWORDS } = COLLECTIONS;
 
-export const readPw = (db: DAO, user: Email & Pick<Password, 'password'>): HTTPEither<string> => {
+type User = Email & Pick<Password, 'password'>;
+
+export const readPw = (db: DAO, user: User, ve = validateEncryption): HTTPEither<string> => {
   return pipe(
     tryCatch(
       async (): Promise<null | Password> => await db(PASSWORDS).findOne({ user: user._id }),
       () => e('Bad gateway', BAD_GATEWAY)
     ),
     chain(pw => (pw ? right(pw) : left(e('Invalid credentials', BAD_REQUEST)))),
-    chain(({ password }) => validateEncryption(user.password, password)),
-    chain(auth => (auth ? right(user._id) : left(e('Invalid credentials', BAD_REQUEST))))
+    chain(({ password }) => ve(user.password, password)),
+    chain(validated => (validated ? right(user._id) : left(e('Invalid credentials', BAD_REQUEST))))
   );
 };

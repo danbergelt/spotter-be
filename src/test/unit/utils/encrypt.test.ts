@@ -13,10 +13,10 @@ describe('encrypt a string', () => {
 
   it('returns an error when encryption fails', async () => {
     const bc = {
-      genSalt: Sinon.stub().throws(new Error('Error!'))
+      genSalt: Sinon.stub().throws('foo')
     };
     const result = await encrypt('foo', bc as any)();
-    const expected = await left({ message: 'Error!', status: 500 })();
+    const expected = await left({ message: 'Server error', status: 500 })();
     assert.deepStrictEqual(result, expected);
   });
 });
