@@ -6,9 +6,9 @@ import { e } from './e';
 
 // compares a string and an encrypted value
 
-export const validateEncryption = (string: string, encrypted: string): HTTPEither<boolean> => {
+export const validateEncryption = (s: string, enc: string, bc = bcrypt): HTTPEither<boolean> => {
   return tryCatch(
-    async () => await bcrypt.compare(string, encrypted),
+    async () => await bc.compare(s, enc),
     () => e('Server error', INTERNAL_SERVER_ERROR)
   );
 };

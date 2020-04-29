@@ -11,6 +11,6 @@ describe('clean http error message', () => {
     const err = cleanError(
       'E11000 duplicate key error collection: foobar index: email_1 dup key: { email: "fake" }'
     );
-    assert.equal(err, 'email already exists, try again');
+    assert.equal(err, 'Email already exists, try again');
   });
 });

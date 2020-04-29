@@ -15,8 +15,7 @@ describe('validating middleware', () => {
     const res = {} as any;
     const next = Sinon.stub();
     await validator(req, res, next);
-    expect(next.firstCall.calledWith({ message: 'Email/password is required', status: 400 })).to.be
-      .true;
+    expect(next.firstCall.calledWith({ message: 'Invalid data', status: 400 })).to.be.true;
   });
 
   it('calls next middleware on successful validation', async () => {

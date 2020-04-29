@@ -22,6 +22,7 @@ const server = ((): Server => {
     // TODO --> ping Sentry
     if (err) throw err;
 
+    // idempotent --> only runs once
     client.db(URI).createIndex(USERS, { email: 1 }, { unique: true });
 
     // inject a Mongo DAO into global express stack

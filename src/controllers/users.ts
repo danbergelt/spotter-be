@@ -29,7 +29,7 @@ r.post(
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
-    return await pipe(
+    return pipe(
       readUser(db, email),
       chain(user => readPw(db, { ...user, password })),
       fold(
