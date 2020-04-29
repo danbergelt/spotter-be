@@ -1,4 +1,7 @@
-import { object, string, ObjectSchema } from 'yup';
+import { object, ObjectSchema } from 'yup';
+import { testShape } from './testShape';
+import { user } from './shapes';
+import { Shape } from './validators.types';
 
 // all schema names
 export const SCHEMAS = {
@@ -12,13 +15,8 @@ type CASE = typeof SCHEMAS[keyof typeof SCHEMAS];
 export const schema = (CASE: CASE): ObjectSchema => {
   switch (CASE) {
     case SCHEMAS.USERS:
-      return object().shape({
-        email: string()
-          .email('Invalid email')
-          .required('Email/password is required'),
-        password: string()
-          .min(6, 'Password too short (6 char minimum)')
-          .required('Email/password is required')
-      });
+      return object()
+        .shape(user)
+        .test('shape', 'Invalid data', <T>(obj: Shape<T>) => testShape(obj, user));
   }
 };
