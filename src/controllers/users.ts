@@ -14,10 +14,37 @@ import { token } from '../utils/token';
 import { resolver } from '../utils/resolver';
 import jwt from 'jsonwebtoken';
 import { COOKIE_OPTIONS } from '../utils/constants';
+import { readUser } from '../services/readUser';
+import { readPw } from '../services/readPw';
+import { UserBody } from './users.types';
 
 const r = express.Router();
 const userPath = path('/users');
 const { USERS } = SCHEMAS;
+
+r.post(
+  userPath('/login'),
+  validate(schema(USERS)),
+  resolver(async (req: UserBody, res, next) => {
+    const { email, password } = req.body;
+    const { db } = req.app.locals;
+
+    return await pipe(
+      readUser(db, email),
+      chain(user => readPw(db, { ...user, password })),
+      fold(
+        error => of(next(error)),
+        id => {
+          res
+            .cookie(...cookie(id, jwt, COOKIE_OPTIONS))
+            .status(OK)
+            .json(success({ token: token(id) }));
+          return of(undefined);
+        }
+      )
+    )();
+  })
+);
 
 r.post(
   userPath('/registration'),
