@@ -3,16 +3,17 @@ import { e } from '../utils/e';
 import { COLLECTIONS } from '../utils/constants';
 import { BAD_REQUEST, BAD_GATEWAY } from 'http-status-codes';
 import { Password, Email } from './user.types';
-import { HTTPEither } from 'src/types';
+import { HTTPEither } from '../types';
 import { DAO } from '../index.types';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { validateEncryption } from '../utils/validateEncryption';
+import { validateEncryption as validate } from '../utils/validateEncryption';
+import { ObjectID } from 'mongodb';
 
 const { PASSWORDS } = COLLECTIONS;
 
 type User = Email & Pick<Password, 'password'>;
 
-export const readPw = (db: DAO, user: User, ve = validateEncryption): HTTPEither<string> => {
+export const readPw = (db: DAO, user: User, ve = validate): HTTPEither<string | ObjectID> => {
   return pipe(
     tryCatch(
       async (): Promise<null | Password> => await db(PASSWORDS).findOne({ user: user._id }),

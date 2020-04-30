@@ -7,3 +7,7 @@ export type HTTPEither<T> = TaskEither<E, T>;
 export interface Req<T> extends Request {
   body: T;
 }
+
+export interface Token {
+  _id: string;
+}
