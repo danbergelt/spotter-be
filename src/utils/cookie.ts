@@ -1,5 +1,6 @@
 import { CookieOptions } from 'express';
 import jwt from 'jsonwebtoken';
+import { COOKIE_NAME } from './constants';
 
 const { REF_SECRET, REF_EXPIRE } = process.env;
 
@@ -11,7 +12,7 @@ export const cookie = (
   ops: CookieOptions
 ): [string, string, CookieOptions] => {
   return [
-    'ref',
+    COOKIE_NAME,
     tokenFactory.sign({ id }, String(REF_SECRET), { expiresIn: String(REF_EXPIRE) }),
     ops
   ];
