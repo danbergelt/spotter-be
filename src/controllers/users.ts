@@ -13,19 +13,24 @@ import { cookie } from '../utils/cookie';
 import { token } from '../utils/token';
 import { resolver } from '../utils/resolver';
 import jwt from 'jsonwebtoken';
-import { COOKIE_OPTIONS } from '../utils/constants';
+import { COOKIE_OPTIONS, COOKIE_NAME } from '../utils/constants';
 import { readUser } from '../services/readUser';
 import { readPw } from '../services/readPw';
-import { UserBody } from './users.types';
+import { UserReq } from './users.types';
 
 const r = express.Router();
 const userPath = path('/users');
 const { USERS } = SCHEMAS;
 
+// eslint-disable-next-line
+r.post(userPath('/logout'), (_req, res, _next) => {
+  pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
+});
+
 r.post(
   userPath('/login'),
   validate(schema(USERS)),
-  resolver(async (req: UserBody, res, next) => {
+  resolver(async (req: UserReq, res, next) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
@@ -49,7 +54,7 @@ r.post(
 r.post(
   userPath('/registration'),
   validate(schema(USERS)),
-  resolver(async (req, res, next) => {
+  resolver(async (req: UserReq, res, next) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 

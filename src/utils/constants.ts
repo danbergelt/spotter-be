@@ -19,3 +19,5 @@ export const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'development' ? false : true,
   sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none'
 } as const;
+
+export const COOKIE_NAME = 'ref';
