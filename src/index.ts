@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'development') {
   connectDB();
   whitelist.push('https://getspotter.io');
   whitelist.push('https://www.getspotter.io');
-  whitelist.push('https://objective-kepler-45537c.netlify.com');
+  whitelist.push('https://objective-kepler-45537c.netlify.app');
 }
 
 // CORS custom config

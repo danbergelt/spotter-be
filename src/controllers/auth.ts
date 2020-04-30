@@ -126,7 +126,7 @@ export const forgotPassword = asyncExpressFn(
     const { user, token } = data;
 
     // create reset url
-    const link = `https://www.getspotter.io/-/${token}`;
+    const link = `https://{process.env.STAGING ? 'objective-kepler-45537c.netlify.app' : 'getspotter.io'}/-/${token}`;
 
     try {
       return await sendForgotPasswordEmail(body.email, link, res);
