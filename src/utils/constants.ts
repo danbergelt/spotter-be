@@ -1,3 +1,9 @@
+export const EMAILS = {
+  CONTACT: 'contact@getspotter.io',
+  NO_REPLY: 'no-reply@getspotter.io',
+  TEAM: 'team@getspotter.io'
+} as const;
+
 export const URI = 'spotter';
 
 export const CONFIG = {
