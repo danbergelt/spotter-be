@@ -5,7 +5,7 @@ export interface MetaData {
   html: string;
 }
 
-export const metadata = (...metadata: string[]): MetaData => {
+export const metadata = (...metadata: [string, string, string, string]): MetaData => {
   const [from, to, subject, html] = metadata;
   return {
     from,
