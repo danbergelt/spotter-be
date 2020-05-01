@@ -4,7 +4,7 @@ import { Password, User } from './user.types';
 import { HTTPEither, Nullable } from '../types';
 import { DAO } from '../index.types';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { verifyEncryption } from '../utils/verifyEncryption';
+import { verifyEncryption } from '../utils/verifiers';
 import { ObjectID } from 'mongodb';
 import { badGateway, invalidCredentials } from '../utils/errors';
 

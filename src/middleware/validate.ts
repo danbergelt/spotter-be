@@ -1,4 +1,4 @@
-import { ObjectSchema as Schema } from 'yup';
+import { ObjectSchema as Schema, ValidationError } from 'yup';
 import { fold, tryCatch } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -14,7 +14,7 @@ export const validate = (schema: Schema): Fn => {
     return await pipe(
       tryCatch(
         async () => await schema.validate(body),
-        error => validationErr(error as Error)
+        error => validationErr((error as ValidationError).message)
       ),
       fold(
         e => of(next(e)),

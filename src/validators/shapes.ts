@@ -7,4 +7,4 @@ export const user = {
   password: string()
     .min(6, 'Password too short (6 char minimum)')
     .required('Password is required')
-};
+} as const;

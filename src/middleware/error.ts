@@ -1,8 +1,8 @@
 import { ErrorRequestHandler } from 'express';
 import { INTERNAL_SERVER_ERROR } from 'http-status-codes';
-import { cleanError } from '../utils/cleanError';
+import { sanitizeError } from '../utils/sanitization';
 import { E } from '../utils/e';
-import { failure } from 'src/utils/failure';
+import { failure } from '../utils/httpResponses';
 
 export type ErrorObject = Error & E;
 
@@ -13,5 +13,5 @@ export type ErrorObject = Error & E;
 export const error: ErrorRequestHandler = (err: ErrorObject, _req, res, _next) => {
   return res
     .status(err.status || INTERNAL_SERVER_ERROR)
-    .json(failure({ error: err.message ? cleanError(err.message) : 'Server error' }));
+    .json(failure({ error: err.message ? sanitizeError(err.message) : 'Server error' }));
 };
