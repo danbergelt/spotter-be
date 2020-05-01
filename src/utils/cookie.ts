@@ -8,7 +8,7 @@ const { REF_SECRET, REF_EXPIRE } = process.env;
 // returns data neede to set a refresh token
 
 export const cookie = (
-  _id: string | ObjectID,
+  _id: ObjectID,
   tokenFactory: typeof jwt,
   ops: CookieOptions
 ): [string, string, CookieOptions] => {

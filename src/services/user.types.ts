@@ -1,13 +1,13 @@
 import { ObjectID } from 'mongodb';
 
 export interface Password {
-  _id: string;
+  _id: ObjectID;
   password: string;
   user: string;
 }
 
 export interface Email {
-  _id: string | ObjectID;
+  _id: ObjectID;
   email: string;
 }
 

@@ -11,5 +11,3 @@ const { USERS } = COLLECTIONS;
 export const createUser = (db: DAO, email: string): HTTPEither<InsertOneWriteOpResult<any>> => {
   return tryCatch(async () => await db(USERS).insertOne({ email }), badGateway);
 };
-
-export type CreateUser = typeof createUser;
