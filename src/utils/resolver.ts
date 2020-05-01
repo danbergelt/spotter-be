@@ -1,4 +1,6 @@
-import { Fn } from './resolver.types';
+import { Request, Response, NextFunction } from 'express';
+
+export type Fn = (req: Request, res: Response, next: NextFunction) => Promise<void> | void;
 
 // HOF that wraps an express middleware to automatically catch errors in the express error middleware
 

@@ -1,4 +1,6 @@
-import { Success } from './success.types';
+export type Success<T> = {
+  success: true;
+} & T;
 
 // default object for successful http responses
 

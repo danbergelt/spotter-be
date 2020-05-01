@@ -1,58 +1,51 @@
 import express from 'express';
 import { path } from '../utils/path';
-import { OK } from 'http-status-codes';
-import { success } from '../utils/success';
 import { validate } from '../middleware/validate';
-import { schema, SCHEMAS } from '../validators';
+import { SCHEMAS, schema } from '../validators';
 import { createUser } from '../services/createUser';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { chain, fold } from 'fp-ts/lib/TaskEither';
-import { of } from 'fp-ts/lib/Task';
 import { createPw } from '../services/createPw';
-import { cookie } from '../utils/cookie';
-import { token } from '../utils/token';
+import { verifyToken } from '../utils/verifyToken';
 import { resolver } from '../utils/resolver';
-import jwt from 'jsonwebtoken';
-import { COOKIE_OPTIONS, COOKIE_NAME } from '../utils/constants';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { readUser } from '../services/readUser';
+import { chain, fold, left, right, chainEitherK } from 'fp-ts/lib/TaskEither';
 import { readPw } from '../services/readPw';
-import { UserReq } from './users.types';
+import { of } from 'fp-ts/lib/Task';
+import { auth } from '../utils/auth';
+import { Nullable, HTTPEither } from '../types';
+import { ObjectId } from 'mongodb';
+import { COOKIE_NAME } from '../utils/constants';
+import { success } from '../utils/success';
+import { OK } from 'http-status-codes';
+import { _ } from '../utils/errors';
+import { Req } from '../types';
+import { Email, Password } from '../services/user.types';
 
-const r = express.Router();
-const userPath = path('/users');
 const { USERS } = SCHEMAS;
 
-// eslint-disable-next-line
-r.post(userPath('/logout'), (_req, res, _next) => {
-  pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
-});
+const r = express.Router();
+export const usersPath = path('/users');
 
 r.post(
-  userPath('/login'),
+  usersPath('/login'),
   validate(schema(USERS)),
   resolver(async (req: UserReq, res, next) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
     return await pipe(
-      readUser(db, email),
+      readUser(db, { email }),
       chain(user => readPw(db, { ...user, password })),
       fold(
         error => of(next(error)),
-        id => {
-          res
-            .cookie(...cookie(id, jwt, COOKIE_OPTIONS))
-            .status(OK)
-            .json(success({ token: token(id) }));
-          return of(undefined);
-        }
+        _id => auth(_id, res)
       )
     )();
   })
 );
 
 r.post(
-  userPath('/registration'),
+  usersPath('/registration'),
   validate(schema(USERS)),
   resolver(async (req: UserReq, res, next) => {
     const { email, password } = req.body;
@@ -63,16 +56,40 @@ r.post(
       chain(({ insertedId }) => createPw(db, insertedId, password)),
       fold(
         error => of(next(error)),
-        id => {
-          res
-            .cookie(...cookie(id, jwt, COOKIE_OPTIONS))
-            .status(OK)
-            .json(success({ token: token(id) }));
-          return of(undefined);
-        }
+        _id => auth(_id, res)
       )
     )();
   })
 );
+
+r.post(
+  usersPath('/refresh'),
+  resolver(async ({ cookies, app }, res) => {
+    const { db } = app.locals;
+
+    const refresh = cookies.ref as Nullable<string>;
+    const validateCookie = (): HTTPEither<string> => (refresh ? right(refresh) : left(_()));
+
+    return await pipe(
+      validateCookie(),
+      chainEitherK(verifyToken),
+      chain(({ _id }) => readUser(db, { _id: new ObjectId(_id) })),
+      fold(
+        ({ status }) => {
+          res.status(status).json({ success: false, token: null });
+          return of(undefined);
+        },
+        ({ _id }) => auth(_id, res)
+      )
+    )();
+  })
+);
+
+// eslint-disable-next-line
+r.post(usersPath('/logout'), (_req, res, _next) => {
+  pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
+});
+
+export type UserReq = Req<Pick<Email, 'email'> & Pick<Password, 'password'>>;
 
 export default r;

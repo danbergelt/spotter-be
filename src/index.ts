@@ -1,7 +1,7 @@
 import express, { json } from 'express';
 import dotenv from 'dotenv';
 import fns from './index.functions';
-import users from './controllers/users';
+import r from './controllers/users';
 import { Server } from 'http';
 import cookies from 'cookie-parser';
 import { error } from './middleware/error';
@@ -32,7 +32,7 @@ const server = ((): Server => {
   });
 
   // inject N middleware
-  inject(app)(cookies(), json(), users, error);
+  inject(app)(cookies(), json(), r, error);
 
   return app.listen(Number(PORT), () => success());
 })();

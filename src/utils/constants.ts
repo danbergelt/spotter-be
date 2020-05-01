@@ -21,3 +21,5 @@ export const COOKIE_OPTIONS = {
 } as const;
 
 export const COOKIE_NAME = 'ref';
+
+export type COLLECTION = typeof COLLECTIONS[keyof typeof COLLECTIONS];
