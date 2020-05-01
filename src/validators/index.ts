@@ -1,12 +1,12 @@
 import { object, ObjectSchema } from 'yup';
+import { user, contact } from './shapes';
+import { CASE } from './validators.types';
 import { testShape } from './testShape';
-import { user } from './shapes';
-// eslint-disable-next-line
-import { Shape, CASE } from './validators.types';
 
 // all schema names
 export const SCHEMAS = {
-  USERS: 'USERS'
+  USERS: 'USERS',
+  CONTACT: 'CONTACT'
 } as const;
 
 // a single function to retrieve a schema by case
@@ -16,6 +16,10 @@ export const schema = (CASE: CASE): ObjectSchema => {
     case SCHEMAS.USERS:
       return object()
         .shape(user)
-        .test('obj shape', 'Invalid data', <T>(obj: Shape<T>) => testShape(obj, user));
+        .test(...testShape(user));
+    case SCHEMAS.CONTACT:
+      return object()
+        .shape(contact)
+        .test(...testShape(contact));
   }
 };
