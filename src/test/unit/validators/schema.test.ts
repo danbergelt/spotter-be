@@ -8,4 +8,9 @@ describe('schema factory', () => {
     const result = schema('USERS');
     assert.ok(result);
   });
+
+  it('returns a schema for the contact case', () => {
+    const result = schema('CONTACT');
+    assert.ok(result);
+  });
 });
