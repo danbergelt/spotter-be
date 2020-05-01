@@ -5,10 +5,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { encrypt } from '../utils/encrypt';
 import { badGateway } from '../utils/errors';
+import { ObjectID } from 'mongodb';
 
 const { PASSWORDS } = COLLECTIONS;
 
-export const createPw = (db: DAO, user: string, pw: string, ec = encrypt): HTTPEither<string> => {
+type O = ObjectID;
+
+export const createPw = (db: DAO, user: O, pw: string, ec = encrypt): HTTPEither<O> => {
   return pipe(
     ec(pw),
     chain(password =>
@@ -19,5 +22,3 @@ export const createPw = (db: DAO, user: string, pw: string, ec = encrypt): HTTPE
     )
   );
 };
-
-export type CreatePw = typeof createPw;

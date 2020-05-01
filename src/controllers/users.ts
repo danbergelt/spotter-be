@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate';
 import { SCHEMAS, schema } from '../validators';
 import { createUser } from '../services/createUser';
 import { createPw } from '../services/createPw';
-import { verifyToken } from '../utils/verifyToken';
+import { verifyJwt } from '../utils/verifyJwt';
 import { resolver } from '../utils/resolver';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { readUser } from '../services/readUser';
@@ -13,13 +13,14 @@ import { readPw } from '../services/readPw';
 import { of } from 'fp-ts/lib/Task';
 import { auth } from '../utils/auth';
 import { Nullable, HTTPEither } from '../types';
-import { ObjectId } from 'mongodb';
+import { ObjectId, ObjectID } from 'mongodb';
 import { COOKIE_NAME } from '../utils/constants';
 import { success } from '../utils/success';
 import { OK } from 'http-status-codes';
 import { _ } from '../utils/errors';
 import { Req } from '../types';
 import { Email, Password } from '../services/user.types';
+import { failure } from 'src/utils/failure';
 
 const { USERS } = SCHEMAS;
 
@@ -53,7 +54,7 @@ r.post(
 
     return await pipe(
       createUser(db, email),
-      chain(({ insertedId }) => createPw(db, insertedId, password)),
+      chain(({ insertedId }) => createPw(db, insertedId as ObjectID, password)),
       fold(
         error => of(next(error)),
         _id => auth(_id, res)
@@ -68,15 +69,14 @@ r.post(
     const { db } = app.locals;
 
     const refresh = cookies.ref as Nullable<string>;
-    const validateCookie = (): HTTPEither<string> => (refresh ? right(refresh) : left(_()));
 
     return await pipe(
-      validateCookie(),
-      chainEitherK(verifyToken),
+      ((): HTTPEither<string> => (refresh ? right(refresh) : left(_())))(),
+      chainEitherK(verifyJwt),
       chain(({ _id }) => readUser(db, { _id: new ObjectId(_id) })),
       fold(
         ({ status }) => {
-          res.status(status).json({ success: false, token: null });
+          res.status(status).json(failure({ token: null }));
           return of(undefined);
         },
         ({ _id }) => auth(_id, res)

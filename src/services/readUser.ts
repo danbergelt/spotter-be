@@ -14,5 +14,3 @@ export const readUser = (db: DAO, creds: Partial<Email>): HTTPEither<Email> => {
     chain(user => (user ? right(user) : left(invalidCredentials())))
   );
 };
-
-export type ReadUser = typeof readUser;

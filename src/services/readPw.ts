@@ -4,13 +4,13 @@ import { Password, User } from './user.types';
 import { HTTPEither, Nullable } from '../types';
 import { DAO } from '../index.types';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { validateEncryption as validate } from '../utils/validateEncryption';
+import { verifyEncryption } from '../utils/verifyEncryption';
 import { ObjectID } from 'mongodb';
 import { badGateway, invalidCredentials } from '../utils/errors';
 
 const { PASSWORDS } = COLLECTIONS;
 
-export const readPw = (db: DAO, user: User, v = validate): HTTPEither<string | ObjectID> => {
+export const readPw = (db: DAO, user: User, v = verifyEncryption): HTTPEither<ObjectID> => {
   return pipe(
     tryCatch(
       async (): Promise<Nullable<Password>> => await db(PASSWORDS).findOne({ user: user._id }),
@@ -21,5 +21,3 @@ export const readPw = (db: DAO, user: User, v = validate): HTTPEither<string | O
     chain(validated => (validated ? right(user._id) : left(invalidCredentials())))
   );
 };
-
-export type ReadPw = typeof readPw;

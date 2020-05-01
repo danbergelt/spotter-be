@@ -17,6 +17,6 @@ export const schema = (CASE: CASE): ObjectSchema => {
     case SCHEMAS.USERS:
       return object()
         .shape(user)
-        .test('shape', 'Invalid data', <T>(obj: Shape<T>) => testShape(obj, user));
+        .test('obj shape', 'Invalid data', <T>(obj: Shape<T>) => testShape(obj, user));
   }
 };
