@@ -1,4 +1,7 @@
-import { E } from './e.types';
+export interface E {
+  message: string;
+  status: number;
+}
 
 // default error object, returning a message and an http status
 

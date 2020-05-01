@@ -10,3 +10,5 @@ export interface Email {
   _id: string | ObjectID;
   email: string;
 }
+
+export type User = Email & Pick<Password, 'password'>;

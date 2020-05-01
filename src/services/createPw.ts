@@ -1,12 +1,10 @@
 import { COLLECTIONS } from '../utils/constants';
 import { DAO } from '../index.types';
 import { HTTPEither } from '../types';
-import { BAD_GATEWAY } from 'http-status-codes';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { encrypt } from '../utils/encrypt';
-import { e } from '../utils/e';
-import { MongoError } from 'mongodb';
+import { badGateway } from '../utils/errors';
 
 const { PASSWORDS } = COLLECTIONS;
 
@@ -14,13 +12,12 @@ export const createPw = (db: DAO, user: string, pw: string, ec = encrypt): HTTPE
   return pipe(
     ec(pw),
     chain(password =>
-      tryCatch(
-        async () => {
-          await db(PASSWORDS).insertOne({ password, user });
-          return user;
-        },
-        error => e((error as MongoError).message, BAD_GATEWAY)
-      )
+      tryCatch(async () => {
+        await db(PASSWORDS).insertOne({ password, user });
+        return user;
+      }, badGateway)
     )
   );
 };
+
+export type CreatePw = typeof createPw;

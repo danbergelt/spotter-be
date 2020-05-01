@@ -11,3 +11,5 @@ export interface Req<T> extends Request {
 export interface Token {
   _id: string;
 }
+
+export type Nullable<T> = T | null;
