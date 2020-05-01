@@ -1,14 +1,13 @@
 import { object, ObjectSchema } from 'yup';
 import { testShape } from './testShape';
 import { user } from './shapes';
-import { Shape } from './validators.types';
+// eslint-disable-next-line
+import { Shape, CASE } from './validators.types';
 
 // all schema names
 export const SCHEMAS = {
   USERS: 'USERS'
 } as const;
-
-type CASE = typeof SCHEMAS[keyof typeof SCHEMAS];
 
 // a single function to retrieve a schema by case
 // TODO --> namespace into an NPM package and share between FE/BE

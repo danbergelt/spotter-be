@@ -13,10 +13,10 @@ describe('user creation', () => {
   });
 
   it('returns an error on failed user creation', async () => {
-    const db = Sinon.stub().returns({ insertOne: Sinon.stub().throws(new Error('Error!')) });
+    const db = Sinon.stub().returns({ insertOne: Sinon.stub().throws('foo') });
     const email = 'foo@bar.com';
     const result = await createUser(db, email)();
-    const expected = await left({ message: 'Error!', status: 502 })();
+    const expected = await left({ message: 'Bad gateway', status: 502 })();
     assert.deepStrictEqual(result, expected);
   });
 });

@@ -10,8 +10,9 @@ import { CONFIG, URI, COLLECTIONS } from './utils/constants';
 import { DAO } from './index.types';
 
 dotenv.config();
-const { success, logRejection, closeServer, inject } = fns;
-const { PORT, DB } = process.env;
+const { log } = console;
+const { inject } = fns;
+const { PORT, DB, NODE_ENV } = process.env;
 const { USERS } = COLLECTIONS;
 
 const server = ((): Server => {
@@ -34,12 +35,12 @@ const server = ((): Server => {
   // inject N middleware
   inject(app)(cookies(), json(), users, error);
 
-  return app.listen(Number(PORT), () => success());
+  return app.listen(Number(PORT), () => log(`Port: ${PORT}\nMode: ${NODE_ENV}`));
 })();
 
 process.on('unhandledRejection', rejection => {
-  logRejection(rejection);
-  closeServer(server, process);
+  log(rejection);
+  server.close(() => process.exit(1));
 });
 
 export default server;

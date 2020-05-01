@@ -4,13 +4,13 @@ import { OK } from 'http-status-codes';
 import { cookie } from './cookie';
 import jwt from 'jsonwebtoken';
 import { COOKIE_OPTIONS } from './constants';
-import { success } from './success';
+import { success } from './httpResponses';
 import { token } from './token';
 import { of, Task } from 'fp-ts/lib/Task';
 
 // http response that sends back a refresh token and an auth token
 
-export const auth = (_id: string | ObjectID, res: Response): Task<void> => {
+export const auth = (_id: ObjectID, res: Response): Task<void> => {
   res
     .cookie(...cookie(_id, jwt, COOKIE_OPTIONS))
     .status(OK)

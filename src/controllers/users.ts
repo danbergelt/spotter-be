@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate';
 import { SCHEMAS, schema } from '../validators';
 import { createUser } from '../services/createUser';
 import { createPw } from '../services/createPw';
-import { verifyJwt } from '../utils/verifyJwt';
+import { verifyJwt } from '../utils/verifiers';
 import { resolver } from '../utils/resolver';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { readUser } from '../services/readUser';
@@ -15,14 +15,15 @@ import { auth } from '../utils/auth';
 import { Nullable, HTTPEither } from '../types';
 import { ObjectId, ObjectID } from 'mongodb';
 import { COOKIE_NAME } from '../utils/constants';
-import { success } from '../utils/success';
+import { success, failure } from '../utils/httpResponses';
 import { OK } from 'http-status-codes';
 import { _ } from '../utils/errors';
 import { Req } from '../types';
 import { Email, Password } from '../services/user.types';
-import { failure } from 'src/utils/failure';
 
 const { USERS } = SCHEMAS;
+
+const { REF_SECRET } = process.env;
 
 const r = express.Router();
 export const usersPath = path('/users');
@@ -72,7 +73,7 @@ r.post(
 
     return await pipe(
       ((): HTTPEither<string> => (refresh ? right(refresh) : left(_())))(),
-      chainEitherK(verifyJwt),
+      chainEitherK(cookie => verifyJwt(cookie, String(REF_SECRET))),
       chain(({ _id }) => readUser(db, { _id: new ObjectId(_id) })),
       fold(
         ({ status }) => {

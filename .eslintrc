@@ -15,7 +15,6 @@
   ],
   "rules": {
     "prettier/prettier": "error",
-    "no-nested-ternary": 2,
     "@typescript-eslint/unbound-method": "off",
     "max-len": "off"
   },

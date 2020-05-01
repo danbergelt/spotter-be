@@ -6,11 +6,9 @@ import assert from 'assert';
 
 use(http);
 
-const userPath = path('/users');
+const p = path('/users')('/registration');
 
 describe('registration', () => {
-  const p = userPath('/registration');
-
   it('can register', async () => {
     const res = await request(server)
       .post(p)
