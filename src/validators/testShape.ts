@@ -2,7 +2,9 @@ import { Shape } from './validators.types';
 
 const { keys } = Object;
 
-// tests the shape of an object against a comparand --> all keys in A must be in B
-export const testShape = <T, U>(obj: Shape<T>, comp: Shape<U>): boolean => {
-  return keys(obj).every(key => key in comp);
-};
+// spreadable args for the test function provided by Yup --> tests the shape of a data against validation
+export const testShape = <T, U>(comp: Shape<T>): [string, string, (obj: Shape<U>) => boolean] => [
+  'obj shape',
+  'Invalid data',
+  (obj: Shape<U>): boolean => keys(obj).every(key => key in comp)
+];

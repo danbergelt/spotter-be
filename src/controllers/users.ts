@@ -29,6 +29,11 @@ const r = express.Router();
 export const usersPath = path('/users');
 
 r.post(
+  usersPath('/contact'),
+  resolver(async (req, res, next) => {})
+);
+
+r.post(
   usersPath('/login'),
   validate(schema(USERS)),
   resolver(async (req: UserReq, res, next) => {
