@@ -13,6 +13,7 @@ type O = ObjectID;
 
 export const createPw = (db: DAO, user: O, pw: string, ec = encrypt): HTTPEither<O> => {
   return pipe(
+    // encrypt the pw
     ec(pw),
     chain(password =>
       tryCatch(async () => {

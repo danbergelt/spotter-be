@@ -1,4 +1,4 @@
-import { ObjectSchema as Schema, ValidationError } from 'yup';
+import { ObjectSchema, ValidationError } from 'yup';
 import { fold, tryCatch } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -9,7 +9,7 @@ import { validationErr } from '../utils/errors';
 // validating middleware. accepts a schema and validates the request body.
 // the request is then either pushed to the next mw on the stack or diverted to the error middleware
 
-export const validate = (schema: Schema): Fn => {
+export const validate = (schema: ObjectSchema): Fn => {
   return resolver(async ({ body }, _res, next) => {
     return await pipe(
       tryCatch(
