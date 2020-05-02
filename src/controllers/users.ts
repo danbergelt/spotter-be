@@ -1,7 +1,7 @@
 import express from 'express';
 import { path } from '../utils/path';
 import { validate } from '../middleware/validate';
-import { SCHEMAS, schema } from '../validators';
+import { schema } from '../validators';
 import { createUser } from '../services/createUser';
 import { createPw } from '../services/createPw';
 import { verifyJwt } from '../utils/verifiers';
@@ -14,7 +14,7 @@ import { of, Task } from 'fp-ts/lib/Task';
 import { auth } from '../utils/auth';
 import { Nullable, HTTPEither } from '../types';
 import { ObjectId, ObjectID } from 'mongodb';
-import { COOKIE_NAME, EMAILS } from '../utils/constants';
+import { COOKIE_NAME, EMAILS, SCHEMAS } from '../utils/constants';
 import { success, failure } from '../utils/httpResponses';
 import { OK } from 'http-status-codes';
 import { _ } from '../utils/errors';
@@ -35,7 +35,7 @@ const usersPath = path('/users');
 r.post(
   usersPath('/contact'),
   validate(schema(CONTACT_SCHEMA)),
-  resolver(async (req: ContactReq, res, next) => {
+  resolver(async (req: Req<Contact>, res, next) => {
     const { name, email, subject, message } = req.body;
 
     const error = (error: E): Task<void> => of(next(error));
@@ -45,9 +45,11 @@ r.post(
     };
 
     return await pipe(
-      sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', contactConfirmTemplate())),
+      // send the message to the official spotter email address
+      sendMail(metadata(CONTACT, TEAM, subject, contactMessageTemplate(message, name, email))),
+      // confirm the successful delivery and send a no-reply confirmation to the user
       chain(() =>
-        sendMail(metadata(CONTACT, TEAM, subject, contactMessageTemplate(message, name, email)))
+        sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', contactConfirmTemplate()))
       ),
       fold(error, response)
     )();
@@ -57,7 +59,7 @@ r.post(
 r.post(
   usersPath('/login'),
   validate(schema(USERS)),
-  resolver(async (req: UserReq, res, next) => {
+  resolver(async (req: Req<User>, res, next) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
@@ -65,6 +67,7 @@ r.post(
     const response = (_id: ObjectID): Task<void> => auth(_id, res);
 
     return await pipe(
+      // confirm the identity of the email/pw
       readUser(db, { email }),
       chain(user => readPw(db, { ...user, password })),
       fold(error, response)
@@ -75,7 +78,7 @@ r.post(
 r.post(
   usersPath('/registration'),
   validate(schema(USERS)),
-  resolver(async (req: UserReq, res, next) => {
+  resolver(async (req: Req<User>, res, next) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
@@ -83,6 +86,7 @@ r.post(
     const response = (_id: ObjectID): Task<void> => auth(_id, res);
 
     return await pipe(
+      // create user and pw docs
       createUser(db, email),
       chain(({ insertedId }) => createPw(db, insertedId as ObjectID, password)),
       fold(error, response)
@@ -103,7 +107,9 @@ r.post(
     const response = ({ _id }: Email): Task<void> => auth(_id, res);
 
     return await pipe(
+      // if cookie is present, continue, otherwise return an error
       ((): HTTPEither<string> => (refresh ? right(refresh) : left(_())))(),
+      // verify the cookie as a JWT and verify the encoded user _id
       chainEitherK(cookie => verifyJwt(cookie, String(REF_SECRET))),
       chain(({ _id }) => readUser(db, { _id: new ObjectId(_id) })),
       fold(error, response)
@@ -112,10 +118,17 @@ r.post(
 );
 
 r.post(usersPath('/logout'), (_, res) => {
+  // clear the cookie and return a successful response
   pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
 });
 
-type UserReq = Req<Pick<Email, 'email'> & Pick<Password, 'password'>>;
-type ContactReq = Req<{ name: string; email: string; subject: string; message: string }>;
+export interface Contact {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export type User = Pick<Email, 'email'> & Pick<Password, 'password'>;
 
 export default r;

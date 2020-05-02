@@ -1,3 +1,14 @@
+// all schema names
+export const SCHEMAS = {
+  USERS: 'USERS',
+  CONTACT: 'CONTACT',
+  RANGE: 'RANGE',
+  WORKOUTS: 'WORKOUTS'
+} as const;
+
+// TODO --> either tighten up this regex or rely on a third party for "mmm dd yyyy"
+export const DATE_REGEX = /[A-Z][a-z]{2} \d{2} \d{4}$/;
+
 export const EMAILS = {
   CONTACT: 'contact@getspotter.io',
   NO_REPLY: 'no-reply@getspotter.io',

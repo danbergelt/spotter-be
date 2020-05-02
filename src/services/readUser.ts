@@ -9,6 +9,7 @@ import { invalidCredentials, badGateway } from '../utils/errors';
 const { USERS } = COLLECTIONS;
 
 export const readUser = (db: DAO, creds: Partial<Email>): HTTPEither<Email> => {
+  // if user can't be found, return an error, otherwise return it into the pipe
   return pipe(
     tryCatch(async (): Promise<Nullable<Email>> => await db(USERS).findOne(creds), badGateway),
     chain(user => (user ? right(user) : left(invalidCredentials())))

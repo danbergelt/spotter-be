@@ -6,6 +6,8 @@ export type Failure<T> = {
   success: false;
 } & T;
 
+// accepts arbitrary data to return in a success/fail http response
+
 export const success = <T>(data = {} as T): Success<T> => {
   return { success: true, ...data };
 };
