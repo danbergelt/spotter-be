@@ -6,13 +6,13 @@ import { success } from '../utils/httpResponses';
 import { validate } from '../middleware/validate';
 import { schema } from '../validators';
 import { SCHEMAS } from '../utils/constants';
-import { protect } from '../middleware/protect';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { createWorkout } from '../services/createWorkout';
 import { Req } from '../types';
-import { fold } from 'fp-ts/lib/TaskEither';
+import { fold, chain } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/sendError';
+import { auth, Auth } from 'src/services/auth';
 
 const { WORKOUTS } = SCHEMAS;
 
@@ -21,14 +21,14 @@ const workoutsPath = path('/workouts');
 
 r.post(
   workoutsPath(''),
-  protect(),
   validate(schema(WORKOUTS)),
-  resolver(async ({ app, body }: Req<Workout>, res) => {
-    const { db } = app.locals;
-    const workout = body;
+  resolver(async (req: Req<Workout>, res) => {
+    const { db } = req.app.locals;
+    const workout = req.body;
 
     return await pipe(
-      createWorkout(db, workout),
+      auth<Workout & Auth>(db, req),
+      chain(workout => createWorkout(db, workout)),
       fold(
         error => of(sendError(error, res)),
         () => of(res.status(CREATED).json(success({ workout })))
