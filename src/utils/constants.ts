@@ -6,6 +6,8 @@ export const SCHEMAS = {
   WORKOUTS: 'WORKOUTS'
 } as const;
 
+export const HEX_COLOR = /^#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b$/i;
+
 export const HEX_REGEX = /^[0-9a-fA-f]{24}$/;
 
 // TODO --> either tighten up this regex or rely on a third party for "mmm dd yyyy"

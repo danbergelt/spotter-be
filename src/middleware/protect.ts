@@ -7,13 +7,14 @@ import { readUser } from '../services/readUser';
 import { HTTPEither } from '../types';
 import { of } from 'fp-ts/lib/Task';
 import { mongoify } from '../utils/mongoify';
+import { sendError } from '../utils/sendError';
 
 const { JWT_SECRET } = process.env;
 
 // auth middleware used to protect private endpoints
 
 export const protect = (v = verifyJwt, m = mongoify, r = readUser): Fn =>
-  resolver(async ({ body, app, headers }, _, next) => {
+  resolver(async ({ body, app, headers }, res, next) => {
     const { db } = app.locals;
     const auth = headers.authorization;
 
@@ -25,8 +26,12 @@ export const protect = (v = verifyJwt, m = mongoify, r = readUser): Fn =>
       chainEitherK(({ _id }) => m(_id)),
       chain(_id => r(db, { _id })),
       fold(
-        e => of(next(e)),
+        e => {
+          sendError(e, res);
+          return of(undefined);
+        },
         // inject the auth'd user as a foreign key into the body
+        // TODO --> find a way to accomplish this without mutation
         ({ _id }) => {
           body.user = _id;
           return of(next());

@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 
-export type Fn = (req: Request, res: Response, next: NextFunction) => Promise<void> | void;
+type Res = Promise<Response | void> | Response | void;
+
+export type Fn = (req: Request, res: Response, next: NextFunction) => Res;
 
 // fallback HOF to automatically jetty uncaught errors into the express error handler
 

@@ -5,7 +5,7 @@ import users from './controllers/users';
 import workouts from './controllers/workouts';
 import { Server } from 'http';
 import cookies from 'cookie-parser';
-import { error } from './middleware/error';
+import { fallback } from './middleware/fallback';
 import { MongoClient } from 'mongodb';
 import { CONFIG, URI, COLLECTIONS } from './utils/constants';
 import { DAO } from './index.types';
@@ -24,7 +24,7 @@ const server = ((): Server => {
     // TODO --> ping Sentry
     if (err) throw err;
 
-    // idempotent --> only runs once
+    // idempotent --> only runs once in collection lifetime
     client.db(URI).createIndex(USERS, { email: 1 }, { unique: true });
 
     // inject a Mongo DAO into global express stack
@@ -34,7 +34,7 @@ const server = ((): Server => {
   });
 
   // inject N middleware
-  inject(app)(cookies(), json(), users, workouts, error);
+  inject(app)(cookies(), json(), users, workouts, fallback);
 
   return app.listen(Number(PORT), () => log(`Port: ${PORT}\nMode: ${NODE_ENV}`));
 })();

@@ -2,6 +2,7 @@ import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { E } from '../utils/e';
 import { Request } from 'express';
 import { Either } from 'fp-ts/lib/Either';
+import { InsertOneWriteOpResult } from 'mongodb';
 
 export type SyncEither<T> = Either<E, T>;
 
@@ -16,3 +17,5 @@ export interface Token {
 }
 
 export type Nullable<T> = T | null;
+
+export type Write = InsertOneWriteOpResult<any>;

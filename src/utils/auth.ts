@@ -6,14 +6,12 @@ import jwt from 'jsonwebtoken';
 import { COOKIE_OPTIONS } from './constants';
 import { success } from './httpResponses';
 import { token } from './token';
-import { of, Task } from 'fp-ts/lib/Task';
 
 // http response that sends back a refresh token and an auth token
 
-export const auth = (_id: ObjectID, res: Response): Task<void> => {
-  res
+export const auth = (_id: ObjectID, res: Response): Response => {
+  return res
     .cookie(...cookie(_id, jwt, COOKIE_OPTIONS))
     .status(OK)
     .json(success({ token: token(_id) }));
-  return of(undefined);
 };
