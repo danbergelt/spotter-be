@@ -1,6 +1,9 @@
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { E } from '../utils/e';
 import { Request } from 'express';
+import { Either } from 'fp-ts/lib/Either';
+
+export type SyncEither<T> = Either<E, T>;
 
 export type HTTPEither<T> = TaskEither<E, T>;
 

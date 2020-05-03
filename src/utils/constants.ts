@@ -6,6 +6,8 @@ export const SCHEMAS = {
   WORKOUTS: 'WORKOUTS'
 } as const;
 
+export const HEX_REGEX = /^[0-9a-fA-f]{24}$/;
+
 // TODO --> either tighten up this regex or rely on a third party for "mmm dd yyyy"
 export const DATE_REGEX = /[A-Z][a-z]{2} \d{2} \d{4}$/;
 
