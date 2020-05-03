@@ -1,6 +1,5 @@
 import express from 'express';
 import { path } from '../utils/path';
-import { validate } from '../middleware/validate';
 import { schema } from '../validators';
 import { createUser } from '../services/createUser';
 import { createPw } from '../services/createPw';
@@ -11,7 +10,7 @@ import { readUser } from '../services/readUser';
 import { chain, fold, left, right, chainEitherK } from 'fp-ts/lib/TaskEither';
 import { readPw } from '../services/readPw';
 import { of } from 'fp-ts/lib/Task';
-import { auth } from '../utils/auth';
+import { sendAuth } from '../utils/sendAuth';
 import { Nullable, HTTPEither } from '../types';
 import { ObjectID } from 'mongodb';
 import { COOKIE_NAME, EMAILS, SCHEMAS } from '../utils/constants';
@@ -25,6 +24,7 @@ import { contactConfirmTemplate, contactMessageTemplate } from '../utils/emailTe
 import { metadata } from '../utils/metadata';
 import { mongoify } from '../utils/mongoify';
 import { sendError } from '../utils/sendError';
+import { validate } from '../services/validate';
 
 const { TEAM, NO_REPLY, CONTACT } = EMAILS;
 const { USERS, CONTACT: CONTACT_SCHEMA } = SCHEMAS;
@@ -35,12 +35,14 @@ const usersPath = path('/users');
 
 r.post(
   usersPath('/contact'),
-  validate(schema(CONTACT_SCHEMA)),
-  resolver(async (req: Req<Contact>, res) => {
-    const { name, email, subject, message } = req.body;
+  resolver(async ({ body }: Req<Contact>, res) => {
+    const { name, email, subject, message } = body;
 
     return await pipe(
-      sendMail(metadata(CONTACT, TEAM, subject, contactMessageTemplate(message, name, email))),
+      validate(schema(CONTACT_SCHEMA), body),
+      chain(() =>
+        sendMail(metadata(CONTACT, TEAM, subject, contactMessageTemplate(message, name, email)))
+      ),
       chain(() =>
         sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', contactConfirmTemplate()))
       ),
@@ -54,17 +56,17 @@ r.post(
 
 r.post(
   usersPath('/login'),
-  validate(schema(USERS)),
-  resolver(async (req: Req<User>, res) => {
-    const { email, password } = req.body;
-    const { db } = req.app.locals;
+  resolver(async ({ body, app }: Req<User>, res) => {
+    const { password } = body;
+    const { db } = app.locals;
 
     return await pipe(
-      readUser(db, { email }),
+      validate(schema(USERS), body),
+      chain(({ email }) => readUser(db, { email })),
       chain(user => readPw(db, { ...user, password })),
       fold(
         error => of(sendError(error, res)),
-        _id => of(auth(_id, res))
+        _id => of(sendAuth(_id, res))
       )
     )();
   })
@@ -72,17 +74,17 @@ r.post(
 
 r.post(
   usersPath('/registration'),
-  validate(schema(USERS)),
-  resolver(async (req: Req<User>, res) => {
-    const { email, password } = req.body;
-    const { db } = req.app.locals;
+  resolver(async ({ body, app }: Req<User>, res) => {
+    const { password } = body;
+    const { db } = app.locals;
 
     return await pipe(
-      createUser(db, email),
+      validate(schema(USERS), body),
+      chain(({ email }) => createUser(db, email)),
       chain(({ insertedId }) => createPw(db, insertedId as ObjectID, password)),
       fold(
         error => of(sendError(error, res)),
-        _id => of(auth(_id, res))
+        _id => of(sendAuth(_id, res))
       )
     )();
   })
@@ -101,7 +103,7 @@ r.post(
       chain(_id => readUser(db, { _id })),
       fold(
         ({ status }) => of(res.status(status).json(failure({ token: null }))),
-        ({ _id }) => of(auth(_id, res))
+        ({ _id }) => of(sendAuth(_id, res))
       )
     )();
   })
