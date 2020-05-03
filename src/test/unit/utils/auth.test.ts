@@ -4,7 +4,7 @@ import { auth } from '../../../utils/auth';
 import assert from 'assert';
 
 describe('auth response', () => {
-  it('returns an auth response with a cookie and a token', async () => {
+  it('returns an auth response with a cookie and a token', () => {
     const _id = new ObjectId();
     const res = {
       cookie: Sinon.stub().returnsThis(),
@@ -12,8 +12,7 @@ describe('auth response', () => {
       json: Sinon.stub().returns('token')
     };
 
-    const result = await auth(_id, res as any)();
-    assert.equal(result, undefined);
+    auth(_id, res as any);
     assert.ok(res.json.returned('token'));
   });
 });

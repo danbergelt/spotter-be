@@ -24,6 +24,7 @@ import { sendMail } from '../services/sendMail';
 import { contactConfirmTemplate, contactMessageTemplate } from '../utils/emailTemplates';
 import { metadata } from '../utils/metadata';
 import { mongoify } from '../utils/mongoify';
+import { sendError } from '../utils/sendError';
 
 const { TEAM, NO_REPLY, CONTACT } = EMAILS;
 const { USERS, CONTACT: CONTACT_SCHEMA } = SCHEMAS;
@@ -35,7 +36,7 @@ const usersPath = path('/users');
 r.post(
   usersPath('/contact'),
   validate(schema(CONTACT_SCHEMA)),
-  resolver(async (req: Req<Contact>, res, next) => {
+  resolver(async (req: Req<Contact>, res) => {
     const { name, email, subject, message } = req.body;
 
     return await pipe(
@@ -44,11 +45,8 @@ r.post(
         sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', contactConfirmTemplate()))
       ),
       fold(
-        error => of(next(error)),
-        () => {
-          res.status(OK).json(success({ message: 'Message sent' }));
-          return of(undefined);
-        }
+        error => of(sendError(error, res)),
+        () => of(res.status(OK).json(success({ message: 'Message sent' })))
       )
     )();
   })
@@ -57,7 +55,7 @@ r.post(
 r.post(
   usersPath('/login'),
   validate(schema(USERS)),
-  resolver(async (req: Req<User>, res, next) => {
+  resolver(async (req: Req<User>, res) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
@@ -65,8 +63,8 @@ r.post(
       readUser(db, { email }),
       chain(user => readPw(db, { ...user, password })),
       fold(
-        error => of(next(error)),
-        _id => auth(_id, res)
+        error => of(sendError(error, res)),
+        _id => of(auth(_id, res))
       )
     )();
   })
@@ -75,7 +73,7 @@ r.post(
 r.post(
   usersPath('/registration'),
   validate(schema(USERS)),
-  resolver(async (req: Req<User>, res, next) => {
+  resolver(async (req: Req<User>, res) => {
     const { email, password } = req.body;
     const { db } = req.app.locals;
 
@@ -83,8 +81,8 @@ r.post(
       createUser(db, email),
       chain(({ insertedId }) => createPw(db, insertedId as ObjectID, password)),
       fold(
-        error => of(next(error)),
-        _id => auth(_id, res)
+        error => of(sendError(error, res)),
+        _id => of(auth(_id, res))
       )
     )();
   })
@@ -102,11 +100,8 @@ r.post(
       chainEitherK(({ _id }) => mongoify(_id)),
       chain(_id => readUser(db, { _id })),
       fold(
-        ({ status }) => {
-          res.status(status).json(failure({ token: null }));
-          return of(undefined);
-        },
-        ({ _id }) => auth(_id, res)
+        ({ status }) => of(res.status(status).json(failure({ token: null }))),
+        ({ _id }) => of(auth(_id, res))
       )
     )();
   })

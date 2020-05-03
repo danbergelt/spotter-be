@@ -1,5 +1,5 @@
 import { string, array, object, number, mixed } from 'yup';
-import { DATE_REGEX } from '../utils/constants';
+import { DATE_REGEX, HEX_COLOR } from '../utils/constants';
 
 export const workout = {
   date: string()
@@ -22,6 +22,7 @@ export const workout = {
           color: string()
             .trim()
             .required('Tag must have a color')
+            .test('hex color', 'Invalid tag color', color => HEX_COLOR.test(color))
         })
     ),
   notes: string().trim(),
