@@ -6,6 +6,7 @@ import { success } from '../utils/httpResponses';
 import { validate } from '../middleware/validate';
 import { schema } from '../validators';
 import { SCHEMAS } from '../utils/constants';
+import { protect } from '../middleware/protect';
 
 const { WORKOUTS } = SCHEMAS;
 
@@ -14,6 +15,7 @@ const workoutsPath = path('/workouts');
 
 r.post(
   workoutsPath(''),
+  protect(),
   validate(schema(WORKOUTS)),
   resolver(async ({ app }, res, next) => {
     const { db } = app.locals;

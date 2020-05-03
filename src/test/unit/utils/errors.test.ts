@@ -3,7 +3,8 @@ import {
   badGateway,
   _,
   validationErr,
-  serverError
+  serverError,
+  unauthorized
 } from '../../../utils/errors';
 import assert from 'assert';
 
@@ -31,5 +32,10 @@ describe('reusable error objects', () => {
   it('server error', () => {
     const result = serverError();
     assert.deepStrictEqual(result, { message: 'Server error', status: 500 });
+  });
+
+  it('unauthorized', () => {
+    const result = unauthorized();
+    assert.deepStrictEqual(result, { message: 'Unauthorized', status: 401 });
   });
 });

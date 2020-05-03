@@ -19,7 +19,7 @@ describe('verifies a JWT', () => {
     const secret = 'bar';
     const verify = Sinon.stub().throws('baz');
     const result = verifyJwt(s, secret, verify);
-    const expected = E.left({ message: '_', status: 400 });
+    const expected = E.left({ message: 'Unauthorized', status: 401 });
     assert.deepStrictEqual(result, expected);
   });
 });

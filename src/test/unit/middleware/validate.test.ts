@@ -1,7 +1,8 @@
 import { validate } from '../../../middleware/validate';
-import { SCHEMAS, schema } from '../../../validators';
+import { schema } from '../../../validators';
 import { expect } from 'chai';
 import Sinon from 'sinon';
+import { SCHEMAS } from '../../../utils/constants';
 
 describe('validating middleware', () => {
   it('returns a functions', () => {
