@@ -9,7 +9,7 @@ import { token } from './token';
 
 // http response that sends back a refresh token and an auth token
 
-export const auth = (_id: ObjectID, res: Response): Response => {
+export const sendAuth = (_id: ObjectID, res: Response): Response => {
   return res
     .cookie(...cookie(_id, jwt, COOKIE_OPTIONS))
     .status(OK)

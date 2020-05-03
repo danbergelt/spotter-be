@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import Sinon from 'sinon';
-import { auth } from '../../../utils/auth';
+import { sendAuth } from '../../../utils/sendAuth';
 import assert from 'assert';
 
 describe('auth response', () => {
@@ -12,7 +12,7 @@ describe('auth response', () => {
       json: Sinon.stub().returns('token')
     };
 
-    auth(_id, res as any);
+    sendAuth(_id, res as any);
     assert.ok(res.json.returned('token'));
   });
 });

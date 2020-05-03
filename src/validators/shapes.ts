@@ -41,7 +41,7 @@ export const workout = {
         })
     ),
   user: mixed().required('Workout must have a user ID')
-};
+} as const;
 
 export const user = {
   email: string()

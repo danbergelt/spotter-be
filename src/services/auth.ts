@@ -3,18 +3,17 @@ import { right, left, chain, chainEitherK, map } from 'fp-ts/lib/TaskEither';
 import { verifyJwt } from '../utils/verifiers';
 import { unauthorized } from '../utils/errors';
 import { readUser } from './readUser';
-import { HTTPEither } from '../types';
+import { HTTPEither, Req } from '../types';
 import { mongoify } from '../utils/mongoify';
-import { DAO } from 'src/index.types';
-import { Request } from 'express';
+import { DAO } from '../index.types';
 import { ObjectID } from 'mongodb';
 
 const { JWT_SECRET } = process.env;
 
 const deps = { verifyJwt, mongoify, readUser };
 
-// auth middleware used to protect private endpoints
-export const auth = <T>(db: DAO, req: Request, d = deps): HTTPEither<T> => {
+// auth helper used to protect private endpoints
+export const auth = <T>(db: DAO, req: Req<T>, d = deps): HTTPEither<WithAuth<T>> => {
   const { authorization } = req.headers;
   const { verifyJwt, mongoify, readUser } = d;
 
@@ -31,6 +30,4 @@ export const auth = <T>(db: DAO, req: Request, d = deps): HTTPEither<T> => {
   );
 };
 
-export interface Auth {
-  _id: ObjectID;
-}
+type WithAuth<T> = T & { user: ObjectID };

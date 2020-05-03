@@ -3,16 +3,16 @@ import { path } from '../utils/path';
 import { resolver } from '../utils/resolver';
 import { CREATED } from 'http-status-codes';
 import { success } from '../utils/httpResponses';
-import { validate } from '../middleware/validate';
 import { schema } from '../validators';
 import { SCHEMAS } from '../utils/constants';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { createWorkout } from '../services/createWorkout';
 import { Req } from '../types';
-import { fold, chain } from 'fp-ts/lib/TaskEither';
+import { fold, chain, map } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/sendError';
-import { auth, Auth } from 'src/services/auth';
+import { auth, WithAuth } from '../services/auth';
+import { validate } from '../services/validate';
 
 const { WORKOUTS } = SCHEMAS;
 
@@ -21,13 +21,13 @@ const workoutsPath = path('/workouts');
 
 r.post(
   workoutsPath(''),
-  validate(schema(WORKOUTS)),
   resolver(async (req: Req<Workout>, res) => {
     const { db } = req.app.locals;
     const workout = req.body;
 
     return await pipe(
-      auth<Workout & Auth>(db, req),
+      auth(db, req),
+      chain(workout => validate(schema(WORKOUTS), workout)),
       chain(workout => createWorkout(db, workout)),
       fold(
         error => of(sendError(error, res)),
