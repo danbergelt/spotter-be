@@ -11,7 +11,7 @@ import { chain, fold, left, right, chainEitherK } from 'fp-ts/lib/TaskEither';
 import { readPw } from '../services/readPw';
 import { of } from 'fp-ts/lib/Task';
 import { sendAuth } from '../utils/sendAuth';
-import { Nullable, HTTPEither } from '../types';
+import { HTTPEither } from '../types';
 import { ObjectID } from 'mongodb';
 import { COOKIE_NAME, EMAILS, SCHEMAS } from '../utils/constants';
 import { success, failure } from '../utils/httpResponses';
@@ -94,10 +94,10 @@ r.post(
   usersPath('/refresh'),
   resolver(async ({ cookies, app }, res) => {
     const { db } = app.locals;
-    const refresh = cookies.ref as Nullable<string>;
+    const checkCookie = (): HTTPEither<string> => (cookies.ref ? right(cookies.ref) : left(_()));
 
     return await pipe(
-      ((): HTTPEither<string> => (refresh ? right(refresh) : left(_())))(),
+      checkCookie(),
       chainEitherK(cookie => verifyJwt(cookie, String(REF_SECRET))),
       chainEitherK(({ _id }) => mongoify(_id)),
       chain(_id => readUser(db, { _id })),

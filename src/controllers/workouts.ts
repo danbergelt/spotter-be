@@ -8,10 +8,10 @@ import { SCHEMAS } from '../utils/constants';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { createWorkout } from '../services/createWorkout';
 import { Req } from '../types';
-import { fold, chain, map } from 'fp-ts/lib/TaskEither';
+import { fold, chain } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/sendError';
-import { auth, WithAuth } from '../services/auth';
+import { auth } from '../services/auth';
 import { validate } from '../services/validate';
 
 const { WORKOUTS } = SCHEMAS;
