@@ -14,12 +14,13 @@ const deps = { verifyJwt, mongoify, readUser };
 
 // auth helper used to protect private endpoints
 export const auth = <T>(db: DAO, req: Req<T>, d = deps): HTTPEither<WithAuth<T>> => {
-  const { authorization } = req.headers;
+  const { authorization: auth } = req.headers;
   const { verifyJwt, mongoify, readUser } = d;
+  const checkHeader = (): HTTPEither<string> => (auth ? right(auth) : left(unauthorized()));
 
   // extract token from header, verify as a JWT, verify the decoded id, and push to next middleware
   return pipe(
-    ((): HTTPEither<string> => (authorization ? right(authorization) : left(unauthorized())))(),
+    checkHeader(),
     chain(auth => (auth.startsWith('Bearer') ? right(auth.split(' ')[1]) : left(unauthorized()))),
     chainEitherK(token => verifyJwt(token, String(JWT_SECRET))),
     chainEitherK(({ _id }) => mongoify(_id)),
@@ -30,4 +31,4 @@ export const auth = <T>(db: DAO, req: Req<T>, d = deps): HTTPEither<WithAuth<T>>
   );
 };
 
-type WithAuth<T> = T & { user: ObjectID };
+export type WithAuth<T> = T & { user: ObjectID };
