@@ -7,7 +7,7 @@ import assert from 'assert';
 describe('validating middleware', () => {
   it('throws error on failed validation', async () => {
     const result = await validate(schema(SCHEMAS.USERS), { foo: 'bar' })();
-    const expected = await left({ message: 'Invalid data', status: 400 })();
+    const expected = await left({ message: 'Password is required', status: 400 })();
     assert.deepStrictEqual(result, expected);
   });
 
