@@ -1,10 +1,6 @@
-import * as z from 'zod';
 import { object, ObjectSchema } from 'yup';
-import { user, contact, range, workout } from './shapes';
-import { DATE_REGEX, SCHEMAS } from '../utils/constants';
-import { testShape } from './testShape';
-
-const { isArray } = Array;
+import { user, contact, range, workout, exercise } from './shapes';
+import { SCHEMAS } from '../utils/constants';
 
 type CASE = typeof SCHEMAS[keyof typeof SCHEMAS];
 
@@ -12,20 +8,16 @@ type CASE = typeof SCHEMAS[keyof typeof SCHEMAS];
 // TODO --> namespace into an NPM package and share between FE/BE
 export const schema = (CASE: CASE): ObjectSchema => {
   switch (CASE) {
+    case SCHEMAS.EXERCISES:
+      return object(exercise).noUnknown();
     case SCHEMAS.WORKOUTS:
-      return object(workout);
+      return object(workout).noUnknown();
     case SCHEMAS.USERS:
-      return object(user).test('shape', 'Invalid data', testShape(user));
+      return object(user).noUnknown();
     case SCHEMAS.CONTACT:
-      return object(contact).test('shape', 'Invalid data', testShape(contact));
+      return object(contact).noUnknown();
     case SCHEMAS.RANGE:
-      return object(range).test('date range', 'Invalid data', obj => {
-        return (
-          testShape(range)(obj) &&
-          isArray(obj.range) &&
-          obj.range.every((date: string) => DATE_REGEX.test(date))
-        );
-      });
+      return object(range).noUnknown();
     default:
       return object();
   }

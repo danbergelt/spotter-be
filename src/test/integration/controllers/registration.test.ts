@@ -50,14 +50,6 @@ describe('registration', () => {
     assert.equal(res.body.error, 'Password is required');
   });
 
-  it('errors out if object shape is invalid', async () => {
-    const res = await request(server)
-      .post(p)
-      .send({ email: 'will@fail.com', password: 'foobar', foo: 'bar' });
-    assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Invalid data');
-  });
-
   it('errors out if user already exists', async () => {
     await request(server)
       .post(p)

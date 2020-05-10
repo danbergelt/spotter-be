@@ -1,5 +1,22 @@
-import { string, array, object, number, mixed } from 'yup';
+import { string, array, object, number, mixed, MixedSchema } from 'yup';
 import { DATE_REGEX, HEX_COLOR } from '../utils/constants';
+import { ObjectID } from 'mongodb';
+
+const { isValid } = ObjectID;
+
+export const userId = (schema: string): MixedSchema =>
+  mixed()
+    .required(`${schema} must have a user id`)
+    .test('is ObjectID', 'Invalid user ID', user => isValid(user));
+
+export const exercise = {
+  name: string()
+    .required('Exercise name is required')
+    .max(25, 'Name too long (25 char max'),
+  user: userId('Exercise'),
+  pr: number().default(0),
+  prDate: string().test('date format', 'Invalid date', date => DATE_REGEX.test(date))
+};
 
 export const workout = {
   date: string()
@@ -14,6 +31,7 @@ export const workout = {
     .typeError('Tags must be sent as array')
     .of(
       object()
+        .noUnknown()
         .typeError('Tag must be an object')
         .shape({
           content: string()
@@ -30,6 +48,7 @@ export const workout = {
     .typeError('Exercises must be sent as array')
     .of(
       object()
+        .noUnknown()
         .typeError('Exercise must be an object')
         .shape({
           name: string()
@@ -40,7 +59,7 @@ export const workout = {
           reps: number().max(2000, '2000 reps limit')
         })
     ),
-  user: mixed().required('Workout must have a user ID')
+  user: userId('Workout')
 } as const;
 
 export const user = {

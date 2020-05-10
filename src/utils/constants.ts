@@ -3,12 +3,11 @@ export const SCHEMAS = {
   USERS: 'USERS',
   CONTACT: 'CONTACT',
   RANGE: 'RANGE',
-  WORKOUTS: 'WORKOUTS'
+  WORKOUTS: 'WORKOUTS',
+  EXERCISES: 'EXERCISES'
 } as const;
 
 export const HEX_COLOR = /^#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b$/i;
-
-export const HEX_REGEX = /^[0-9a-fA-f]{24}$/;
 
 // TODO --> either tighten up this regex or rely on a third party for "mmm dd yyyy"
 export const DATE_REGEX = /[A-Z][a-z]{2} \d{2} \d{4}$/;
