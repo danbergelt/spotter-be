@@ -4,10 +4,9 @@ import { COLLECTIONS } from '../utils/constants';
 import { badGateway } from '../utils/errors';
 import { Workout } from '../controllers/workouts';
 import { HTTPEither, Write } from '../types';
-import { WithAuth } from './auth';
 
 const { WORKOUTS } = COLLECTIONS;
 
-export const createWorkout = (db: DAO, workout: WithAuth<Workout>): HTTPEither<Write> => {
+export const createWorkout = (db: DAO, workout: Workout): HTTPEither<Write> => {
   return tryCatch(async () => await db(WORKOUTS).insertOne(workout), badGateway);
 };

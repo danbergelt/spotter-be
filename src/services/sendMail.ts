@@ -6,12 +6,12 @@ import { MetaData } from '../utils/metadata';
 
 const { MG_KEY, MG_DOMAIN, TESTING } = process.env;
 
-// load a new mailgun instance with the below config
+// build a new mailgun instance
 const mailgunInstance = new Mailgun({
   apiKey: String(MG_KEY),
   domain: String(MG_DOMAIN),
   testMode: Boolean(TESTING),
-  testModeLogger: (): undefined => undefined
+  testModeLogger: (): null => null
 });
 
 // send an email with the information from the provided metadata

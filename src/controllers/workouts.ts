@@ -13,6 +13,7 @@ import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/sendError';
 import { auth } from '../services/auth';
 import { validate } from '../services/validate';
+import { ObjectID } from 'mongodb';
 
 const { WORKOUTS } = SCHEMAS;
 
@@ -27,8 +28,8 @@ r.post(
 
     return await pipe(
       auth(db, req),
-      chain(workout => validate(schema(WORKOUTS), workout)),
-      chain(workout => createWorkout(db, workout)),
+      chain(w => validate(schema(WORKOUTS), w)),
+      chain(w => createWorkout(db, w)),
       fold(
         error => of(sendError(error, res)),
         () => of(res.status(CREATED).json(success({ workout })))
@@ -43,7 +44,7 @@ export interface Workout {
   tags?: Array<{ color: string; content?: string }>;
   notes?: string;
   exercises: Array<{ name: string; weight?: number; sets?: number; reps?: number }>;
-  user: string;
+  user: ObjectID;
 }
 
 export default r;
