@@ -1,48 +1,42 @@
-import express from 'express';
-import { path } from '../utils/path';
-import { resolver } from 'src/utils/resolver';
+import { resolver } from '../utils/resolver';
 import { CREATED, BAD_REQUEST } from 'http-status-codes';
-import { success } from 'src/utils/httpResponses';
+import { success } from '../utils/httpResponses';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { auth } from 'src/services/auth';
-import { validate } from 'src/services/validate';
-import { schema } from 'src/validators';
-import { SCHEMAS } from 'src/utils/constants';
+import { authenticate } from '../services/authenticate';
+import { validate } from '../services/validate';
+import { schema } from '../validators';
+import { SCHEMAS } from '../utils/constants';
 import { chain, fold, fromEither } from 'fp-ts/lib/TaskEither';
 import { ObjectID } from 'mongodb';
-import { createExercise } from 'src/services/createExercise';
-import { Req } from 'src/types';
-import { readExercise } from 'src/services/readExercise';
-import { e } from 'src/utils/e';
+import { createExercise } from '../services/createExercise';
+import { Req } from '../types';
+import { readExercise } from '../services/readExercise';
+import { e } from '../utils/e';
 import { of } from 'fp-ts/lib/Task';
-import { sendError } from 'src/utils/sendError';
+import { sendError } from '../utils/sendError';
 import { fromNullable } from 'fp-ts/lib/Either';
 
 const { EXERCISES } = SCHEMAS;
 
-const r = express.Router();
-const exercisesPath = path('/exercises');
-const checkIfExerciseExists = fromNullable(e('Exercise already exists', BAD_REQUEST));
+// compositions
+const isExerciseNull = fromNullable(e('Exercise already exists', BAD_REQUEST));
 
-r.post(
-  exercisesPath(''),
-  resolver(async (req: Req<Exercise>, res) => {
-    const { db } = req.app.locals;
-    const exercise = req.body;
+export const postExercise = resolver(async (req: Req<Exercise>, res) => {
+  const { db } = req.app.locals;
+  const exercise = req.body;
 
-    return await pipe(
-      auth(db, req),
-      chain(ex => validate(schema(EXERCISES), ex)),
-      chain(ex => readExercise(db, ex)),
-      chain(ex => fromEither(checkIfExerciseExists(ex))),
-      chain(ex => createExercise(db, ex)),
-      fold(
-        error => of(sendError(error, res)),
-        () => of(res.status(CREATED).json(success({ exercise })))
-      )
-    )();
-  })
-);
+  return await pipe(
+    authenticate(db, req),
+    chain(ex => validate(schema(EXERCISES), ex)),
+    chain(ex => readExercise(db, ex)),
+    chain(ex => fromEither(isExerciseNull(ex))),
+    chain(ex => createExercise(db, ex)),
+    fold(
+      error => of(sendError(error, res)),
+      () => of(res.status(CREATED).json(success({ exercise })))
+    )
+  )();
+});
 
 export interface Exercise {
   name: string;
@@ -50,5 +44,3 @@ export interface Exercise {
   pr?: number;
   prDate?: string;
 }
-
-export default r;

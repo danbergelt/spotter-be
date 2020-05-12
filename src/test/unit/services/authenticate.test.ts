@@ -1,4 +1,4 @@
-import { auth } from '../../../services/auth';
+import { authenticate } from '../../../services/authenticate';
 import Sinon from 'sinon';
 import assert from 'assert';
 import { left, right } from 'fp-ts/lib/TaskEither';
@@ -8,7 +8,7 @@ describe('authenticator', () => {
     const db = Sinon.stub();
     const deps = { verifyJwt: Sinon.stub(), mongoify: Sinon.stub(), readUser: Sinon.stub() };
     const req = { app: { locals: { db: Sinon.stub() } }, headers: {} } as any;
-    const result = await auth(db, req, deps)();
+    const result = await authenticate(db, req, deps)();
     const expected = await left({ message: 'Unauthorized', status: 401 })();
     assert.deepStrictEqual(result, expected);
   });
@@ -20,7 +20,7 @@ describe('authenticator', () => {
     } as any;
     const db = Sinon.stub();
     const deps = { verifyJwt: Sinon.stub(), mongoify: Sinon.stub(), readUser: Sinon.stub() };
-    const result = await auth(db, req, deps)();
+    const result = await authenticate(db, req, deps)();
     const expected = await left({ message: 'Unauthorized', status: 401 })();
     assert.deepStrictEqual(result, expected);
   });
@@ -37,7 +37,7 @@ describe('authenticator', () => {
       mongoify: Sinon.stub(),
       readUser: Sinon.stub()
     };
-    const result = await auth(db, req, deps)();
+    const result = await authenticate(db, req, deps)();
     const expected = await left({ message: 'Unauthorized', status: 401 })();
     assert.deepStrictEqual(result, expected);
   });
@@ -55,7 +55,7 @@ describe('authenticator', () => {
       mongoify: Sinon.stub().returns(bar),
       readUser: Sinon.stub()
     };
-    const result = await auth(db, req, deps)();
+    const result = await authenticate(db, req, deps)();
     const expected = await left({ message: 'Unauthorized', status: 401 })();
     assert.deepStrictEqual(result, expected);
   });
@@ -73,7 +73,7 @@ describe('authenticator', () => {
       mongoify: Sinon.stub().returns(foo),
       readUser: Sinon.stub().returns(bar)
     };
-    const result = await auth(db, req, deps)();
+    const result = await authenticate(db, req, deps)();
     const expected = await left({ message: 'Unauthorized', status: 401 })();
     assert.deepStrictEqual(result, expected);
   });
@@ -91,7 +91,7 @@ describe('authenticator', () => {
       mongoify: Sinon.stub().returns(foo),
       readUser: Sinon.stub().returns(right({ _id: 'id' }))
     };
-    const result = await auth(db, req, deps)();
+    const result = await authenticate(db, req, deps)();
     const expected = await right({ foo: 'bar', user: 'id' })();
     assert.deepStrictEqual(result, expected);
   });

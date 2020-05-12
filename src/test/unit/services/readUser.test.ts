@@ -19,12 +19,4 @@ describe('read a user from the db', () => {
     const expected = await left({ message: 'Bad gateway', status: 502 })();
     assert.deepStrictEqual(result, expected);
   });
-
-  it('returns an error if email cannot be found', async () => {
-    const db = Sinon.stub().returns({ findOne: Sinon.stub().returns(null) });
-    const email = { email: 'email' };
-    const result = await readUser(db, email)();
-    const expected = await left({ message: 'Invalid credentials', status: 400 })();
-    assert.deepStrictEqual(result, expected);
-  });
 });

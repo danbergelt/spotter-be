@@ -8,6 +8,6 @@ const { isValid } = ObjectId;
 
 // convert a 24 character hex string into a mongo ObjectID
 
-export const mongoify = (_id: string): SyncEither<ObjectID> => {
+export const mongofy = (_id: string): SyncEither<ObjectID> => {
   return isValid(_id) ? right(new ObjectId(_id)) : left(e('Invalid ObjectId', BAD_REQUEST));
 };
