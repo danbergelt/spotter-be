@@ -11,7 +11,7 @@ import { Req } from '../types';
 import { fold, chain } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/sendError';
-import { auth } from '../services/auth';
+import { authenticate } from '../services/authenticate';
 import { validate } from '../services/validate';
 import { ObjectID } from 'mongodb';
 
@@ -27,7 +27,7 @@ r.post(
     const workout = req.body;
 
     return await pipe(
-      auth(db, req),
+      authenticate(db, req),
       chain(w => validate(schema(WORKOUTS), w)),
       chain(w => createWorkout(db, w)),
       fold(
@@ -43,7 +43,7 @@ export interface Workout {
   title: string;
   tags?: Array<{ color: string; content?: string }>;
   notes?: string;
-  exercises: Array<{ name: string; weight?: number; sets?: number; reps?: number }>;
+  exercises?: Array<{ name: string; weight?: number; sets?: number; reps?: number }>;
   user: ObjectID;
 }
 

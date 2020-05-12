@@ -2,7 +2,7 @@ import { tryCatch } from 'fp-ts/lib/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
 import jwt from 'jsonwebtoken';
 import { Token } from '../types';
-import { _, unauthorized } from './errors';
+import { unauthorized } from './errors';
 import bcrypt from 'bcryptjs';
 import { HTTPEither, SyncEither } from '../types';
 import { serverError } from './errors';

@@ -1,9 +1,9 @@
 import { tryCatch } from 'fp-ts/lib/TaskEither';
-import { DAO } from 'src/index.types';
-import { Exercise } from 'src/controllers/exercises';
+import { DAO } from '../index.types';
+import { Exercise } from '../controllers/exercises';
 import { COLLECTIONS } from '../utils/constants';
-import { badGateway } from 'src/utils/errors';
-import { HTTPEither, Write } from 'src/types';
+import { badGateway } from '../utils/errors';
+import { HTTPEither, Write } from '../types';
 
 const { EXERCISES } = COLLECTIONS;
 

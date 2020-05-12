@@ -1,8 +1,6 @@
 import express, { json } from 'express';
 import dotenv from 'dotenv';
-import fns from './index.functions';
-import users from './controllers/users';
-import workouts from './controllers/workouts';
+import router from './controllers/';
 import { Server } from 'http';
 import cookies from 'cookie-parser';
 import { fallback } from './middleware/fallback';
@@ -12,7 +10,6 @@ import { DAO } from './index.types';
 
 dotenv.config();
 const { log } = console;
-const { inject } = fns;
 const { PORT, DB, NODE_ENV } = process.env;
 const { USERS } = COLLECTIONS;
 
@@ -29,12 +26,10 @@ const server = ((): Server => {
 
     // inject a Mongo DAO into global express stack
     app.locals.db = (collection => client.db(URI).collection(collection)) as DAO;
-
-    return;
   });
 
   // inject N middleware
-  inject(app)(cookies(), json(), users, workouts, fallback);
+  [cookies(), json(), router, fallback].forEach(mw => app.use(mw));
 
   return app.listen(Number(PORT), () => log(`Port: ${PORT}\nMode: ${NODE_ENV}`));
 })();
