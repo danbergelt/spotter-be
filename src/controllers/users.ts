@@ -1,20 +1,16 @@
 import { schema } from '../validators';
 import { createUser } from '../services/createUser';
-import { createPw } from '../services/createPw';
 import { resolver, Fn } from '../utils/resolver';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { readUser } from '../services/readUser';
-import { chain, fold, fromEither } from 'fp-ts/lib/TaskEither';
-import { readPw } from '../services/readPw';
+import { chain, fold, fromEither, right, left } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { sendAuth } from '../utils/sendAuth';
-import { ObjectID } from 'mongodb';
 import { COOKIE_NAME, EMAILS, SCHEMAS } from '../utils/constants';
 import { success, failure } from '../utils/httpResponses';
 import { OK } from 'http-status-codes';
 import { _, invalidCredentials } from '../utils/errors';
 import { Req } from '../types';
-import { Email, Password } from '../services/user.types';
 import { sendMail } from '../services/sendMail';
 import { contactConfirmTemplate, contactMessageTemplate } from '../utils/emailTemplates';
 import { metadata } from '../utils/metadata';
@@ -22,6 +18,8 @@ import { sendError } from '../utils/sendError';
 import { validate } from '../services/validate';
 import { fromNullable } from 'fp-ts/lib/Either';
 import { digestToken } from 'src/utils/digestToken';
+import { encrypt } from 'src/utils/encrypt';
+import { verifyEncryption } from 'src/utils/verifiers';
 
 // destructured constants
 const { TEAM, NO_REPLY, CONTACT } = EMAILS;
@@ -55,27 +53,31 @@ export const login = resolver(async (req: Req<User>, res) => {
 
   return await pipe(
     validate(schema(USERS), req.body),
-    chain(user => readUser(db, { email: user.email })),
+    chain(user => readUser(db, user.email)),
     chain(user => fromEither(isUserNull(user))),
-    chain(user => readPw(db, { ...user, password })),
+    chain(user =>
+      pipe(
+        verifyEncryption(password, user.password),
+        chain(verified => (verified ? right(user) : left(invalidCredentials())))
+      )
+    ),
     fold(
       error => of(sendError(error, res)),
-      _id => of(sendAuth(_id, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });
 
 export const registration = resolver(async (req: Req<User>, res) => {
-  const { password } = req.body;
   const { db } = req.app.locals;
 
   return await pipe(
     validate(schema(USERS), req.body),
-    chain(user => createUser(db, user.email)),
-    chain(user => createPw(db, user.insertedId as ObjectID, password)),
+    chain(user => encrypt(user.password)),
+    chain(password => createUser(db, { ...req.body, password })),
     fold(
       error => of(sendError(error, res)),
-      _id => of(sendAuth(_id, res))
+      user => of(sendAuth(user.insertedId, res))
     )
   )();
 });
@@ -104,4 +106,8 @@ export interface Contact {
   subject: string;
   message: string;
 }
-export type User = Pick<Email, 'email'> & Pick<Password, 'password'>;
+
+export interface User {
+  email: string;
+  password: string;
+}
