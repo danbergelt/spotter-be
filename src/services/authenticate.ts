@@ -4,7 +4,7 @@ import { unauthorized } from '../utils/errors';
 import { HTTPEither, Req } from '../types';
 import { DAO } from '../index.types';
 import { fromNullable } from 'fp-ts/lib/Either';
-import { digestToken } from 'src/utils/digestToken';
+import { digestToken } from '../utils/digestToken';
 
 const isNull = fromNullable(unauthorized());
 

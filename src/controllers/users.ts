@@ -12,14 +12,14 @@ import { OK } from 'http-status-codes';
 import { _, invalidCredentials } from '../utils/errors';
 import { Req } from '../types';
 import { sendMail } from '../services/sendMail';
-import { contactConfirmTemplate, contactMessageTemplate } from '../utils/emailTemplates';
+import { confirmContactMsg, contactMsg } from '../utils/emailTemplates';
 import { metadata } from '../utils/metadata';
 import { sendError } from '../utils/sendError';
 import { validate } from '../services/validate';
 import { fromNullable } from 'fp-ts/lib/Either';
-import { digestToken } from 'src/utils/digestToken';
-import { encrypt } from 'src/utils/encrypt';
-import { verifyEncryption } from 'src/utils/verifiers';
+import { digestToken } from '../utils/digestToken';
+import { encrypt } from '../utils/encrypt';
+import { verifyEncryption } from '../utils/verifiers';
 
 // destructured constants
 const { TEAM, NO_REPLY, CONTACT } = EMAILS;
@@ -34,12 +34,8 @@ export const contact = resolver(async (req: Req<Contact>, res) => {
 
   return await pipe(
     validate(schema(CONTACT_SCHEMA), req.body),
-    chain(() =>
-      sendMail(metadata(CONTACT, TEAM, subject, contactMessageTemplate(message, name, email)))
-    ),
-    chain(() =>
-      sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', contactConfirmTemplate()))
-    ),
+    chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
+    chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
     fold(
       error => of(sendError(error, res)),
       () => of(res.status(OK).json(success({ message: 'Message sent' })))
@@ -53,7 +49,7 @@ export const login = resolver(async (req: Req<User>, res) => {
 
   return await pipe(
     validate(schema(USERS), req.body),
-    chain(user => readUser(db, user.email)),
+    chain(user => readUser(db, { email: user.email })),
     chain(user => fromEither(isUserNull(user))),
     chain(user =>
       pipe(
