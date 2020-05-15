@@ -1,24 +1,23 @@
 import { object, ObjectSchema } from 'yup';
 import { user, contact, range, workout, exercise } from './shapes';
 import { SCHEMAS } from '../utils/constants';
+import { Eq } from 'fp-ts/lib/Eq';
 
 type CASE = typeof SCHEMAS[keyof typeof SCHEMAS];
+declare const eqSchema: Eq<CASE>;
 
-// a single function to retrieve a schema by case
+// pattern matcher that returns a schema by case
 // TODO --> namespace into an NPM package and share between FE/BE
 export const schema = (CASE: CASE): ObjectSchema => {
-  switch (CASE) {
-    case SCHEMAS.EXERCISES:
-      return object(exercise).noUnknown();
-    case SCHEMAS.WORKOUTS:
-      return object(workout).noUnknown();
-    case SCHEMAS.USERS:
-      return object(user).noUnknown();
-    case SCHEMAS.CONTACT:
-      return object(contact).noUnknown();
-    case SCHEMAS.RANGE:
-      return object(range).noUnknown();
-    default:
-      return object();
-  }
+  return eqSchema.equals(CASE, SCHEMAS.EXERCISES)
+    ? object(exercise).noUnknown()
+    : eqSchema.equals(CASE, SCHEMAS.WORKOUTS)
+    ? object(workout).noUnknown()
+    : eqSchema.equals(CASE, SCHEMAS.USERS)
+    ? object(user).noUnknown()
+    : eqSchema.equals(CASE, SCHEMAS.CONTACT)
+    ? object(contact).noUnknown()
+    : eqSchema.equals(CASE, SCHEMAS.RANGE)
+    ? object(range).noUnknown()
+    : object();
 };
