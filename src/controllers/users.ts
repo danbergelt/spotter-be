@@ -3,7 +3,7 @@ import { createUser } from '../services/createUser';
 import { resolver, Fn } from '../utils/resolver';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { readUser } from '../services/readUser';
-import { chain, fold, fromEither, right, left } from 'fp-ts/lib/TaskEither';
+import { chain, fold, fromEither, right, left, map } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { sendAuth } from '../utils/sendAuth';
 import { COOKIE_NAME, EMAILS, SCHEMAS } from '../utils/constants';
@@ -12,16 +12,18 @@ import { OK } from 'http-status-codes';
 import { _, invalidCredentials } from '../utils/errors';
 import { Req } from '../types';
 import { sendMail } from '../services/sendMail';
-import { contactConfirmTemplate, contactMessageTemplate } from '../utils/emailTemplates';
+import { confirmContactMsg, contactMsg } from '../utils/emailTemplates';
 import { metadata } from '../utils/metadata';
 import { sendError } from '../utils/sendError';
 import { validate } from '../services/validate';
 import { fromNullable } from 'fp-ts/lib/Either';
-import { digestToken } from 'src/utils/digestToken';
-import { encrypt } from 'src/utils/encrypt';
-import { verifyEncryption } from 'src/utils/verifiers';
+import { digestToken } from '../utils/digestToken';
+import { encrypt } from '../utils/encrypt';
+import { verifyEncryption } from '../utils/verifiers';
+import { parseWrite } from '../utils/parseWrite';
 
 // destructured constants
+const { REF_SECRET } = process.env;
 const { TEAM, NO_REPLY, CONTACT } = EMAILS;
 const { USERS, CONTACT: CONTACT_SCHEMA } = SCHEMAS;
 
@@ -34,12 +36,8 @@ export const contact = resolver(async (req: Req<Contact>, res) => {
 
   return await pipe(
     validate(schema(CONTACT_SCHEMA), req.body),
-    chain(() =>
-      sendMail(metadata(CONTACT, TEAM, subject, contactMessageTemplate(message, name, email)))
-    ),
-    chain(() =>
-      sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', contactConfirmTemplate()))
-    ),
+    chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
+    chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
     fold(
       error => of(sendError(error, res)),
       () => of(res.status(OK).json(success({ message: 'Message sent' })))
@@ -53,7 +51,7 @@ export const login = resolver(async (req: Req<User>, res) => {
 
   return await pipe(
     validate(schema(USERS), req.body),
-    chain(user => readUser(db, user.email)),
+    chain(user => readUser(db, { email: user.email })),
     chain(user => fromEither(isUserNull(user))),
     chain(user =>
       pipe(
@@ -75,9 +73,10 @@ export const registration = resolver(async (req: Req<User>, res) => {
     validate(schema(USERS), req.body),
     chain(user => encrypt(user.password)),
     chain(password => createUser(db, { ...req.body, password })),
+    map(write => parseWrite<User>(write)),
     fold(
       error => of(sendError(error, res)),
-      user => of(sendAuth(user.insertedId, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });
@@ -88,7 +87,7 @@ export const refresh = resolver(async (req, res) => {
 
   return await pipe(
     fromEither(isCookieNull(cookie)),
-    chain(cookie => digestToken(cookie, db)),
+    chain(cookie => digestToken(cookie, db, String(REF_SECRET))),
     fold(
       error => of(res.status(error.status).json(failure({ token: null }))),
       user => of(sendAuth(user._id, res))

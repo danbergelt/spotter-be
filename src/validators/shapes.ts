@@ -12,10 +12,10 @@ export const userId = (schema: string): MixedSchema =>
 export const exercise = {
   name: string()
     .required('Exercise name is required')
-    .max(25, 'Name too long (25 char max'),
+    .max(25, 'Name too long (25 char max)'),
   user: userId('Exercise'),
   pr: number().default(0),
-  prDate: string().test('date format', 'Invalid date', date => DATE_REGEX.test(date))
+  prDate: string().test('date format', 'Invalid date', d => (d ? DATE_REGEX.test(d) : true))
 };
 
 export const workout = {
