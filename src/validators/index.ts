@@ -4,20 +4,20 @@ import { SCHEMAS } from '../utils/constants';
 import { Eq } from 'fp-ts/lib/Eq';
 
 type CASE = typeof SCHEMAS[keyof typeof SCHEMAS];
-declare const eqSchema: Eq<CASE>;
+const { equals }: Eq<CASE> = { equals: (a, b) => a === b };
 
 // pattern matcher that returns a schema by case
 // TODO --> namespace into an NPM package and share between FE/BE
 export const schema = (CASE: CASE): ObjectSchema => {
-  return eqSchema.equals(CASE, SCHEMAS.EXERCISES)
+  return equals(CASE, SCHEMAS.EXERCISES)
     ? object(exercise).noUnknown()
-    : eqSchema.equals(CASE, SCHEMAS.WORKOUTS)
+    : equals(CASE, SCHEMAS.WORKOUTS)
     ? object(workout).noUnknown()
-    : eqSchema.equals(CASE, SCHEMAS.USERS)
+    : equals(CASE, SCHEMAS.USERS)
     ? object(user).noUnknown()
-    : eqSchema.equals(CASE, SCHEMAS.CONTACT)
+    : equals(CASE, SCHEMAS.CONTACT)
     ? object(contact).noUnknown()
-    : eqSchema.equals(CASE, SCHEMAS.RANGE)
+    : equals(CASE, SCHEMAS.RANGE)
     ? object(range).noUnknown()
     : object();
 };

@@ -9,15 +9,16 @@ import { DAO } from '../index.types';
 import { HTTPEither, Saved } from '../types';
 import { User } from '../controllers/users';
 
-const { REF_SECRET } = process.env;
 const deps = { mongofy, readUser, verifyJwt };
 const isUserNull = fromNullable(unauthorized());
 
+type SU = Saved<User>;
+
 // accepts a JWT, and verifies its payload against a persisted user id
-export const digestToken = (raw: string, db: DAO, d = deps): HTTPEither<Saved<User>> => {
+export const digestToken = (raw: string, db: DAO, sec: string, d = deps): HTTPEither<SU> => {
   const { mongofy, readUser, verifyJwt } = d;
   return pipe(
-    fromEither(verifyJwt(raw, String(REF_SECRET))),
+    fromEither(verifyJwt(raw, sec)),
     chain(jwt => fromEither(mongofy(jwt._id))),
     chain(_id => readUser(db, { _id })),
     chain(user => fromEither(isUserNull(user)))

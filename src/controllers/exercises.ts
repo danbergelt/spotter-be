@@ -20,13 +20,16 @@ const { EXERCISES } = SCHEMAS;
 
 export const postExercise = resolver(async (req: Req<Exercise>, res) => {
   const { db } = req.app.locals;
-  const exercise = req.body;
 
   return await pipe(
     authenticate(db, req),
     chain(ex => validate(schema(EXERCISES), ex)),
-    chain(ex => readExercise(db, ex)),
-    chain(ex => (!ex ? right(exercise) : left(e('Exercise already exists', BAD_REQUEST)))),
+    chain(ex =>
+      pipe(
+        readExercise(db, ex),
+        chain(savedEx => (!savedEx ? right(ex) : left(e('Exercise already exists', BAD_REQUEST))))
+      )
+    ),
     chain(ex => createExercise(db, ex)),
     map(write => parseWrite<Exercise>(write)),
     fold(

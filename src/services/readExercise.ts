@@ -3,10 +3,12 @@ import { DAO } from '../index.types';
 import { tryCatch } from 'fp-ts/lib/TaskEither';
 import { COLLECTIONS } from '../utils/constants';
 import { badGateway } from '../utils/errors';
-import { HTTPEither } from '../types';
+import { HTTPEither, Saved, Nullable } from '../types';
 
 const { EXERCISES } = COLLECTIONS;
 
-export const readExercise = (db: DAO, { name, user }: Exercise): HTTPEither<Exercise | null> => {
-  return tryCatch(async () => await db(EXERCISES).findOne({ name, user }), badGateway);
+type SE = Saved<Exercise>;
+
+export const readExercise = (db: DAO, exercise: Exercise): HTTPEither<Nullable<SE>> => {
+  return tryCatch(async () => await db(EXERCISES).findOne(exercise), badGateway);
 };

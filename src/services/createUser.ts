@@ -7,7 +7,6 @@ import { User } from '../controllers/users';
 
 const { USERS } = COLLECTIONS;
 
-// eslint-disable-next-line
 export const createUser = (db: DAO, user: User): HTTPEither<Write> => {
   return tryCatch(async () => await db(USERS).insertOne(user), forkMongoError);
 };
