@@ -6,10 +6,12 @@ import { token } from '../../../utils/token';
 import { ObjectId } from 'mongodb';
 import assert from 'assert';
 
+const { TEST_ID } = process.env;
+
 use(http);
 
 const p = path('/exercises')('');
-const t = token(new ObjectId('5ebf274db6ec9534d8e917ab'));
+const t = token(new ObjectId(TEST_ID));
 
 describe('post exercise', () => {
   it('creates a new exercise', async () => {

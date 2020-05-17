@@ -13,7 +13,7 @@ describe('mongoify an _id', () => {
 
   it('returns an error if mongoification fails', () => {
     const result = mongofy('foo');
-    const expected = left({ message: 'Invalid ObjectId', status: 400 });
+    const expected = left({ message: 'Invalid resource id', status: 400 });
     assert.deepStrictEqual(result, expected);
   });
 });
