@@ -73,7 +73,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
     validate(schema(USERS), req.body),
     chain(user => encrypt(user.password)),
     chain(password => createUser(db, { ...req.body, password })),
-    map(write => parseWrite<User>(write)),
+    map(write => parseWrite(write)),
     fold(
       error => of(sendError(error, res)),
       user => of(sendAuth(user._id, res))

@@ -5,10 +5,10 @@ dd:
 dt:
 	docker exec db mongo --eval db.getSiblingDB"('spotter')".dropDatabase"()"
 	docker exec db mongo --eval db.getSiblingDB"('spotter')".users.insertOne"({email: 'test@test.com', password: 'testpassword', _id: ObjectId('5ebf274db6ec9534d8e917ab')})"
-	docker-compose -f docker-compose.development.yml run dev_api yarn test
+	docker-compose -f docker-compose.development.yml run --rm dev_api yarn test
 	docker exec db mongo --eval db.getSiblingDB"('spotter')".dropDatabase"()"
 dciu:
-	docker-compose -f docker-compose.development.yml run dev_api yarn coverage
+	docker-compose -f docker-compose.development.yml run --rm dev_api yarn coverage
 dcid:
 	docker-compose -f docker-compose.development.yml down
 depp:
