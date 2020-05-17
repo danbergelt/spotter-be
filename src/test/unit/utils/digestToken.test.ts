@@ -28,7 +28,7 @@ describe('digest token', () => {
     const d = {
       verifyJwt: Sinon.stub().returns(right({ _id: 'foo' })),
       mongofy: Sinon.stub().returns(right('bar')),
-      readUser: Sinon.stub().returns(taskLeft('baz'))
+      readOne: Sinon.stub().returns(taskLeft('baz'))
     };
     const db = Sinon.stub();
     const result = await digestToken('foo', db, 'secret', d)();
@@ -40,7 +40,7 @@ describe('digest token', () => {
     const d = {
       verifyJwt: Sinon.stub().returns(right({ _id: 'foo' })),
       mongofy: Sinon.stub().returns(right('bar')),
-      readUser: Sinon.stub().returns(taskRight(null))
+      readOne: Sinon.stub().returns(taskRight(null))
     };
     const db = Sinon.stub();
     const result = await digestToken('foo', db, 'secret', d)();
@@ -52,7 +52,7 @@ describe('digest token', () => {
     const d = {
       verifyJwt: Sinon.stub().returns(right({ _id: 'foo' })),
       mongofy: Sinon.stub().returns(right('bar')),
-      readUser: Sinon.stub().returns(taskRight('baz'))
+      readOne: Sinon.stub().returns(taskRight('baz'))
     };
     const db = Sinon.stub();
     const result = await digestToken('foo', db, 'secret', d)();
