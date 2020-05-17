@@ -60,6 +60,6 @@ describe('registration', () => {
       .send({ email: 'a@b.com', password: 'password' });
 
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Email already exists, try again');
+    assert.equal(res.body.error, 'User already exists');
   });
 });

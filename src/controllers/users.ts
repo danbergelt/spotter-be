@@ -1,14 +1,13 @@
 import { schema } from '../validators';
-import { createUser } from '../services/createUser';
+import { hooks } from '../services/hooks';
 import { resolver, Fn } from '../utils/resolver';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { readUser } from '../services/readUser';
 import { chain, fold, fromEither, right, left, map } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
 import { sendAuth } from '../utils/sendAuth';
-import { COOKIE_NAME, EMAILS, SCHEMAS } from '../utils/constants';
+import { COOKIE_NAME, EMAILS, SCHEMAS, COLLECTIONS } from '../utils/constants';
 import { success, failure } from '../utils/httpResponses';
-import { OK } from 'http-status-codes';
+import { OK, BAD_REQUEST } from 'http-status-codes';
 import { _, invalidCredentials } from '../utils/errors';
 import { Req } from '../types';
 import { sendMail } from '../services/sendMail';
@@ -21,6 +20,7 @@ import { digestToken } from '../utils/digestToken';
 import { encrypt } from '../utils/encrypt';
 import { verifyEncryption } from '../utils/verifiers';
 import { parseWrite } from '../utils/parseWrite';
+import { e } from '../utils/e';
 
 // destructured constants
 const { REF_SECRET } = process.env;
@@ -30,6 +30,7 @@ const { USERS, CONTACT: CONTACT_SCHEMA } = SCHEMAS;
 // compositions
 const isUserNull = fromNullable(invalidCredentials());
 const isCookieNull = fromNullable(_());
+const { readOne, createOne } = hooks<User>(COLLECTIONS.USERS);
 
 export const contact = resolver(async (req: Req<Contact>, res) => {
   const { name, email, subject, message } = req.body;
@@ -51,7 +52,7 @@ export const login = resolver(async (req: Req<User>, res) => {
 
   return await pipe(
     validate(schema(USERS), req.body),
-    chain(user => readUser(db, { email: user.email })),
+    chain(user => readOne(db, { email: user.email })),
     chain(user => fromEither(isUserNull(user))),
     chain(user =>
       pipe(
@@ -71,8 +72,10 @@ export const registration = resolver(async (req: Req<User>, res) => {
 
   return await pipe(
     validate(schema(USERS), req.body),
+    chain(() => readOne(db, { email: req.body.email })),
+    chain(user => (!user ? right(req.body) : left(e('User already exists', BAD_REQUEST)))),
     chain(user => encrypt(user.password)),
-    chain(password => createUser(db, { ...req.body, password })),
+    chain(password => createOne(db, { ...req.body, password })),
     map(write => parseWrite(write)),
     fold(
       error => of(sendError(error, res)),
