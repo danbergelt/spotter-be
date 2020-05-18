@@ -1,21 +1,16 @@
-import { resolver } from '../utils/resolver';
+import { resolver } from '../utils/express';
 import { CREATED, BAD_REQUEST, OK, NOT_FOUND } from 'http-status-codes';
-import { success } from '../utils/httpResponses';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { authenticate } from '../services/authenticate';
 import { validate } from '../services/validate';
 import { schema } from '../validators';
 import { SCHEMAS, COLLECTIONS } from '../utils/constants';
 import { chain, fold, left, right, map, fromEither } from 'fp-ts/lib/TaskEither';
-import { ObjectID } from 'mongodb';
 import { hooks } from '../services/hooks';
-import { Req } from '../types';
-import { e } from '../utils/e';
+import { Req, Owner } from '../types';
+import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
-import { sendError } from '../utils/sendError';
-import { parseWrite } from '../utils/parseWrite';
-import { parseDelete } from '../utils/parseDelete';
-import { mongofy } from '../utils/mongofy';
+import { sendError } from '../utils/http';
 import { fromNullable } from 'fp-ts/lib/Either';
 
 const { EXERCISES } = SCHEMAS;
@@ -23,13 +18,12 @@ const { EXERCISES } = SCHEMAS;
 const isExerciseNull = fromNullable(e('Exercise not found', NOT_FOUND));
 const { readMany, deleteOne, readOne, createOne } = hooks<Exercise>(COLLECTIONS.EXERCISES);
 
-export const readExercises = resolver(async (req, res) => {
+export const readExercises = resolver(async (req: Req<{}>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
     authenticate(db, req),
-    chain(({ user }) => fromEither(mongofy(user))),
-    chain(user => readMany(db, { user })),
+    chain(user => readMany(db, user)),
     fold(
       error => of(sendError(error, res)),
       exercises => of(res.status(OK).json(success({ exercises })))
@@ -37,7 +31,7 @@ export const readExercises = resolver(async (req, res) => {
   )();
 });
 
-export const deleteExercise = resolver(async (req, res) => {
+export const deleteExercise = resolver(async (req: Req<{}>, res) => {
   const { db } = req.app.locals;
   const { id } = req.params;
 
@@ -54,7 +48,7 @@ export const deleteExercise = resolver(async (req, res) => {
   )();
 });
 
-export const postExercise = resolver(async (req: Req<Exercise>, res) => {
+export const postExercise = resolver(async (req: Req<RawExercise>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
@@ -63,7 +57,7 @@ export const postExercise = resolver(async (req: Req<Exercise>, res) => {
     chain(ex =>
       pipe(
         readOne(db, ex),
-        chain(savedEx => (!savedEx ? right(ex) : left(e('Exercise already exists', BAD_REQUEST))))
+        chain(saved => (!saved ? right(ex) : left(e('Exercise already exists', BAD_REQUEST))))
       )
     ),
     chain(ex => createOne(db, ex)),
@@ -75,9 +69,10 @@ export const postExercise = resolver(async (req: Req<Exercise>, res) => {
   )();
 });
 
-export interface Exercise {
+export type RawExercise = {
   name: string;
-  user: ObjectID;
   pr?: number;
   prDate?: string;
-}
+};
+
+export type Exercise = RawExercise & Owner;

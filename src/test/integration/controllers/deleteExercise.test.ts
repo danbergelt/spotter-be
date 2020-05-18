@@ -1,8 +1,8 @@
 import { request, use } from 'chai';
 import http from 'chai-http';
 import server from '../../../index';
-import { path } from '../../../utils/path';
-import { token } from '../../../utils/token';
+import { path } from '../../../utils/express';
+import { token } from '../../../utils/jwt';
 import { ObjectId } from 'mongodb';
 import assert from 'assert';
 

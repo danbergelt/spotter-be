@@ -1,13 +1,18 @@
 import Sinon from 'sinon';
 import { expect } from 'chai';
 import { mockReq, mockRes } from 'sinon-express-mock';
-import { resolver } from '../../../utils/resolver';
+import { resolver, path } from '../../../utils/express';
+
+describe('path factory', () => {
+  it('builds a path', () => {
+    expect(path('/foo')('/bar')).to.equal('/api/auth/foo/bar');
+  });
+});
 
 const utils = () => {
   const req = mockReq();
   const res = mockRes();
   const next = Sinon.stub();
-  res.status = Sinon.stub();
   return { req, res, next };
 };
 

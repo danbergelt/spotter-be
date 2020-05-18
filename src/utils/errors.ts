@@ -1,4 +1,4 @@
-import { e, E } from './e';
+import { e, E } from './parsers';
 import { BAD_REQUEST, BAD_GATEWAY, INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
 
 // reusable error responses
