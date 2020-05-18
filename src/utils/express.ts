@@ -9,4 +9,5 @@ export const resolver = (fn: Fn): Fn => async (req, res, next): Res =>
   Promise.resolve(fn(req, res, next)).catch(next); // eslint-disable-line
 
 type Res = Promise<Response | void>;
+
 export type Fn = (req: Request, res: Response, next: NextFunction) => Res;

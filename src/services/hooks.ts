@@ -13,23 +13,19 @@ interface Hooks<T> {
 
 export const hooks = <T>(collection: COLLECTION): Hooks<T> => {
   return {
-    createOne: (db: DAO, document: T): HTTPEither<Write<Saved<T>>> => {
-      return tryCatch(async () => await db(collection).insertOne(document), badGateway);
-    },
-    readOne: (db: DAO, filter: Partial<Saved<T>>): HTTPEither<Nullable<Saved<T>>> => {
-      return tryCatch(async () => await db(collection).findOne(filter), badGateway);
-    },
-    deleteOne: (db: DAO, document: Partial<Saved<T>>): HTTPEither<Del<Saved<T>>> => {
-      return tryCatch(async () => db(collection).findOneAndDelete(document), badGateway);
-    },
-    readMany: (db: DAO, filter: Partial<Saved<T>>): HTTPEither<Saved<T>[]> => {
-      return tryCatch(
+    createOne: (db: DAO, document: T): HTTPEither<Write<Saved<T>>> =>
+      tryCatch(async () => await db(collection).insertOne(document), badGateway),
+    readOne: (db: DAO, filter: Partial<Saved<T>>): HTTPEither<Nullable<Saved<T>>> =>
+      tryCatch(async () => await db(collection).findOne(filter), badGateway),
+    deleteOne: (db: DAO, document: Partial<Saved<T>>): HTTPEither<Del<Saved<T>>> =>
+      tryCatch(async () => db(collection).findOneAndDelete(document), badGateway),
+    readMany: (db: DAO, filter: Partial<Saved<T>>): HTTPEither<Saved<T>[]> =>
+      tryCatch(
         async () =>
           await db(collection)
             .find(filter)
             .toArray(),
         badGateway
-      );
-    }
+      )
   };
 };

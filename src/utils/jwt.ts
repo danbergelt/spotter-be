@@ -9,9 +9,8 @@ import { tryCatch } from 'fp-ts/lib/Either';
 const { REF_SECRET, REF_EXPIRE, JWT_SECRET, JWT_EXPIRE } = process.env;
 
 // verifies a JWT with the passed-in secret
-export const verifyJwt = (token: string, sec: string, verify = jwt.verify): SyncEither<Token> => {
-  return tryCatch(() => verify(token, sec) as Token, unauthorized);
-};
+export const verifyJwt = (token: string, sec: string, verify = jwt.verify): SyncEither<Token> =>
+  tryCatch(() => verify(token, sec) as Token, unauthorized);
 
 // generates an auth token
 export const token = (_id: ObjectID, tokenFactory = jwt): string =>

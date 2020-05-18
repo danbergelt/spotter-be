@@ -13,8 +13,6 @@ export const validate = <T>(schema: ObjectSchema, object: T): HTTPEither<T> => {
       async () => await schema.validate(object),
       error => validationErr((error as ValidationError).message)
     ),
-    map(object => {
-      return { ...object } as T;
-    })
+    map(object => (object as unknown) as T)
   );
 };
