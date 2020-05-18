@@ -7,6 +7,8 @@ export const SCHEMAS = {
   EXERCISES: 'EXERCISES'
 } as const;
 
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const HEX_COLOR = /^#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b$/i;
 
 // TODO --> either tighten up this regex or rely on a third party for "mmm dd yyyy"

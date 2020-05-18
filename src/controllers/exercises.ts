@@ -3,20 +3,21 @@ import { CREATED, BAD_REQUEST, OK, NOT_FOUND } from 'http-status-codes';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { authenticate } from '../services/authenticate';
 import { validate } from '../services/validate';
-import { schema } from '../validators';
-import { SCHEMAS, COLLECTIONS } from '../utils/constants';
+import { COLLECTIONS } from '../utils/constants';
 import { chain, fold, left, right, map, fromEither } from 'fp-ts/lib/TaskEither';
 import { hooks } from '../services/hooks';
-import { Req, Owner } from '../types';
+import { Req, Raw } from '../types';
 import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/http';
 import { fromNullable } from 'fp-ts/lib/Either';
+import * as D from 'io-ts/lib/Decoder';
+import { exerciseDecoder } from '../validators/decoders';
 
-const { EXERCISES } = SCHEMAS;
+const { EXERCISES } = COLLECTIONS;
 
 const isExerciseNull = fromNullable(e('Exercise not found', NOT_FOUND));
-const { readMany, deleteOne, readOne, createOne } = hooks<Exercise>(COLLECTIONS.EXERCISES);
+const { readMany, deleteOne, readOne, createOne } = hooks<Exercise>(EXERCISES);
 
 export const readExercises = resolver(async (req: Req<{}>, res) => {
   const { db } = req.app.locals;
@@ -48,12 +49,12 @@ export const deleteExercise = resolver(async (req: Req<{}>, res) => {
   )();
 });
 
-export const postExercise = resolver(async (req: Req<RawExercise>, res) => {
+export const postExercise = resolver(async (req: Req<Raw<Exercise>>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
     authenticate(db, req),
-    chain(ex => validate(schema(EXERCISES), ex)),
+    chain(ex => fromEither(validate(exerciseDecoder, ex))),
     chain(ex =>
       pipe(
         readOne(db, ex),
@@ -69,10 +70,4 @@ export const postExercise = resolver(async (req: Req<RawExercise>, res) => {
   )();
 });
 
-export type RawExercise = {
-  name: string;
-  pr?: number;
-  prDate?: string;
-};
-
-export type Exercise = RawExercise & Owner;
+export type Exercise = D.TypeOf<typeof exerciseDecoder>;

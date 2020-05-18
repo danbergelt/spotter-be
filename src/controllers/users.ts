@@ -1,10 +1,9 @@
-import { schema } from '../validators';
 import { hooks } from '../services/hooks';
 import { resolver } from '../utils/express';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain, fold, fromEither, right, left, map } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
-import { COOKIE_NAME, EMAILS, SCHEMAS, COLLECTIONS } from '../utils/constants';
+import { COOKIE_NAME, EMAILS, COLLECTIONS } from '../utils/constants';
 import { OK, BAD_REQUEST } from 'http-status-codes';
 import { _, invalidCredentials } from '../utils/errors';
 import { Req } from '../types';
@@ -17,22 +16,24 @@ import { digestToken } from '../utils/digestToken';
 import { verifyEncryption, encrypt } from '../utils/bcrypt';
 import { e, parseWrite, metadata, success, failure } from '../utils/parsers';
 import { Response } from 'express';
+import * as D from 'io-ts/lib/Decoder';
+import { userDecoder, contactDecoder } from '../validators/decoders';
 
 // destructured constants
 const { REF_SECRET } = process.env;
 const { TEAM, NO_REPLY, CONTACT } = EMAILS;
-const { USERS, CONTACT: CONTACT_SCHEMA } = SCHEMAS;
+const { USERS } = COLLECTIONS;
 
 // compositions
 const isUserNull = fromNullable(invalidCredentials());
 const isCookieNull = fromNullable(_());
-const { readOne, createOne } = hooks<User>(COLLECTIONS.USERS);
+const { readOne, createOne } = hooks<User>(USERS);
 
 export const contact = resolver(async (req: Req<Contact>, res) => {
   const { name, email, subject, message } = req.body;
 
   return await pipe(
-    validate(schema(CONTACT_SCHEMA), req.body),
+    fromEither(validate(contactDecoder, req.body)),
     chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
     chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
     fold(
@@ -47,7 +48,7 @@ export const login = resolver(async (req: Req<User>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
-    validate(schema(USERS), req.body),
+    fromEither(validate(userDecoder, req.body)),
     chain(user => readOne(db, { email: user.email })),
     chain(user => fromEither(isUserNull(user))),
     chain(user =>
@@ -67,7 +68,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
-    validate(schema(USERS), req.body),
+    fromEither(validate(userDecoder, req.body)),
     chain(() => readOne(db, { email: req.body.email })),
     chain(user => (!user ? right(req.body) : left(e('User already exists', BAD_REQUEST)))),
     chain(user => encrypt(user.password)),
@@ -98,14 +99,5 @@ export const logout = (_: Req<{}>, res: Response): Response =>
   pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
 
 // TYPES
-export interface Contact {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
-
-export interface User {
-  email: string;
-  password: string;
-}
+export type Contact = D.TypeOf<typeof contactDecoder>;
+export type User = D.TypeOf<typeof userDecoder>;

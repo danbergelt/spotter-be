@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { ObjectID } from 'mongodb';
 import { CookieOptions } from 'express';
 import { COOKIE_NAME } from './constants';
-import { SyncEither, Token } from 'src/types';
+import { SyncEither, Token } from '../types';
 import { unauthorized } from './errors';
 import { tryCatch } from 'fp-ts/lib/Either';
 

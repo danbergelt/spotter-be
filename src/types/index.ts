@@ -25,3 +25,5 @@ export type Del<T> = FindAndModifyWriteOpResultObject<Saved<T>>;
 export type Saved<T> = { _id: ObjectID } & T;
 
 export type Owner = { user: ObjectID };
+
+export type Raw<T> = Omit<T, 'user'>;

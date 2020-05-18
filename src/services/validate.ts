@@ -1,18 +1,13 @@
-import { ObjectSchema, ValidationError } from 'yup';
-import { tryCatch, map } from 'fp-ts/lib/TaskEither';
-import { validationErr } from '../utils/errors';
-import { HTTPEither } from '../types';
+import { mapLeft, left } from 'fp-ts/lib/Either';
+import { validationErr, serverError } from '../utils/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
+import * as D from 'io-ts/lib/Decoder';
+import { SyncEither } from '../types';
 
-// validating middleware. accepts a schema and validates the request body.
-// the request is then either pushed to the next mw on the stack or diverted to the error middleware
-
-export const validate = <T>(schema: ObjectSchema, object: T): HTTPEither<T> => {
-  return pipe(
-    tryCatch(
-      async () => await schema.validate(object),
-      error => validationErr((error as ValidationError).message)
-    ),
-    map(object => (object as unknown) as T)
-  );
-};
+export const validate = <T>(decoder: D.Decoder<T> | null, object: T): SyncEither<T> =>
+  !decoder
+    ? left(serverError())
+    : pipe(
+        decoder.decode(object),
+        mapLeft(errors => validationErr(errors[0].forest[0].value))
+      );
