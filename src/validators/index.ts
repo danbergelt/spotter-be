@@ -7,7 +7,6 @@ type CASE = typeof SCHEMAS[keyof typeof SCHEMAS];
 const { equals }: Eq<CASE> = { equals: (a, b) => a === b };
 
 // pattern matcher that returns a schema by case
-// TODO --> namespace into an NPM package and share between FE/BE
 export const schema = (CASE: CASE): ObjectSchema => {
   return equals(CASE, SCHEMAS.EXERCISES)
     ? object(exercise).noUnknown()

@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain, fromEither } from 'fp-ts/lib/TaskEither';
-import { verifyJwt } from './verifiers';
-import { mongofy } from './mongofy';
+import { verifyJwt } from './jwt';
+import { mongofy } from './parsers';
 import { hooks } from '../services/hooks';
 import { unauthorized } from './errors';
 import { fromNullable } from 'fp-ts/lib/Either';

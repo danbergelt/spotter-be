@@ -1,26 +1,22 @@
 import { schema } from '../validators';
 import { hooks } from '../services/hooks';
-import { resolver, Fn } from '../utils/resolver';
+import { resolver } from '../utils/express';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain, fold, fromEither, right, left, map } from 'fp-ts/lib/TaskEither';
 import { of } from 'fp-ts/lib/Task';
-import { sendAuth } from '../utils/sendAuth';
 import { COOKIE_NAME, EMAILS, SCHEMAS, COLLECTIONS } from '../utils/constants';
-import { success, failure } from '../utils/httpResponses';
 import { OK, BAD_REQUEST } from 'http-status-codes';
 import { _, invalidCredentials } from '../utils/errors';
 import { Req } from '../types';
 import { sendMail } from '../services/sendMail';
 import { confirmContactMsg, contactMsg } from '../utils/emailTemplates';
-import { metadata } from '../utils/metadata';
-import { sendError } from '../utils/sendError';
+import { sendError, sendAuth } from '../utils/http';
 import { validate } from '../services/validate';
 import { fromNullable } from 'fp-ts/lib/Either';
 import { digestToken } from '../utils/digestToken';
-import { encrypt } from '../utils/encrypt';
-import { verifyEncryption } from '../utils/verifiers';
-import { parseWrite } from '../utils/parseWrite';
-import { e } from '../utils/e';
+import { verifyEncryption, encrypt } from '../utils/bcrypt';
+import { e, parseWrite, metadata, success, failure } from '../utils/parsers';
+import { Response } from 'express';
 
 // destructured constants
 const { REF_SECRET } = process.env;
@@ -98,7 +94,7 @@ export const refresh = resolver(async (req, res) => {
   )();
 });
 
-export const logout: Fn = (_, res) =>
+export const logout = (_: Req<{}>, res: Response): Response =>
   pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
 
 // TYPES

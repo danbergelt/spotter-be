@@ -2,7 +2,7 @@ import { tryCatch } from 'fp-ts/lib/TaskEither';
 import { serverError } from '../utils/errors';
 import { HTTPEither } from '../types';
 import Mailgun from 'mailgun-js';
-import { MetaData } from '../utils/metadata';
+import { MetaData } from '../utils/parsers';
 
 const { MG_KEY, MG_DOMAIN, TESTING } = process.env;
 

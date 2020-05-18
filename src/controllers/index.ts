@@ -1,5 +1,5 @@
 import express from 'express';
-import { path } from '../utils/path';
+import { path } from '../utils/express';
 import { postExercise, deleteExercise, readExercises } from './exercises';
 import { contact, login, registration, refresh, logout } from './users';
 

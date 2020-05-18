@@ -1,7 +1,7 @@
 import { use, request } from 'chai';
 import http from 'chai-http';
 import server from '../../../index';
-import { path } from '../../../utils/path';
+import { path } from '../../../utils/express';
 import assert from 'assert';
 
 use(http);
