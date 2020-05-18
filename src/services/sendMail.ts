@@ -15,8 +15,7 @@ const mailgunInstance = new Mailgun({
 });
 
 // send an email with the information from the provided metadata
-export const sendMail = (metadata: MetaData, mg = mailgunInstance): HTTPEither<void> => {
-  return tryCatch(async () => {
-    await mg.messages().send(metadata);
-  }, serverError);
-};
+export const sendMail = (metadata: MetaData, mg = mailgunInstance): HTTPEither<Response> =>
+  tryCatch(async () => await mg.messages().send(metadata), serverError);
+
+type Response = Mailgun.messages.SendResponse;

@@ -21,6 +21,7 @@
     "hpp": "^0.2.3",
     "http-status-codes": "^1.4.0",
     "husky": "^4.2.0",
+    "io-ts": "^2.2.2",
     "is-hexcolor": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "lint-staged": "^10.0.2",

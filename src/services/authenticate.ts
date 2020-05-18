@@ -8,19 +8,20 @@ import { digestToken } from '../utils/digestToken';
 
 const { JWT_SECRET } = process.env;
 
-const isNull = fromNullable(unauthorized());
+const isAuthNull = fromNullable(unauthorized());
 
 // auth helper used to protect private endpoints
 export const authenticate = <T>(db: DAO, req: Req<T>, dg = digestToken): HTTPEither<Owner & T> => {
   const { authorization: auth } = req.headers;
 
-  // extract token from header, verify as a JWT, verify the decoded id, and push to next middleware
+  // extract token from header, digest the JWT, and push to next middleware
   return pipe(
-    fromEither(isNull(auth)),
-    chain(auth => (auth.startsWith('Bearer') ? right(auth.split(' ')[1]) : left(unauthorized()))),
+    fromEither(isAuthNull(auth)),
+    chain(auth => (auth.startsWith('Bearer') ? right(auth) : left(unauthorized()))),
+    map(bearer => bearer.split(' ')[1]),
     chain(token => dg(token, db, String(JWT_SECRET))),
-    map(({ _id }) => {
-      return { ...req.body, user: _id };
+    map(user => {
+      return { ...req.body, user: user._id };
     })
   );
 };
