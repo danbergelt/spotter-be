@@ -16,7 +16,7 @@ import { digestToken } from '../utils/digestToken';
 import { verifyEncryption, encrypt } from '../utils/bcrypt';
 import { e, parseWrite, metadata, success, failure } from '../utils/parsers';
 import { Response } from 'express';
-import { userDecoder, contactDecoder, User, Contact } from '../validators/decoders';
+import { userDecoder, contactDecoder, User, Contact, Saved } from '../validators/decoders';
 import { ObjectID } from 'mongodb';
 
 // destructured constants
@@ -27,7 +27,7 @@ const { USERS } = COLLECTIONS;
 // compositions
 const isUserNull = fromNullable(invalidCredentials());
 const isCookieNull = fromNullable(_());
-const { readOne, createOne } = hooks<User>(USERS);
+const { readOne, createOne } = hooks<Saved<User>>(USERS);
 
 export const contact = resolver(async (req: Req<Contact>, res) => {
   const { name, email, subject, message } = req.body;
@@ -81,7 +81,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
   )();
 });
 
-export const refresh = resolver(async (req, res) => {
+export const refresh = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
   const cookie: string | null = req.cookies.ref;
 
@@ -95,5 +95,5 @@ export const refresh = resolver(async (req, res) => {
   )();
 });
 
-export const logout = (_: Req<{}>, res: Response): Response =>
+export const logout = (_: Req, res: Response): Response =>
   pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
