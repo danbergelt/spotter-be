@@ -6,9 +6,9 @@ import { hooks } from '../services/hooks';
 import { unauthorized } from './errors';
 import { fromNullable } from 'fp-ts/lib/Either';
 import { DAO } from '../index.types';
-import { HTTPEither, Saved } from '../types';
+import { HTTPEither } from '../types';
 import { COLLECTIONS } from './constants';
-import { User } from '../validators/decoders';
+import { User, Saved } from '../validators/decoders';
 
 const { readOne } = hooks<User>(COLLECTIONS.USERS);
 const deps = { mongofy, readOne, verifyJwt };
@@ -22,7 +22,7 @@ export const digestToken = (raw: string, db: DAO, sec: string, d = deps): HTTPEi
   return pipe(
     fromEither(verifyJwt(raw, sec)),
     chain(jwt => fromEither(mongofy(jwt._id))),
-    chain(_id => readOne(db, { _id })),
+    chain(_id => readOne(db, { _id } as Saved)),
     chain(user => fromEither(isUserNull(user)))
   );
 };

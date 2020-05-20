@@ -5,15 +5,14 @@ import { HTTPEither, Req } from '../types';
 import { DAO } from '../index.types';
 import { fromNullable } from 'fp-ts/lib/Either';
 import { digestToken } from '../utils/digestToken';
-import { Owner } from 'src/validators/decoders';
-import { ObjectId } from 'mongodb';
+import { Owned } from '../validators/decoders';
 
 const { JWT_SECRET } = process.env;
 
 const isAuthNull = fromNullable(unauthorized());
 
 // auth helper used to protect private endpoints
-export const authenticate = <T>(db: DAO, req: Req<T>, dg = digestToken): HTTPEither<Owner & T> => {
+export const authenticate = <T>(db: DAO, req: Req<T>, dg = digestToken): HTTPEither<Owned<T>> => {
   const { authorization: auth } = req.headers;
 
   // extract token from header, digest the JWT, and push to next middleware

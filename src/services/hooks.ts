@@ -2,7 +2,8 @@ import { tryCatch } from 'fp-ts/lib/TaskEither';
 import { DAO } from '../index.types';
 import { COLLECTION } from '../utils/constants';
 import { badGateway } from '../utils/errors';
-import { HTTPEither, Write, Saved, Nullable, Del } from '../types';
+import { HTTPEither, Write, Nullable, Del } from '../types';
+import { Saved } from 'src/validators/decoders';
 
 interface Hooks<T> {
   createOne: (db: DAO, document: T) => HTTPEither<Write<Saved<T>>>;

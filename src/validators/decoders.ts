@@ -75,5 +75,8 @@ export const exerciseDecoder = t.exact(
 
 export type Exercise = t.TypeOf<typeof exerciseDecoder>;
 
-const Owner = t.exact(t.type({ user: withMessage(OId, () => 'Invalid Id') }));
-export type Owner = t.TypeOf<typeof Owner>;
+export const Owner = t.exact(t.type({ user: withMessage(OId, () => 'Invalid id') }));
+export type Owned<T = {}> = t.TypeOf<typeof Owner> & T;
+
+export const Saved = t.exact(t.type({ _id: withMessage(OId, () => 'Invalid id') }));
+export type Saved<T = {}> = t.TypeOf<typeof Saved> & T;

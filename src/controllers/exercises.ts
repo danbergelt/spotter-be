@@ -11,7 +11,7 @@ import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/http';
 import { fromNullable } from 'fp-ts/lib/Either';
-import { exerciseDecoder, Exercise } from '../validators/decoders';
+import { exerciseDecoder, Exercise, Saved } from '../validators/decoders';
 
 const { EXERCISES } = COLLECTIONS;
 
@@ -23,7 +23,7 @@ export const readExercises = resolver(async (req: Req<{}>, res) => {
 
   return await pipe(
     authenticate(db, req),
-    chain(user => readMany(db, user as Owner)),
+    chain(user => readMany(db, user)),
     fold(
       error => of(sendError(error, res)),
       exercises => of(res.status(OK).json(success({ exercises })))
@@ -38,7 +38,7 @@ export const deleteExercise = resolver(async (req: Req<{}>, res) => {
   return await pipe(
     authenticate(db, req),
     chain(() => fromEither(mongofy(id))),
-    chain(_id => deleteOne(db, { _id })),
+    chain(_id => deleteOne(db, { _id } as Saved)),
     map(del => parseDelete(del)),
     chain(exercise => fromEither(isExerciseNull(exercise))),
     fold(
