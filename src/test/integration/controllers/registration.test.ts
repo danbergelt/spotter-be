@@ -31,7 +31,7 @@ describe('registration', () => {
       .post(p)
       .send({ password: 'foobar' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Email is required');
+    assert.equal(res.body.error, 'Invalid email');
   });
 
   it('errors out if password is too short', async () => {
@@ -39,7 +39,7 @@ describe('registration', () => {
       .post(p)
       .send({ email: 'will@fail.com', password: 'foo' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Password too short (6 char minimum)');
+    assert.equal(res.body.error, 'Password too short (6 char min)');
   });
 
   it('errors out with missing password', async () => {
@@ -47,7 +47,7 @@ describe('registration', () => {
       .post(p)
       .send({ email: 'will@fail.com' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Password is required');
+    assert.equal(res.body.error, 'Invalid password');
   });
 
   it('errors out if user already exists', async () => {
