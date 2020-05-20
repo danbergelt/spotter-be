@@ -5,7 +5,7 @@ import { authenticate } from '../services/authenticate';
 import { validate } from '../services/validate';
 import { COLLECTIONS } from '../utils/constants';
 import { chain, fold, left, right, map, fromEither } from 'fp-ts/lib/TaskEither';
-import { hooks } from '../services/hooks';
+import { hooks, Entity } from '../services/hooks';
 import { Req, Raw } from '../types';
 import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
@@ -15,10 +15,11 @@ import { exerciseDecoder, Exercise, Saved } from '../validators/decoders';
 
 const { EXERCISES } = COLLECTIONS;
 
+// compositions
 const isExerciseNull = fromNullable(e('Exercise not found', NOT_FOUND));
-const { readMany, deleteOne, readOne, createOne } = hooks<Exercise>(EXERCISES);
+const { readMany, deleteOne, readOne, createOne } = hooks<Entity<Exercise>>(EXERCISES);
 
-export const readExercises = resolver(async (req: Req<{}>, res) => {
+export const readExercises = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
@@ -31,7 +32,7 @@ export const readExercises = resolver(async (req: Req<{}>, res) => {
   )();
 });
 
-export const deleteExercise = resolver(async (req: Req<{}>, res) => {
+export const deleteExercise = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
   const { id } = req.params;
 
