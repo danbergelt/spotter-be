@@ -16,8 +16,7 @@ import { digestToken } from '../utils/digestToken';
 import { verifyEncryption, encrypt } from '../utils/bcrypt';
 import { e, parseWrite, metadata, success, failure } from '../utils/parsers';
 import { Response } from 'express';
-import * as D from 'io-ts/lib/Decoder';
-import { userDecoder, contactDecoder } from '../validators/decoders';
+import { userDecoder, contactDecoder, User, Contact } from '../validators/decoders';
 
 // destructured constants
 const { REF_SECRET } = process.env;
@@ -72,7 +71,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
     chain(() => readOne(db, { email: req.body.email })),
     chain(user => (!user ? right(req.body) : left(e('User already exists', BAD_REQUEST)))),
     chain(user => encrypt(user.password)),
-    chain(password => createOne(db, { ...req.body, password })),
+    chain(password => createOne(db, { ...req.body, password } as User)),
     map(write => parseWrite(write)),
     fold(
       error => of(sendError(error, res)),
@@ -97,7 +96,3 @@ export const refresh = resolver(async (req, res) => {
 
 export const logout = (_: Req<{}>, res: Response): Response =>
   pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));
-
-// TYPES
-export type Contact = D.TypeOf<typeof contactDecoder>;
-export type User = D.TypeOf<typeof userDecoder>;

@@ -26,7 +26,7 @@ describe('contact form', () => {
       .post(p)
       .send({ message: 'foo', subject: 'bar', email: 'foo@bar.com' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Name is required');
+    assert.equal(res.body.error, 'Invalid name');
   });
 
   it('errors out email is not present', async () => {
@@ -34,7 +34,7 @@ describe('contact form', () => {
       .post(p)
       .send({ message: 'foo', subject: 'bar', name: 'baz' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Email is required');
+    assert.equal(res.body.error, 'Invalid email');
   });
 
   it('errors out subject is not present', async () => {
@@ -42,7 +42,7 @@ describe('contact form', () => {
       .post(p)
       .send({ message: 'foo', email: 'foo@bar.com', name: 'bar' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Subject is required');
+    assert.equal(res.body.error, 'Invalid subject');
   });
 
   it('errors out if message is not present', async () => {
@@ -50,6 +50,6 @@ describe('contact form', () => {
       .post(p)
       .send({ name: 'foo', subject: 'bar', email: 'foo@bar.com' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Message is required');
+    assert.equal(res.body.error, 'Invalid message');
   });
 });

@@ -7,8 +7,8 @@ import { unauthorized } from './errors';
 import { fromNullable } from 'fp-ts/lib/Either';
 import { DAO } from '../index.types';
 import { HTTPEither, Saved } from '../types';
-import { User } from '../controllers/users';
 import { COLLECTIONS } from './constants';
+import { User } from '../validators/decoders';
 
 const { readOne } = hooks<User>(COLLECTIONS.USERS);
 const deps = { mongofy, readOne, verifyJwt };

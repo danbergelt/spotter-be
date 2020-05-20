@@ -1,10 +1,12 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { right, left, chain, map, fromEither } from 'fp-ts/lib/TaskEither';
 import { unauthorized } from '../utils/errors';
-import { HTTPEither, Req, Owner } from '../types';
+import { HTTPEither, Req } from '../types';
 import { DAO } from '../index.types';
 import { fromNullable } from 'fp-ts/lib/Either';
 import { digestToken } from '../utils/digestToken';
+import { Owner } from 'src/validators/decoders';
+import { ObjectId } from 'mongodb';
 
 const { JWT_SECRET } = process.env;
 

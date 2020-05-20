@@ -38,7 +38,7 @@ describe('post exercise', () => {
       .set('Authorization', `Bearer ${t}`)
       .send({ foo: 'bar' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Exercise name is required');
+    assert.equal(res.body.error, 'Invalid name');
   });
 
   it('errors out if exercise name is too long', async () => {

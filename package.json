@@ -22,6 +22,8 @@
     "http-status-codes": "^1.4.0",
     "husky": "^4.2.0",
     "io-ts": "^2.2.2",
+    "io-ts-extra": "^0.7.0",
+    "io-ts-types": "^0.5.6",
     "is-hexcolor": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "lint-staged": "^10.0.2",

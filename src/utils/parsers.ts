@@ -4,6 +4,8 @@ import { ObjectId, ObjectID } from 'mongodb';
 import { left, right } from 'fp-ts/lib/Either';
 import { BAD_REQUEST } from 'http-status-codes';
 import { SyncEither } from '../types';
+import { Errors } from 'io-ts';
+import { validationErr } from './errors';
 
 const { isValid } = ObjectId;
 
@@ -42,6 +44,9 @@ export const e = (message: string, status: number): E => {
 // convert a 24 character hex string into a mongo ObjectID
 export const mongofy = (_id: string): SyncEither<ObjectID> =>
   isValid(_id) ? right(new ObjectId(_id)) : left(e('Invalid resource id', BAD_REQUEST));
+
+export const parseValidationError = (errors: Errors): E =>
+  validationErr(errors[0].message ? errors[0].message : 'Validation error');
 
 export type Success<T> = {
   success: true;

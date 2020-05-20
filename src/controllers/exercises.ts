@@ -11,8 +11,7 @@ import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/http';
 import { fromNullable } from 'fp-ts/lib/Either';
-import * as D from 'io-ts/lib/Decoder';
-import { exerciseDecoder } from '../validators/decoders';
+import { exerciseDecoder, Exercise } from '../validators/decoders';
 
 const { EXERCISES } = COLLECTIONS;
 
@@ -24,7 +23,7 @@ export const readExercises = resolver(async (req: Req<{}>, res) => {
 
   return await pipe(
     authenticate(db, req),
-    chain(user => readMany(db, user)),
+    chain(user => readMany(db, user as Owner)),
     fold(
       error => of(sendError(error, res)),
       exercises => of(res.status(OK).json(success({ exercises })))
@@ -69,5 +68,3 @@ export const postExercise = resolver(async (req: Req<Raw<Exercise>>, res) => {
     )
   )();
 });
-
-export type Exercise = D.TypeOf<typeof exerciseDecoder>;
