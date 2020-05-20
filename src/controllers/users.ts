@@ -28,12 +28,14 @@ const { USERS } = COLLECTIONS;
 const isUserNull = fromNullable(invalidCredentials());
 const isCookieNull = fromNullable(_());
 const { readOne, createOne } = hooks<Saved<User>>(USERS);
+const decodeUser = validate(userDecoder);
+const decodeContact = validate(contactDecoder);
 
 export const contact = resolver(async (req: Req<Contact>, res) => {
   const { name, email, subject, message } = req.body;
 
   return await pipe(
-    fromEither(validate(contactDecoder, req.body)),
+    fromEither(decodeContact(req.body)),
     chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
     chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
     fold(
@@ -48,7 +50,7 @@ export const login = resolver(async (req: Req<User>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
-    fromEither(validate(userDecoder, req.body)),
+    fromEither(decodeUser(req.body)),
     chain(user => readOne(db, { email: user.email })),
     chain(user => fromEither(isUserNull(user))),
     chain(user =>
@@ -68,7 +70,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
-    fromEither(validate(userDecoder, req.body)),
+    fromEither(decodeUser(req.body)),
     chain(() => readOne(db, { email: req.body.email })),
     chain(user => (!user ? right(req.body) : left(e('User already exists', BAD_REQUEST)))),
     chain(user => encrypt(user.password)),

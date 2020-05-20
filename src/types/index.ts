@@ -22,5 +22,3 @@ export type Nullable<T> = T | null;
 export type Write<T> = InsertOneWriteOpResult<Saved<T>>;
 
 export type Del<T> = FindAndModifyWriteOpResultObject<Saved<T>>;
-
-export type Raw<T> = Omit<T, 'user'>;

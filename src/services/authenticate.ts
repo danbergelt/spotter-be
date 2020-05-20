@@ -12,12 +12,10 @@ const { JWT_SECRET } = process.env;
 const isAuthNull = fromNullable(unauthorized());
 
 // auth helper used to protect private endpoints
-export const authenticate = <T>(db: DAO, req: Req<T>, dg = digestToken): HTTPEither<Owned<T>> => {
-  const { authorization: auth } = req.headers;
-
+export const authenticate = <T>(db: DAO, req: Req<T>, dg = digestToken): HTTPEither<Owned<T>> =>
   // extract token from header, digest the JWT, and push to next middleware
-  return pipe(
-    fromEither(isAuthNull(auth)),
+  pipe(
+    fromEither(isAuthNull(req.headers.authorization)),
     chain(auth => (auth.startsWith('Bearer') ? right(auth) : left(unauthorized()))),
     map(bearer => bearer.split(' ')[1]),
     chain(token => dg(token, db, String(JWT_SECRET))),
@@ -25,4 +23,3 @@ export const authenticate = <T>(db: DAO, req: Req<T>, dg = digestToken): HTTPEit
       return { ...req.body, user: user._id };
     })
   );
-};

@@ -10,7 +10,7 @@ import { HTTPEither } from '../types';
 import { COLLECTIONS } from './constants';
 import { User, Saved } from '../validators/decoders';
 
-const { readOne } = hooks<User>(COLLECTIONS.USERS);
+const { readOne } = hooks<SU>(COLLECTIONS.USERS);
 const deps = { mongofy, readOne, verifyJwt };
 const isUserNull = fromNullable(unauthorized());
 

@@ -1,6 +1,8 @@
-import { Email, Password, Exercise } from './brands';
+import brands from './brands';
 import * as t from 'io-ts';
 import { withMessage } from 'io-ts-types/lib/withMessage';
+
+const { Email, Password, Exercise } = brands;
 
 // checks a string, returns an error message
 export const isValidString = (x: string): t.StringC => withMessage(t.string, () => `Invalid ${x}`);

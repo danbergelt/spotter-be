@@ -1,50 +1,36 @@
 import * as t from 'io-ts';
 import { DATE_REGEX, EMAIL_REGEX } from 'src/utils/constants';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
-// empty symbols to map our custom types onto
-
-interface StringDate {
-  readonly Date: unique symbol;
-}
-
-interface Id {
-  readonly Id: unique symbol;
-}
-
-interface Email {
-  readonly Email: unique symbol;
-}
-
-interface PW {
-  readonly PW: unique symbol;
-}
-
-interface Ex {
-  readonly Ex: unique symbol;
-}
-
-// the branded types
-
-export const StringDate = t.brand(
+const StrDate = t.brand(
   t.string,
-  (d): d is t.Branded<string, StringDate> => DATE_REGEX.test(d),
-  'Date'
+  (d): d is t.Branded<string, { readonly D: unique symbol }> => DATE_REGEX.test(d),
+  'D'
 );
 
 // TODO --> need to fix this type, io-ts cannot match actual ObjectIDs with the branded version (causing lots of typecasting)
-export const OId = t.brand(
+const OId = t.brand(
   t.object,
-  (o): o is t.Branded<ObjectID, Id> => o instanceof ObjectID,
+  (o): o is t.Branded<ObjectId, { readonly Id: unique symbol }> => o instanceof ObjectId,
   'Id'
 );
 
-export const Exercise = t.brand(t.string, (e): e is t.Branded<string, Ex> => e.length < 26, 'Ex');
-
-export const Email = t.brand(
+const Exercise = t.brand(
   t.string,
-  (e): e is t.Branded<string, Email> => EMAIL_REGEX.test(e),
+  (e): e is t.Branded<string, { readonly Exercise: unique symbol }> => e.length < 26,
+  'Exercise'
+);
+
+const Email = t.brand(
+  t.string,
+  (e): e is t.Branded<string, { readonly Email: unique symbol }> => EMAIL_REGEX.test(e),
   'Email'
 );
 
-export const Password = t.brand(t.string, (p): p is t.Branded<string, PW> => p.length > 5, 'PW');
+export const Password = t.brand(
+  t.string,
+  (p): p is t.Branded<string, { readonly PW: unique symbol }> => p.length > 5,
+  'PW'
+);
+
+export default { StrDate, OId, Exercise, Email, Password };
