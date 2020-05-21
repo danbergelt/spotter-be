@@ -8,5 +8,5 @@ import { ExactC, TypeC } from 'io-ts';
 export const validate = (decoder: ExactC<TypeC<any>>) => <T>(object: T): SyncEither<T> =>
   pipe(
     decoder.decode(object),
-    mapLeft(([e]) => validationErr(e.message ? e.message : 'Validation error'))
+    mapLeft(([{ message }]) => validationErr(message ? message : 'Validation error'))
   );

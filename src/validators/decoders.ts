@@ -4,7 +4,7 @@ import { optional } from 'io-ts-extra';
 import brands from './brands';
 import { ExerciseString, EmailString, PasswordString, isValidString } from './intersections';
 
-const { OId, StrDate } = brands;
+const { _id, StrDate } = brands;
 
 // raw user type
 export const userDecoder = t.exact(
@@ -33,15 +33,15 @@ export const exerciseDecoder = t.exact(
   })
 );
 
-// any input that has a 'user' as a foreign key
-export const Owner = t.exact(t.type({ user: withMessage(OId, () => 'Invalid user id') }));
+// any input that has a user as a foreign key
+export const ownerDecoder = t.exact(t.type({ user: withMessage(_id, () => 'Invalid user id') }));
 
 // any input that has a primary key
-export const Saved = t.exact(t.type({ _id: withMessage(OId, () => 'Invalid id') }));
+export const savedDecoder = t.exact(t.type({ _id: withMessage(_id, () => 'Invalid id') }));
 
 // statically inferred types
 export type User = t.TypeOf<typeof userDecoder>;
 export type Contact = t.TypeOf<typeof contactDecoder>;
 export type Exercise = t.TypeOf<typeof exerciseDecoder>;
-export type Owned<T = {}> = t.TypeOf<typeof Owner> & T;
-export type Saved<T = {}> = t.TypeOf<typeof Saved> & T;
+export type Owned<T = {}> = t.TypeOf<typeof ownerDecoder> & T;
+export type Saved<T = {}> = t.TypeOf<typeof savedDecoder> & T;

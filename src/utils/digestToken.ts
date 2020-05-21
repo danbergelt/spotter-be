@@ -22,7 +22,7 @@ export const digestToken = (raw: string, db: DAO, sec: string, d = deps): HTTPEi
   return pipe(
     fromEither(verifyJwt(raw, sec)),
     chain(jwt => fromEither(mongofy(jwt._id))),
-    chain(_id => readOne(db, { _id } as Saved)),
+    chain(_id => readOne(db, { _id })),
     chain(user => fromEither(isUserNull(user)))
   );
 };

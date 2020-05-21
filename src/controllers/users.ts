@@ -17,7 +17,6 @@ import { verifyEncryption, encrypt } from '../utils/bcrypt';
 import { e, parseWrite, metadata, success, failure } from '../utils/parsers';
 import { Response } from 'express';
 import { userDecoder, contactDecoder, User, Contact, Saved } from '../validators/decoders';
-import { ObjectID } from 'mongodb';
 
 // destructured constants
 const { REF_SECRET } = process.env;
@@ -61,7 +60,7 @@ export const login = resolver(async (req: Req<User>, res) => {
     ),
     fold(
       error => of(sendError(error, res)),
-      user => of(sendAuth(user._id as ObjectID, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });
@@ -78,7 +77,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
     map(write => parseWrite(write)),
     fold(
       error => of(sendError(error, res)),
-      user => of(sendAuth(user._id as ObjectID, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });
@@ -92,7 +91,7 @@ export const refresh = resolver(async (req: Req, res) => {
     chain(cookie => digestToken(cookie, db, String(REF_SECRET))),
     fold(
       error => of(res.status(error.status).json(failure({ token: null }))),
-      user => of(sendAuth(user._id as ObjectID, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });

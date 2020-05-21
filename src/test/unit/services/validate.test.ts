@@ -1,22 +1,20 @@
-// import { validate } from '../../../services/validate';
-// import { schema } from '../../../validators';
-// import { SCHEMAS } from '../../../utils/constants';
-// import { left, right } from 'fp-ts/lib/TaskEither';
-// import assert from 'assert';
+import { validate } from '../../../services/validate';
+import Sinon from 'sinon';
+import { right, left } from 'fp-ts/lib/Either';
+import assert from 'assert';
 
-// describe('validating middleware', () => {
-//   it('throws error on failed validation', async () => {
-//     const result = await validate(schema(SCHEMAS.USERS), { foo: 'bar' })();
-//     const expected = await left({ message: 'Password is required', status: 400 })();
-//     assert.deepStrictEqual(result, expected);
-//   });
+describe('validator', () => {
+  it('returns the original object on validation', () => {
+    const object = { foo: 'bar' };
+    const decoder = { decode: Sinon.stub().returns(right(object)) };
+    const result = validate(decoder as any)(object);
+    assert.deepStrictEqual(result, right(object));
+  });
 
-//   it('returns the data on a successful validation', async () => {
-//     const result = await validate(schema(SCHEMAS.USERS), {
-//       email: 'foo@bar.com',
-//       password: 'foobar'
-//     })();
-//     const expected = await right({ email: 'foo@bar.com', password: 'foobar' })();
-//     assert.deepStrictEqual(result, expected);
-//   });
-// });
+  it('returns a validation error on failed validation', () => {
+    const object = { foo: 'bar' };
+    const decoder = { decode: Sinon.stub().returns(left([{ message: 'foo' }])) };
+    const result = validate(decoder as any)(object);
+    assert.deepStrictEqual(result, left({ message: 'foo', status: 400 }));
+  });
+});

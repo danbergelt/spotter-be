@@ -11,7 +11,7 @@ import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/http';
 import { fromNullable } from 'fp-ts/lib/Either';
-import { exerciseDecoder, Exercise, Saved } from '../validators/decoders';
+import { exerciseDecoder, Exercise } from '../validators/decoders';
 
 const { EXERCISES } = COLLECTIONS;
 
@@ -40,7 +40,7 @@ export const deleteExercise = resolver(async (req: Req, res) => {
   return await pipe(
     authenticate(db, req),
     chain(() => fromEither(mongofy(id))),
-    chain(_id => deleteOne(db, { _id } as Saved)),
+    chain(_id => deleteOne(db, { _id })),
     map(del => parseDelete(del)),
     chain(exercise => fromEither(isExerciseNull(exercise))),
     fold(
