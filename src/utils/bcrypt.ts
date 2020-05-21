@@ -4,12 +4,12 @@ import { HTTPEither } from '../types';
 import { serverError } from './errors';
 
 // encrypts any string --> if it fails for some reason, return an HTTP error (should not fail encryption silently)
-export const encrypt = (string: string, bc = bcrypt): HTTPEither<string> =>
+export const hash = (string: string, bc = bcrypt): HTTPEither<string> =>
   tryCatch(async () => {
     const salt = await bc.genSalt(12);
     return await bc.hash(string, salt);
   }, serverError);
 
 // compares a string against an encrypted value
-export const verifyEncryption = (s: string, enc: string, bc = bcrypt): HTTPEither<boolean> =>
+export const compareHash = (s: string, enc: string, bc = bcrypt): HTTPEither<boolean> =>
   tryCatch(async () => await bc.compare(s, enc), serverError);
