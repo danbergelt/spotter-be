@@ -30,6 +30,7 @@ const { readOne, createOne } = hooks<User>(USERS);
 const decodeUser = validate(userDecoder);
 const decodeContact = validate(contactDecoder);
 
+// send a contact email to the spotter team
 export const contact = resolver(async (req: Req<Contact>, res) => {
   const { name, email, subject, message } = req.body;
 
@@ -44,6 +45,7 @@ export const contact = resolver(async (req: Req<Contact>, res) => {
   )();
 });
 
+// log in a user
 export const login = resolver(async (req: Req<User>, res) => {
   const { password } = req.body;
   const { db } = req.app.locals;
@@ -65,6 +67,7 @@ export const login = resolver(async (req: Req<User>, res) => {
   )();
 });
 
+// register a new user
 export const registration = resolver(async (req: Req<RawUser>, res) => {
   const { db } = req.app.locals;
 
@@ -82,6 +85,7 @@ export const registration = resolver(async (req: Req<RawUser>, res) => {
   )();
 });
 
+// submit a refresh request --> validate the refresh token, return a new auth token
 export const refresh = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
   const cookie: string | null = req.cookies.ref;
@@ -96,5 +100,6 @@ export const refresh = resolver(async (req: Req, res) => {
   )();
 });
 
+// log out a user --> clear the refresh token, return an undefined auth token
 export const logout = (_: Req, res: Response): Response =>
   pipe(res.clearCookie(COOKIE_NAME), res => res.status(OK).json(success()));

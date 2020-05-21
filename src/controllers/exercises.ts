@@ -20,6 +20,7 @@ const isExerciseNull = fromNullable(e('Exercise not found', NOT_FOUND));
 const { readMany, deleteOne, readOne, createOne } = hooks<Exercise>(EXERCISES);
 const decode = validate(exerciseDecoder);
 
+// get all exercises for a specific user
 export const readExercises = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
 
@@ -33,6 +34,7 @@ export const readExercises = resolver(async (req: Req, res) => {
   )();
 });
 
+// delete an exercise by id
 export const deleteExercise = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
   const { id } = req.params;
@@ -50,6 +52,7 @@ export const deleteExercise = resolver(async (req: Req, res) => {
   )();
 });
 
+// create a new exercise
 export const postExercise = resolver(async (req: Req<RawExercise>, res) => {
   const { db } = req.app.locals;
 

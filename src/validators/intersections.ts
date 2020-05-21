@@ -1,8 +1,13 @@
-import brands from './brands';
+import { Email, Password, Exercise, str } from './brands';
 import * as t from 'io-ts';
 import { withMessage } from 'io-ts-types/lib/withMessage';
 
-const { Email, Password, Exercise, str } = brands;
+/*== Intersections =====================================================
+
+Intersections allow us to combine individual io-ts type checks into one
+single type
+
+*/
 
 // checks a string, returns an error message
 export const isValidString = (x: string): typeof str => withMessage(str, () => `Invalid ${x}`);
