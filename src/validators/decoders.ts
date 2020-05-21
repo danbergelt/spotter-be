@@ -29,7 +29,8 @@ export const exerciseDecoder = t.exact(
   t.type({
     name: ExerciseString,
     pr: withMessage(optional(t.number), () => 'Invalid pr'),
-    prDate: withMessage(optional(StrDate), () => 'Invalid pr date')
+    prDate: withMessage(optional(StrDate), () => 'Invalid pr date'),
+    user: withMessage(_id, () => 'Invalid user id')
   })
 );
 
