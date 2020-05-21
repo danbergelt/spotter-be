@@ -6,18 +6,19 @@ import { validate } from '../services/validate';
 import { COLLECTIONS } from '../utils/constants';
 import { chain, fold, left, right, map, fromEither } from 'fp-ts/lib/TaskEither';
 import { hooks, Entity } from '../services/hooks';
-import { Req, Raw } from '../types';
+import { Req } from '../types';
 import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/http';
 import { fromNullable } from 'fp-ts/lib/Either';
-import { exerciseDecoder, Exercise, Saved } from '../validators/decoders';
+import { exerciseDecoder, Exercise } from '../validators/decoders';
 
 const { EXERCISES } = COLLECTIONS;
 
 // compositions
 const isExerciseNull = fromNullable(e('Exercise not found', NOT_FOUND));
 const { readMany, deleteOne, readOne, createOne } = hooks<Entity<Exercise>>(EXERCISES);
+const decode = validate(exerciseDecoder);
 
 export const readExercises = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
@@ -39,7 +40,7 @@ export const deleteExercise = resolver(async (req: Req, res) => {
   return await pipe(
     authenticate(db, req),
     chain(() => fromEither(mongofy(id))),
-    chain(_id => deleteOne(db, { _id } as Saved)),
+    chain(_id => deleteOne(db, { _id })),
     map(del => parseDelete(del)),
     chain(exercise => fromEither(isExerciseNull(exercise))),
     fold(
@@ -49,12 +50,12 @@ export const deleteExercise = resolver(async (req: Req, res) => {
   )();
 });
 
-export const postExercise = resolver(async (req: Req<Raw<Exercise>>, res) => {
+export const postExercise = resolver(async (req: Req<Exercise>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
     authenticate(db, req),
-    chain(ex => fromEither(validate(exerciseDecoder, ex))),
+    chain(ex => fromEither(decode(ex))),
     chain(ex =>
       pipe(
         readOne(db, ex),

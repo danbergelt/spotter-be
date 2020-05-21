@@ -17,7 +17,6 @@ import { verifyEncryption, encrypt } from '../utils/bcrypt';
 import { e, parseWrite, metadata, success, failure } from '../utils/parsers';
 import { Response } from 'express';
 import { userDecoder, contactDecoder, User, Contact, Saved } from '../validators/decoders';
-import { ObjectID } from 'mongodb';
 
 // destructured constants
 const { REF_SECRET } = process.env;
@@ -28,12 +27,14 @@ const { USERS } = COLLECTIONS;
 const isUserNull = fromNullable(invalidCredentials());
 const isCookieNull = fromNullable(_());
 const { readOne, createOne } = hooks<Saved<User>>(USERS);
+const decodeUser = validate(userDecoder);
+const decodeContact = validate(contactDecoder);
 
 export const contact = resolver(async (req: Req<Contact>, res) => {
   const { name, email, subject, message } = req.body;
 
   return await pipe(
-    fromEither(validate(contactDecoder, req.body)),
+    fromEither(decodeContact(req.body)),
     chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
     chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
     fold(
@@ -48,7 +49,7 @@ export const login = resolver(async (req: Req<User>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
-    fromEither(validate(userDecoder, req.body)),
+    fromEither(decodeUser(req.body)),
     chain(user => readOne(db, { email: user.email })),
     chain(user => fromEither(isUserNull(user))),
     chain(user =>
@@ -59,7 +60,7 @@ export const login = resolver(async (req: Req<User>, res) => {
     ),
     fold(
       error => of(sendError(error, res)),
-      user => of(sendAuth(user._id as ObjectID, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });
@@ -68,7 +69,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
   const { db } = req.app.locals;
 
   return await pipe(
-    fromEither(validate(userDecoder, req.body)),
+    fromEither(decodeUser(req.body)),
     chain(() => readOne(db, { email: req.body.email })),
     chain(user => (!user ? right(req.body) : left(e('User already exists', BAD_REQUEST)))),
     chain(user => encrypt(user.password)),
@@ -76,7 +77,7 @@ export const registration = resolver(async (req: Req<User>, res) => {
     map(write => parseWrite(write)),
     fold(
       error => of(sendError(error, res)),
-      user => of(sendAuth(user._id as ObjectID, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });
@@ -90,7 +91,7 @@ export const refresh = resolver(async (req: Req, res) => {
     chain(cookie => digestToken(cookie, db, String(REF_SECRET))),
     fold(
       error => of(res.status(error.status).json(failure({ token: null }))),
-      user => of(sendAuth(user._id as ObjectID, res))
+      user => of(sendAuth(user._id, res))
     )
   )();
 });

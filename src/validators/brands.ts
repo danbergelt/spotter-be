@@ -1,50 +1,45 @@
 import * as t from 'io-ts';
-import { DATE_REGEX, EMAIL_REGEX } from 'src/utils/constants';
-import { ObjectID } from 'mongodb';
+import { DATE_REGEX, EMAIL_REGEX } from '../utils/constants';
+import { ObjectId } from 'mongodb';
 
-// empty symbols to map our custom types onto
+// mongo object id
+const _id = new t.Type<ObjectId, ObjectId, unknown>(
+  '_id',
+  (i: unknown): i is ObjectId => i instanceof ObjectId,
+  (i, context) => (i instanceof ObjectId ? t.success(i) : t.failure(i, context)),
+  t.identity
+);
 
-interface StringDate {
-  readonly Date: unique symbol;
-}
+// custom string type that trims the input
+const str = new t.Type<string, string, unknown>(
+  'string',
+  (i: unknown): i is string => typeof i === 'string',
+  (i, context) => (typeof i === 'string' ? t.success(i.trim()) : t.failure(i, context)),
+  t.identity
+);
 
-interface Id {
-  readonly Id: unique symbol;
-}
-
-interface Email {
-  readonly Email: unique symbol;
-}
-
-interface PW {
-  readonly PW: unique symbol;
-}
-
-interface Ex {
-  readonly Ex: unique symbol;
-}
-
-// the branded types
-
-export const StringDate = t.brand(
-  t.string,
-  (d): d is t.Branded<string, StringDate> => DATE_REGEX.test(d),
+const StrDate = t.brand(
+  str,
+  (d): d is t.Branded<string, { readonly Date: unique symbol }> => DATE_REGEX.test(d),
   'Date'
 );
 
-// TODO --> need to fix this type, io-ts cannot match actual ObjectIDs with the branded version (causing lots of typecasting)
-export const OId = t.brand(
-  t.object,
-  (o): o is t.Branded<ObjectID, Id> => o instanceof ObjectID,
-  'Id'
+const Exercise = t.brand(
+  str,
+  (e): e is t.Branded<string, { readonly Exercise: unique symbol }> => e.length < 26,
+  'Exercise'
 );
 
-export const Exercise = t.brand(t.string, (e): e is t.Branded<string, Ex> => e.length < 26, 'Ex');
-
-export const Email = t.brand(
-  t.string,
-  (e): e is t.Branded<string, Email> => EMAIL_REGEX.test(e),
+const Email = t.brand(
+  str,
+  (e): e is t.Branded<string, { readonly Email: unique symbol }> => EMAIL_REGEX.test(e),
   'Email'
 );
 
-export const Password = t.brand(t.string, (p): p is t.Branded<string, PW> => p.length > 5, 'PW');
+export const Password = t.brand(
+  str,
+  (p): p is t.Branded<string, { readonly PW: unique symbol }> => p.length > 5,
+  'PW'
+);
+
+export default { StrDate, Exercise, Email, Password, str, _id };

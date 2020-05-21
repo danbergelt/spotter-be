@@ -10,7 +10,7 @@ import { HTTPEither } from '../types';
 import { COLLECTIONS } from './constants';
 import { User, Saved } from '../validators/decoders';
 
-const { readOne } = hooks<User>(COLLECTIONS.USERS);
+const { readOne } = hooks<SU>(COLLECTIONS.USERS);
 const deps = { mongofy, readOne, verifyJwt };
 const isUserNull = fromNullable(unauthorized());
 
@@ -22,7 +22,7 @@ export const digestToken = (raw: string, db: DAO, sec: string, d = deps): HTTPEi
   return pipe(
     fromEither(verifyJwt(raw, sec)),
     chain(jwt => fromEither(mongofy(jwt._id))),
-    chain(_id => readOne(db, { _id } as Saved)),
+    chain(_id => readOne(db, { _id })),
     chain(user => fromEither(isUserNull(user)))
   );
 };
