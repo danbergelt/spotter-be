@@ -1,10 +1,8 @@
 import * as t from 'io-ts';
 import { withMessage } from 'io-ts-types/lib/withMessage';
 import { optional } from 'io-ts-extra';
-import brands from './brands';
+import { _id, StrDate } from './brands';
 import { ExerciseString, EmailString, PasswordString, isValidString } from './intersections';
-
-const { _id, StrDate } = brands;
 
 // raw user type
 export const userDecoder = t.exact(
@@ -34,10 +32,10 @@ export const exerciseDecoder = t.exact(
   })
 );
 
-// any input that has a user as a foreign key
+// foreign key
 export const ownerDecoder = t.exact(t.type({ user: withMessage(_id, () => 'Invalid user id') }));
 
-// any input that has a primary key
+// primary key
 export const savedDecoder = t.exact(t.type({ _id: withMessage(_id, () => 'Invalid id') }));
 
 // statically inferred types

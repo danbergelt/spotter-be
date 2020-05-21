@@ -135,49 +135,61 @@ describe('contact decoder', () => {
 
 describe('exercise decoder', () => {
   it('errors out when name is missing', () => {
-    const foo = {};
+    const foo = { user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid name');
   });
 
   it('errors out when exercise name is too long', () => {
-    const foo = { name: 'jeiowfjeiowfjeiowjfioewjfweiofjioewjfiowjfo' };
+    const foo = { name: 'jeiowfjeiowfjeiowjfioewjfweiofjioewjfiowjfo', user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
     assert.equal(isLeft(result) && result.left[0].message, 'Name too long (25 char max)');
   });
 
+  it('errors out when user is missing', () => {
+    const foo = { name: 'foobar' };
+    const result = exerciseDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
+  });
+
+  it('errors out when user id is invalid', () => {
+    const foo = { name: 'foobar', user: 'foobar' };
+    const result = exerciseDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
+  });
+
   it('errors out if pr is not a number', () => {
-    const foo = { name: 'foobar', pr: 'foo' };
+    const foo = { name: 'foobar', pr: 'foo', user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid pr');
   });
 
   it('errors out if pr date is not a string', () => {
-    const foo = { name: 'foobar', prDate: 1 };
+    const foo = { name: 'foobar', prDate: 1, user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid pr date');
   });
 
   it('errors out if pr date is invalid', () => {
-    const foo = { name: 'foobar', prDate: 'foo' };
+    const foo = { name: 'foobar', prDate: 'foo', user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid pr date');
   });
 
   it('allows pr and prDate to be optional', () => {
-    const foo = { name: 'foobar', pr: undefined, prDate: undefined };
+    const foo = { name: 'foobar', pr: undefined, prDate: undefined, user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
 
   it('strips junk fields', () => {
-    const foo = { name: 'foobar', pr: undefined, prDate: undefined };
+    const foo = { name: 'foobar', pr: undefined, prDate: undefined, user: new ObjectId() };
     const result = exerciseDecoder.decode({ ...foo, foo: 'bar' });
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
 
   it('validates and returns the object as a right', () => {
-    const foo = { name: 'foobar', pr: 100, prDate: 'Jan 01 2000' };
+    const foo = { name: 'foobar', pr: 100, prDate: 'Jan 01 2000', user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });

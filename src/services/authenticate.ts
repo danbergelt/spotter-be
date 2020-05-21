@@ -20,6 +20,7 @@ export const authenticate = <T>(db: DAO, req: Req<T>, dg = digestToken): HTTPEit
     map(bearer => bearer.split(' ')[1]),
     chain(token => dg(token, db, String(JWT_SECRET))),
     map(user => {
+      // once authenticated, the raw data is now owned by a user
       return { ...req.body, user: user._id };
     })
   );
