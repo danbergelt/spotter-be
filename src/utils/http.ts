@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import { COOKIE_OPTIONS } from './constants';
 import { success } from './parsers';
 import { token, cookie } from './jwt';
+import { of, Task } from 'fp-ts/lib/Task';
 
 // http response that sends back a refresh token and an auth token
 export const sendAuth = (_id: ObjectID, res: Response): Response =>
@@ -15,5 +16,5 @@ export const sendAuth = (_id: ObjectID, res: Response): Response =>
     .json(success({ token: token(_id) }));
 
 // http error response
-export const sendError = ({ status, message }: E, res: Response): Response =>
-  res.status(status).json(failure({ error: message }));
+export const sendError = (res: Response) => ({ status, message }: E): Task<Response> =>
+  of(res.status(status).json(failure({ error: message })));

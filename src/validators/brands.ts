@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { DATE_REGEX, EMAIL_REGEX } from '../utils/constants';
+import { DATE_REGEX, EMAIL_REGEX, HEX_COLOR } from '../utils/constants';
 import { ObjectId } from 'mongodb';
 
 /*== Branded types =====================================================
@@ -55,4 +55,18 @@ export const Password = t.brand(
   str,
   (p): p is t.Branded<string, { readonly PW: unique symbol }> => p.length > 5,
   'PW'
+);
+
+// a string representation of a valid hex color
+export const Hex = t.brand(
+  str,
+  (h): h is t.Branded<string, { readonly Hex: unique symbol }> => HEX_COLOR.test(h),
+  'Hex'
+);
+
+// a string representation of a tag's content
+export const Tag = t.brand(
+  str,
+  (tag): tag is t.Branded<string, { readonly Tag: unique symbol }> => tag.length < 21,
+  'Tag'
 );

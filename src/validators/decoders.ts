@@ -2,7 +2,15 @@ import * as t from 'io-ts';
 import { withMessage } from 'io-ts-types/lib/withMessage';
 import { optional } from 'io-ts-extra';
 import { _id, StrDate } from './brands';
-import { ExerciseString, EmailString, PasswordString, isValidString } from './intersections';
+import {
+  ExerciseString,
+  EmailString,
+  PasswordString,
+  isValidString,
+  UserId,
+  HexString,
+  TagString
+} from './intersections';
 
 // raw user type
 export const userDecoder = t.exact(
@@ -28,7 +36,16 @@ export const exerciseDecoder = t.exact(
     name: ExerciseString,
     pr: withMessage(optional(t.number), () => 'Invalid pr'),
     prDate: withMessage(optional(StrDate), () => 'Invalid pr date'),
-    user: withMessage(_id, () => 'Invalid user id')
+    user: UserId
+  })
+);
+
+// raw tag type
+export const tagDecoder = t.exact(
+  t.type({
+    color: HexString,
+    user: UserId,
+    content: TagString
   })
 );
 
@@ -42,5 +59,6 @@ export const savedDecoder = t.exact(t.type({ _id: withMessage(_id, () => 'Invali
 export type User = t.TypeOf<typeof userDecoder>;
 export type Contact = t.TypeOf<typeof contactDecoder>;
 export type Exercise = t.TypeOf<typeof exerciseDecoder>;
+export type Tag = t.TypeOf<typeof tagDecoder>;
 export type Owned<T = {}> = t.TypeOf<typeof ownerDecoder> & T;
 export type Saved<T = {}> = t.TypeOf<typeof savedDecoder> & T;

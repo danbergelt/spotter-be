@@ -38,16 +38,12 @@ export const contact = resolver(async (req: Req<Contact>, res) => {
     fromEither(decodeContact(req.body)),
     chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
     chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
-    fold(
-      error => of(sendError(error, res)),
-      () => of(res.status(OK).json(success({ message: 'Message sent' })))
-    )
+    fold(sendError(res), () => of(res.status(OK).json(success({ message: 'Message sent' }))))
   )();
 });
 
 // log in a user
 export const login = resolver(async (req: Req<User>, res) => {
-  const { password } = req.body;
   const { db } = req.app.locals;
 
   return await pipe(
@@ -56,14 +52,11 @@ export const login = resolver(async (req: Req<User>, res) => {
     chain(user => fromEither(isUserNull(user))),
     chain(user =>
       pipe(
-        compareHash(password, user.password),
+        compareHash(req.body.password, user.password),
         chain(verified => (verified ? right(user) : left(invalidCredentials())))
       )
     ),
-    fold(
-      error => of(sendError(error, res)),
-      user => of(sendAuth(user._id, res))
-    )
+    fold(sendError(res), user => of(sendAuth(user._id, res)))
   )();
 });
 
@@ -77,11 +70,8 @@ export const registration = resolver(async (req: Req<RawUser>, res) => {
     chain(user => (!user ? right(req.body) : left(e('User already exists', BAD_REQUEST)))),
     chain(user => hash(user.password)),
     chain(password => createOne(db, { ...req.body, password } as User)),
-    map(write => parseWrite(write)),
-    fold(
-      error => of(sendError(error, res)),
-      user => of(sendAuth(user._id, res))
-    )
+    map(parseWrite),
+    fold(sendError(res), user => of(sendAuth(user._id, res)))
   )();
 });
 

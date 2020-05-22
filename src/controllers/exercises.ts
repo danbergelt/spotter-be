@@ -27,10 +27,7 @@ export const readExercises = resolver(async (req: Req, res) => {
   return await pipe(
     authenticate(db, req),
     chain(user => readMany(db, user)),
-    fold(
-      error => of(sendError(error, res)),
-      exercises => of(res.status(OK).json(success({ exercises })))
-    )
+    fold(sendError(res), exercises => of(res.status(OK).json(success({ exercises }))))
   )();
 });
 
@@ -43,12 +40,9 @@ export const deleteExercise = resolver(async (req: Req, res) => {
     authenticate(db, req),
     chain(() => fromEither(mongofy(id))),
     chain(_id => deleteOne(db, { _id })),
-    map(del => parseDelete(del)),
+    map(parseDelete),
     chain(exercise => fromEither(isExerciseNull(exercise))),
-    fold(
-      error => of(sendError(error, res)),
-      exercise => of(res.status(OK).json(success({ exercise })))
-    )
+    fold(sendError(res), exercise => of(res.status(OK).json(success({ exercise }))))
   )();
 });
 
@@ -66,10 +60,7 @@ export const postExercise = resolver(async (req: Req<RawExercise>, res) => {
       )
     ),
     chain(ex => createOne(db, ex)),
-    map(write => parseWrite(write)),
-    fold(
-      error => of(sendError(error, res)),
-      exercise => of(res.status(CREATED).json(success({ exercise })))
-    )
+    map(parseWrite),
+    fold(sendError(res), exercise => of(res.status(CREATED).json(success({ exercise }))))
   )();
 });

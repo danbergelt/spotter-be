@@ -2,6 +2,7 @@ import express from 'express';
 import { path } from '../utils/express';
 import { postExercise, deleteExercise, readExercises } from './exercises';
 import { contact, login, registration, refresh, logout } from './users';
+import { postTag } from './tags';
 
 const router = express.Router();
 
@@ -18,5 +19,9 @@ const exercisesPath = path('/exercises');
 router.post(exercisesPath(''), postExercise);
 router.get(exercisesPath(''), readExercises);
 router.delete(exercisesPath('/:id'), deleteExercise);
+
+// all tag endpoints
+const tagsPath = path('/tags');
+router.post(tagsPath(''), postTag);
 
 export default router;

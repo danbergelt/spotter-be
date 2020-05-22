@@ -1,4 +1,4 @@
-import { Email, Password, Exercise, str } from './brands';
+import { Email, Password, Exercise, str, _id, Hex, Tag } from './brands';
 import * as t from 'io-ts';
 import { withMessage } from 'io-ts-types/lib/withMessage';
 
@@ -11,6 +11,9 @@ single type
 
 // checks a string, returns an error message
 export const isValidString = (x: string): typeof str => withMessage(str, () => `Invalid ${x}`);
+
+// checks that the user foreign key is a valid Object Id
+export const UserId = withMessage(_id, () => 'Invalid user id');
 
 // intersects isValidString with an email regex
 export const EmailString = t.intersection([
@@ -28,4 +31,16 @@ export const PasswordString = t.intersection([
 export const ExerciseString = t.intersection([
   isValidString('name'),
   withMessage(Exercise, () => 'Name too long (25 char max)')
+]);
+
+// intersects isValidString with a hex color regex
+export const HexString = t.intersection([
+  isValidString('color'),
+  withMessage(Hex, () => 'Invalid color (must be hex)')
+]);
+
+// intersects isValidString with a max length check
+export const TagString = t.intersection([
+  isValidString('tag'),
+  withMessage(Tag, () => 'Tag content too long (20 char max)')
 ]);
