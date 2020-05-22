@@ -24,7 +24,7 @@ describe('error response function', () => {
     const err = { message: 'foo', status: 500 };
     const res = mockRes();
 
-    sendError(err, res);
+    sendError(res)(err);
 
     expect(res.status.calledWith(500)).to.be.true;
     expect(res.json.calledWith({ success: false, error: 'foo' })).to.be.true;
