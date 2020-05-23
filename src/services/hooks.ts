@@ -32,21 +32,19 @@ interface Hooks<T> {
   readMany: (db: DAO, filter: Filter<T>) => HTTPEither<Saved<T>[]>;
 }
 
-export const hooks = <T>(collection: COLLECTION): Hooks<T> => {
-  return {
-    createOne: (db: DAO, document: T): HTTPEither<Write<Saved<T>>> =>
-      tryCatch(async () => await db(collection).insertOne(document), badGateway),
-    readOne: (db: DAO, filter: Filter<T>): HTTPEither<Nullable<Saved<T>>> =>
-      tryCatch(async () => await db(collection).findOne(filter), badGateway),
-    deleteOne: (db: DAO, filter: Filter<T>): HTTPEither<Del<Saved<T>>> =>
-      tryCatch(async () => db(collection).findOneAndDelete(filter), badGateway),
-    readMany: (db: DAO, filter: Filter<T>): HTTPEither<Saved<T>[]> =>
-      tryCatch(
-        async () =>
-          await db(collection)
-            .find(filter)
-            .toArray(),
-        badGateway
-      )
-  };
-};
+export const hooks = <T>(collection: COLLECTION): Hooks<T> => ({
+  createOne: (db: DAO, document: T): HTTPEither<Write<Saved<T>>> =>
+    tryCatch(async () => await db(collection).insertOne(document), badGateway),
+  readOne: (db: DAO, filter: Filter<T>): HTTPEither<Nullable<Saved<T>>> =>
+    tryCatch(async () => await db(collection).findOne(filter), badGateway),
+  deleteOne: (db: DAO, filter: Filter<T>): HTTPEither<Del<Saved<T>>> =>
+    tryCatch(async () => db(collection).findOneAndDelete(filter), badGateway),
+  readMany: (db: DAO, filter: Filter<T>): HTTPEither<Saved<T>[]> =>
+    tryCatch(
+      async () =>
+        await db(collection)
+          .find(filter)
+          .toArray(),
+      badGateway
+    )
+});

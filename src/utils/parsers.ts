@@ -10,25 +10,18 @@ import { validationErr } from './errors';
 const { isValid } = ObjectId;
 
 // http success template
-export const success = <T>(data = {} as T): Success<T> => {
-  return { success: true, ...data };
-};
+export const success = <T>(data = {} as T): Success<T> => ({ success: true, ...data });
 
 // http error template
-export const failure = <T>(data = {} as T): Failure<T> => {
-  return { success: false, ...data };
-};
+export const failure = <T>(data = {} as T): Failure<T> => ({ success: false, ...data });
 
 // build a metadata object to be used when sending emails with mailgun
-export const metadata = (...metadata: [string, string, string, string]): MetaData => {
-  const [from, to, subject, html] = metadata;
-  return {
-    from,
-    to,
-    subject,
-    html
-  };
-};
+export const metadata = (from: string, to: string, subject: string, html: string): MetaData => ({
+  from,
+  to,
+  subject,
+  html
+});
 
 // extracts the document from a delete result from mongodb
 export const parseDelete = <T>(del: Del<T>): T | null | undefined => del.value;
@@ -37,9 +30,7 @@ export const parseDelete = <T>(del: Del<T>): T | null | undefined => del.value;
 export const parseWrite = <T>(write: Write<T>): T => write.ops[0];
 
 // default error object
-export const e = (message: string, status: number): E => {
-  return { message, status };
-};
+export const e = (message: string, status: number): E => ({ message, status });
 
 // convert a 24 character hex string into a mongo ObjectID
 export const mongofy = (_id: string): SyncEither<ObjectID> =>

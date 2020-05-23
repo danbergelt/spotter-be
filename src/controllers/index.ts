@@ -1,10 +1,10 @@
-import express from 'express';
+import { Router } from 'express';
 import { path } from '../utils/express';
 import { postExercise, deleteExercise, readExercises } from './exercises';
 import { contact, login, registration, refresh, logout } from './users';
-import { postTag } from './tags';
+import { postTag, readTags } from './tags';
 
-const router = express.Router();
+const router = Router();
 
 // all user endpoints
 const usersPath = path('/users');
@@ -23,5 +23,6 @@ router.delete(exercisesPath('/:id'), deleteExercise);
 // all tag endpoints
 const tagsPath = path('/tags');
 router.post(tagsPath(''), postTag);
+router.get(tagsPath(''), readTags);
 
 export default router;

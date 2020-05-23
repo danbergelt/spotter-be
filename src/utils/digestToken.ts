@@ -17,12 +17,10 @@ const isUserNull = fromNullable(unauthorized());
 type SU = Saved<User>;
 
 // accepts a JWT, and verifies its payload against a persisted user id
-export const digestToken = (raw: string, db: DAO, sec: string, d = deps): HTTPEither<SU> => {
-  const { mongofy, readOne, verifyJwt } = d;
-  return pipe(
-    fromEither(verifyJwt(raw, sec)),
-    chain(jwt => fromEither(mongofy(jwt._id))),
-    chain(_id => readOne(db, { _id })),
+export const digestToken = (raw: string, db: DAO, sec: string, d = deps): HTTPEither<SU> =>
+  pipe(
+    fromEither(d.verifyJwt(raw, sec)),
+    chain(jwt => fromEither(d.mongofy(jwt._id))),
+    chain(_id => d.readOne(db, { _id })),
     chain(user => fromEither(isUserNull(user)))
   );
-};

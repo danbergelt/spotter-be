@@ -9,3 +9,4 @@ export const _ = (): E => e('_', BAD_REQUEST);
 export const validationErr = (message: string): E => e(message, BAD_REQUEST);
 export const serverError = (): E => e('Server error', INTERNAL_SERVER_ERROR);
 export const unauthorized = (): E => e('Unauthorized', UNAUTHORIZED);
+export const duplicate = (entity: string): E => e(`${entity} already exists`, BAD_REQUEST);
