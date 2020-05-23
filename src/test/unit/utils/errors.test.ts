@@ -4,7 +4,9 @@ import {
   _,
   validationErr,
   serverError,
-  unauthorized
+  unauthorized,
+  duplicate,
+  writeError
 } from '../../../utils/errors';
 import assert from 'assert';
 
@@ -37,5 +39,20 @@ describe('reusable error objects', () => {
   it('unauthorized', () => {
     const result = unauthorized();
     assert.deepStrictEqual(result, { message: 'Unauthorized', status: 401 });
+  });
+
+  it('duplicate', () => {
+    const result = duplicate('foo');
+    assert.deepStrictEqual(result, { message: 'foo already exists', status: 400 });
+  });
+
+  it('write error if duplicate key error', () => {
+    const result = writeError('foo')({ message: 'E11000' });
+    assert.deepStrictEqual(result, { message: 'foo already exists', status: 400 });
+  });
+
+  it('write error if not duplicate key error', () => {
+    const result = writeError('foo')({});
+    assert.deepStrictEqual(result, { message: 'Bad gateway', status: 502 });
   });
 });

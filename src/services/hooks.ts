@@ -1,7 +1,7 @@
 import { tryCatch } from 'fp-ts/lib/TaskEither';
 import { DAO } from '../index.types';
 import { COLLECTION } from '../utils/constants';
-import { badGateway } from '../utils/errors';
+import { badGateway, writeError } from '../utils/errors';
 import { HTTPEither, Write, Nullable, Del } from '../types';
 import { Saved } from 'src/validators/decoders';
 
@@ -26,15 +26,15 @@ a filter, which can be any number of fields from a saved document
 type Filter<T> = Partial<Saved<T>>;
 
 interface Hooks<T> {
-  createOne: (db: DAO, document: T) => HTTPEither<Write<Saved<T>>>;
+  createOne: (db: DAO, document: T, entity: string) => HTTPEither<Write<Saved<T>>>;
   readOne: (db: DAO, filter: Filter<T>) => HTTPEither<Nullable<Saved<T>>>;
   deleteOne: (db: DAO, filter: Filter<T>) => HTTPEither<Del<Saved<T>>>;
   readMany: (db: DAO, filter: Filter<T>) => HTTPEither<Saved<T>[]>;
 }
 
 export const hooks = <T>(collection: COLLECTION): Hooks<T> => ({
-  createOne: (db: DAO, document: T): HTTPEither<Write<Saved<T>>> =>
-    tryCatch(async () => await db(collection).insertOne(document), badGateway),
+  createOne: (db: DAO, document: T, entity: string): HTTPEither<Write<Saved<T>>> =>
+    tryCatch(async () => await db(collection).insertOne(document), writeError(entity)),
   readOne: (db: DAO, filter: Filter<T>): HTTPEither<Nullable<Saved<T>>> =>
     tryCatch(async () => await db(collection).findOne(filter), badGateway),
   deleteOne: (db: DAO, filter: Filter<T>): HTTPEither<Del<Saved<T>>> =>
