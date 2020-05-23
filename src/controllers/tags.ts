@@ -30,7 +30,7 @@ export const postTag = resolver(async (req: Req<RawTag>, res) => {
         chain(dup => (dup ? left(duplicate('Tag')) : right(tag)))
       )
     ),
-    chain(tag => pipe(createOne(db, tag), map(parseWrite))),
+    chain(tag => pipe(createOne(db, tag, 'Tag'), map(parseWrite))),
     fold(sendError(res), tag => of(res.status(CREATED).json(success({ tag }))))
   )();
 });

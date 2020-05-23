@@ -5,7 +5,7 @@ import { chain, fold, fromEither, right, left, map } from 'fp-ts/lib/TaskEither'
 import { of } from 'fp-ts/lib/Task';
 import { COOKIE_NAME, EMAILS, COLLECTIONS } from '../utils/constants';
 import { OK } from 'http-status-codes';
-import { _, invalidCredentials, duplicate } from '../utils/errors';
+import { _, invalidCredentials } from '../utils/errors';
 import { Req, RawUser } from '../types';
 import { sendMail } from '../services/sendMail';
 import { confirmContactMsg, contactMsg } from '../utils/emailTemplates';
@@ -63,13 +63,12 @@ export const login = resolver(async (req: Req<User>, res) => {
 // register a new user
 export const registration = resolver(async (req: Req<RawUser>, res) => {
   const { db } = req.app.locals;
+  const { body } = req;
 
   return await pipe(
-    fromEither(decodeUser(req.body)),
-    chain(() => readOne(db, { email: req.body.email })),
-    chain(user => (user ? left(duplicate('User')) : right(req.body))),
+    fromEither(decodeUser(body)),
     chain(user => hash(user.password)),
-    chain(password => pipe(createOne(db, { ...req.body, password } as User), map(parseWrite))),
+    chain(password => pipe(createOne(db, { ...body, password } as User, 'User'), map(parseWrite))),
     fold(sendError(res), user => of(sendAuth(user._id, res)))
   )();
 });
