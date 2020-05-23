@@ -63,12 +63,11 @@ export const login = resolver(async (req: Req<User>, res) => {
 // register a new user
 export const registration = resolver(async (req: Req<RawUser>, res) => {
   const { db } = req.app.locals;
-  const { body } = req;
 
   return await pipe(
-    fromEither(decodeUser(body)),
+    fromEither(decodeUser(req.body)),
     chain(user => hash(user.password)),
-    chain(password => pipe(createOne(db, { ...body, password } as User, 'User'), map(parseWrite))),
+    chain(password => pipe(createOne(db, { ...req.body, password } as User), map(parseWrite))),
     fold(sendError(res), user => of(sendAuth(user._id, res)))
   )();
 });

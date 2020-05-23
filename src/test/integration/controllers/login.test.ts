@@ -59,7 +59,7 @@ describe('login', () => {
       .post(p)
       .send({ password: 'foobar' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Invalid email');
+    assert.equal(res.body.error, 'Invalid email - must be string');
   });
 
   it('errors out if password is too short', async () => {
@@ -75,6 +75,6 @@ describe('login', () => {
       .post(p)
       .send({ email: 'will@fail.com' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Invalid password');
+    assert.equal(res.body.error, 'Invalid password - must be string');
   });
 });

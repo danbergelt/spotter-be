@@ -9,7 +9,9 @@ import {
   isValidString,
   UserId,
   HexString,
-  TagString
+  TagString,
+  DateString,
+  isValidNum
 } from './intersections';
 
 // raw user type
@@ -34,8 +36,8 @@ export const contactDecoder = t.exact(
 export const exerciseDecoder = t.exact(
   t.type({
     name: ExerciseString,
-    pr: withMessage(optional(t.number), () => 'Invalid pr'),
-    prDate: withMessage(optional(StrDate), () => 'Invalid pr date'),
+    pr: optional(isValidNum('pr')),
+    prDate: optional(DateString),
     user: UserId
   })
 );
@@ -45,7 +47,7 @@ export const tagDecoder = t.exact(
   t.type({
     color: HexString,
     user: UserId,
-    content: TagString
+    content: optional(TagString)
   })
 );
 
