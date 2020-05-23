@@ -26,14 +26,15 @@ a filter, which can be any number of fields from a saved document
 type Filter<T> = Partial<Saved<T>>;
 
 interface Hooks<T> {
-  createOne: (db: DAO, document: T, entity: string) => HTTPEither<Write<Saved<T>>>;
+  createOne: (db: DAO, document: T, entity?: string) => HTTPEither<Write<Saved<T>>>;
   readOne: (db: DAO, filter: Filter<T>) => HTTPEither<Nullable<Saved<T>>>;
   deleteOne: (db: DAO, filter: Filter<T>) => HTTPEither<Del<Saved<T>>>;
   readMany: (db: DAO, filter: Filter<T>) => HTTPEither<Saved<T>[]>;
 }
 
 export const hooks = <T>(collection: COLLECTION): Hooks<T> => ({
-  createOne: (db: DAO, document: T, entity: string): HTTPEither<Write<Saved<T>>> =>
+  // user is only current indexed collection --> option to pass any entity name as third arg for future
+  createOne: (db: DAO, document: T, entity = 'User'): HTTPEither<Write<Saved<T>>> =>
     tryCatch(async () => await db(collection).insertOne(document), writeError(entity)),
   readOne: (db: DAO, filter: Filter<T>): HTTPEither<Nullable<Saved<T>>> =>
     tryCatch(async () => await db(collection).findOne(filter), badGateway),

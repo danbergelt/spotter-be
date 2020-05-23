@@ -3,7 +3,8 @@ import {
   contactDecoder,
   exerciseDecoder,
   ownerDecoder,
-  savedDecoder
+  savedDecoder,
+  tagDecoder
 } from '../../../validators/decoders';
 import assert from 'assert';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
@@ -13,14 +14,14 @@ describe('user decoder', () => {
   it('errors out when email is missing', () => {
     const foo = { password: 'password' };
     const result = userDecoder.decode(foo);
-    const expected = 'Invalid email';
+    const expected = 'Invalid email - must be string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
   it('errors out when email is not a string', () => {
     const foo = { email: 1, password: 'password' };
     const result = userDecoder.decode(foo);
-    const expected = 'Invalid email';
+    const expected = 'Invalid email - must be string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
@@ -34,14 +35,14 @@ describe('user decoder', () => {
   it('errors out when password is missing', () => {
     const foo = { email: 'foo@bar.com' };
     const result = userDecoder.decode(foo);
-    const expected = 'Invalid password';
+    const expected = 'Invalid password - must be string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
   it('errors out when password is not a string', () => {
     const foo = { email: 'foo@bar.com', password: 1 };
     const result = userDecoder.decode(foo);
-    const expected = 'Invalid password';
+    const expected = 'Invalid password - must be string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
@@ -69,25 +70,25 @@ describe('contact decoder', () => {
   it('errors out when name is missing', () => {
     const foo = { email: 'foo@bar.com', subject: 'foo', message: 'bar' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid name');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid name - must be string');
   });
 
   it('errors out when name is not a string', () => {
     const foo = { name: 1, email: 'foo@bar.com', subject: 'foo', message: 'bar' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid name');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid name - must be string');
   });
 
   it('errors out when email is missing', () => {
     const foo = { name: 'foo', subject: 'foo', message: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid email');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid email - must be string');
   });
 
   it('errors out when email is not a string', () => {
     const foo = { email: 1, name: 'foo', subject: 'foo', message: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid email');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid email - must be string');
   });
 
   it('errors out when email is invalid format', () => {
@@ -99,25 +100,25 @@ describe('contact decoder', () => {
   it('errors out when subject is missing', () => {
     const foo = { email: 'foo@bar.com', name: 'foo', message: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid subject');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid subject - must be string');
   });
 
   it('errors out when subject is not a string', () => {
     const foo = { email: 'foo@bar.com', name: 'foo', message: 'foo', subject: 1 };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid subject');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid subject - must be string');
   });
 
   it('errors out when message is missing', () => {
     const foo = { email: 'foo@bar.com', name: 'foo', subject: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid message');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid message - must be string');
   });
 
   it('errors out when message is not a string', () => {
     const foo = { email: 'foo@bar.com', name: 'foo', subject: 'foo', message: 1 };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Invalid message');
+    assert.ok(isLeft(result) && result.left[0].message === 'Invalid message - must be string');
   });
 
   it('strips junk fields', () => {
@@ -137,7 +138,7 @@ describe('exercise decoder', () => {
   it('errors out when name is missing', () => {
     const foo = { user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid name');
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid name - must be string');
   });
 
   it('errors out when exercise name is too long', () => {
@@ -161,19 +162,19 @@ describe('exercise decoder', () => {
   it('errors out if pr is not a number', () => {
     const foo = { name: 'foobar', pr: 'foo', user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid pr');
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid pr - must be number');
   });
 
   it('errors out if pr date is not a string', () => {
     const foo = { name: 'foobar', prDate: 1, user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid pr date');
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid date - must be string');
   });
 
   it('errors out if pr date is invalid', () => {
     const foo = { name: 'foobar', prDate: 'foo', user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid pr date');
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid date');
   });
 
   it('allows pr and prDate to be optional', () => {
@@ -191,6 +192,79 @@ describe('exercise decoder', () => {
   it('validates and returns the object as a right', () => {
     const foo = { name: 'foobar', pr: 100, prDate: 'Jan 01 2000', user: new ObjectId() };
     const result = exerciseDecoder.decode(foo);
+    assert.deepStrictEqual(isRight(result) && result.right, foo);
+  });
+});
+
+describe('tag decoder', () => {
+  const color = '#8FBC8F';
+  it('errors out when no owner exists', () => {
+    const foo = { color };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
+  });
+
+  it('errors out when id is invalid object id', () => {
+    const foo = { user: 'foo', color };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
+  });
+
+  it('errors out when id is not class instantiation', () => {
+    const foo = { user: process.env.TEST_ID, color };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
+  });
+
+  it('errors out if color is missing', () => {
+    const foo = { user: new ObjectId() };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid color - must be string');
+  });
+
+  it('errors out if color is not a string', () => {
+    const foo = { user: new ObjectId(), color: 1 };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid color - must be string');
+  });
+
+  it('errors out if color is not hex color', () => {
+    const foo = { user: new ObjectId(), color: 'red' };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid color - must be hex');
+  });
+
+  it('errors out if content is not a string', () => {
+    const foo = { user: new ObjectId(), color, content: 1 };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Invalid tag content - must be string');
+  });
+
+  it('errors out if content is too long', () => {
+    const foo = {
+      user: new ObjectId(),
+      color,
+      content: 'jowjfoiw3fjiowjfeiowfjewiofjeiowfjeiowfjeiowfjewiojfojw'
+    };
+    const result = tagDecoder.decode(foo);
+    assert.equal(isLeft(result) && result.left[0].message, 'Tag content too long (20 char max)');
+  });
+
+  it('allows content to be optional', () => {
+    const foo = { user: new ObjectId(), color, content: undefined };
+    const result = tagDecoder.decode(foo);
+    assert.deepStrictEqual(isRight(result) && result.right, foo);
+  });
+
+  it('strips junk fields', () => {
+    const foo = { user: new ObjectId(), color, content: 'foo' };
+    const result = tagDecoder.decode({ ...foo, foo: 'bar' });
+    assert.deepStrictEqual(isRight(result) && result.right, foo);
+  });
+
+  it('validates', () => {
+    const foo = { user: new ObjectId(), color, content: 'foo' };
+    const result = tagDecoder.decode(foo);
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
 });

@@ -18,6 +18,7 @@ const { TAGS } = COLLECTIONS;
 const { readOne, createOne, readMany } = hooks<Tag>(TAGS);
 const decoder = validate(tagDecoder);
 
+// create a new tag
 export const postTag = resolver(async (req: Req<RawTag>, res) => {
   const { db } = req.app.locals;
 
@@ -30,11 +31,12 @@ export const postTag = resolver(async (req: Req<RawTag>, res) => {
         chain(dup => (dup ? left(duplicate('Tag')) : right(tag)))
       )
     ),
-    chain(tag => pipe(createOne(db, tag, 'Tag'), map(parseWrite))),
+    chain(tag => pipe(createOne(db, tag), map(parseWrite))),
     fold(sendError(res), tag => of(res.status(CREATED).json(success({ tag }))))
   )();
 });
 
+// get all tags by user id
 export const readTags = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
 

@@ -25,7 +25,7 @@ describe('read exercises', () => {
       .set('Authorization', `Bearer ${t}`);
 
     assert.ok(res.body.success);
-    assert.notEqual(res.body.exercises.length, 0);
+    assert.ok(res.body.exercises);
   });
 
   it('errors out if user cannot be authenticated', async () => {

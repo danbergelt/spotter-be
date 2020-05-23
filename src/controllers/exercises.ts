@@ -59,7 +59,7 @@ export const postExercise = resolver(async (req: Req<RawExercise>, res) => {
         chain(dup => (dup ? left(duplicate('Exercise')) : right(ex)))
       )
     ),
-    chain(ex => pipe(createOne(db, ex, 'Exercise'), map(parseWrite))),
+    chain(ex => pipe(createOne(db, ex), map(parseWrite))),
     fold(sendError(res), exercise => of(res.status(CREATED).json(success({ exercise }))))
   )();
 });
