@@ -3,13 +3,10 @@ import bcrypt from 'bcryptjs';
 import { HTTPEither } from '../types';
 import { serverError } from './errors';
 
-// encrypts any string --> if it fails for some reason, return an HTTP error (should not fail encryption silently)
-export const hash = (string: string, bc = bcrypt): HTTPEither<string> =>
-  tryCatch(async () => {
-    const salt = await bc.genSalt(12);
-    return await bc.hash(string, salt);
-  }, serverError);
+// hashes + salts a string (10 salt rounds, can be bumped if needed)
+export const hash = (s: string, bc = bcrypt): HTTPEither<string> =>
+  tryCatch(async () => await bc.hash(s, await bc.genSalt(10)), serverError);
 
-// compares a string against an encrypted value
-export const compareHash = (s: string, enc: string, bc = bcrypt): HTTPEither<boolean> =>
-  tryCatch(async () => await bc.compare(s, enc), serverError);
+// compares a string against a hash
+export const compareHash = (s: string, hash: string, bc = bcrypt): HTTPEither<boolean> =>
+  tryCatch(async () => await bc.compare(s, hash), serverError);
