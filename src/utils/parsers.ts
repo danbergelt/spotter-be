@@ -33,11 +33,11 @@ export const parseWrite = <T>(write: Write<T>): T => write.ops[0];
 export const e = (message: string, status: number): E => ({ message, status });
 
 // convert a 24 character hex string into a mongo ObjectID
-export const mongofy = (_id: string): SyncEither<ObjectID> =>
+export const mongofy = (_id: string | ObjectId): SyncEither<ObjectID> =>
   isValid(_id) ? right(new ObjectId(_id)) : left(e('Invalid resource id', BAD_REQUEST));
 
-export const parseValidationError = (errors: Errors): E =>
-  validationErr(errors[0].message ? errors[0].message : 'Validation error');
+export const parseValidationError = ([{ message }]: Errors): E =>
+  validationErr(message ? message : 'Validation error');
 
 export type Success<T> = {
   success: true;

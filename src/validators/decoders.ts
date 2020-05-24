@@ -56,5 +56,6 @@ export type User = t.TypeOf<typeof userDecoder>;
 export type Contact = t.TypeOf<typeof contactDecoder>;
 export type Exercise = t.TypeOf<typeof exerciseDecoder>;
 export type Tag = t.TypeOf<typeof tagDecoder>;
+export type Workout = t.TypeOf<typeof workoutDecoder>;
 export type Owned<T = {}> = t.TypeOf<typeof ownerDecoder> & T;
 export type Saved<T = {}> = t.TypeOf<typeof savedDecoder> & T;

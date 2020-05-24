@@ -9,15 +9,20 @@ parameters, e.g. length, regex validation, and more.
 
 They allow us to speak about our data in a more granular, specific way --> 
 e.g., a password is not just a string, it's a specific type of string 
-that must pass certain tests in order to be successfully validated
+that must pass certain tests in order to be checked
 
 */
 
-// mongo object id
+const { isValid } = ObjectId;
+
+// mongo object id --> checks if id is stringifed ObjectId or literal ObjectId instance
 export const _id = new t.Type<ObjectId, ObjectId, unknown>(
   '_id',
-  (i: unknown): i is ObjectId => i instanceof ObjectId,
-  (i, context) => (i instanceof ObjectId ? t.success(i) : t.failure(i, context)),
+  (i: unknown): i is ObjectId => (typeof i === 'string' || i instanceof ObjectId) && isValid(i),
+  (i, context) =>
+    (typeof i === 'string' || i instanceof ObjectId) && isValid(i)
+      ? t.success(new ObjectId(i))
+      : t.failure(i, context),
   t.identity
 );
 
