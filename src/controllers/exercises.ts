@@ -35,11 +35,10 @@ export const readExercises = resolver(async (req: Req, res) => {
 // delete an exercise by id
 export const deleteExercise = resolver(async (req: Req, res) => {
   const { db } = req.app.locals;
-  const { id } = req.params;
 
   return await pipe(
     authenticate(db, req),
-    chain(() => fromEither(mongofy(id))),
+    chain(() => fromEither(mongofy(req.params.id))),
     chain(_id => pipe(deleteOne(db, { _id }), map(parseDelete))),
     chain(exercise => fromEither(isExerciseNull(exercise))),
     fold(sendError(res), exercise => of(res.status(OK).json(success({ exercise }))))

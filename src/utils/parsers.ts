@@ -36,6 +36,7 @@ export const e = (message: string, status: number): E => ({ message, status });
 export const mongofy = (_id: string | ObjectId): SyncEither<ObjectID> =>
   isValid(_id) ? right(new ObjectId(_id)) : left(e('Invalid resource id', BAD_REQUEST));
 
+// parse a decoded validation error
 export const parseValidationError = ([{ message }]: Errors): E =>
   validationErr(message ? message : 'Validation error');
 

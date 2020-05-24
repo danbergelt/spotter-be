@@ -3,7 +3,7 @@ import { path } from '../utils/express';
 import { postExercise, deleteExercise, readExercises } from './exercises';
 import { contact, login, registration, refresh, logout } from './users';
 import { postTag, readTags } from './tags';
-import { postWorkout } from './workouts';
+import { postWorkout, deleteWorkout } from './workouts';
 
 const router = Router();
 
@@ -29,5 +29,6 @@ router.get(tagsPath(''), readTags);
 // all workout endpoints
 const workoutsPath = path('/workouts');
 router.post(workoutsPath(''), postWorkout);
+router.delete(workoutsPath('/:id'), deleteWorkout);
 
 export default router;
