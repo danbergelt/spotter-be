@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { right, left } from 'fp-ts/lib/TaskEither';
 import assert from 'assert';
 
-const { readOne, readMany, deleteOne, createOne } = hooks(COLLECTIONS.USERS);
+const { replaceOne, readOne, readMany, deleteOne, createOne } = hooks(COLLECTIONS.USERS);
 const _id = new ObjectId();
 
 describe('database hooks', () => {
@@ -63,8 +63,22 @@ describe('database hooks', () => {
   });
 
   it('returns bad gateway if create one fails', async () => {
-    const db = Sinon.stub().returns({ createOne: Sinon.stub().throws('foo') });
+    const db = Sinon.stub().returns({ insertOne: Sinon.stub().throws('foo') });
     const result = await createOne(db, { _id })();
+    const expected = await left({ message: 'Bad gateway', status: 502 })();
+    assert.deepStrictEqual(result, expected);
+  });
+
+  it('replaces one', async () => {
+    const db = Sinon.stub().returns({ findOneAndReplace: Sinon.stub().returns('foo') });
+    const result = await replaceOne(db, { _id }, { bar: 'baz' })();
+    const expected = await right('foo')();
+    assert.deepStrictEqual(result, expected);
+  });
+
+  it('returns bad gateway if replace one fails', async () => {
+    const db = Sinon.stub().returns({ findOneAndReplace: Sinon.stub().throws('foo') });
+    const result = await replaceOne(db, { _id }, { bar: 'baz' })();
     const expected = await left({ message: 'Bad gateway', status: 502 })();
     assert.deepStrictEqual(result, expected);
   });

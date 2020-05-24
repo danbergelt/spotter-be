@@ -2,7 +2,7 @@ import { tryCatch } from 'fp-ts/lib/TaskEither';
 import { DAO } from '../index.types';
 import { COLLECTION } from '../utils/constants';
 import { badGateway, writeError } from '../utils/errors';
-import { HTTPEither, Write, Nullable, Del } from '../types';
+import { HTTPEither, Write, Nullable, Modify } from '../types';
 import { Saved } from 'src/validators/decoders';
 
 /*
@@ -28,7 +28,8 @@ type Filter<T> = Partial<Saved<T>>;
 interface Hooks<T> {
   createOne: (db: DAO, document: T, entity?: string) => HTTPEither<Write<Saved<T>>>;
   readOne: (db: DAO, filter: Filter<T>) => HTTPEither<Nullable<Saved<T>>>;
-  deleteOne: (db: DAO, filter: Filter<T>) => HTTPEither<Del<Saved<T>>>;
+  deleteOne: (db: DAO, filter: Filter<T>) => HTTPEither<Modify<Saved<T>>>;
+  replaceOne: (db: DAO, filter: Filter<T>, update: object) => HTTPEither<Modify<Saved<T>>>;
   readMany: (db: DAO, filter: Filter<T>) => HTTPEither<Saved<T>[]>;
 }
 
@@ -38,8 +39,14 @@ export const hooks = <T>(collection: COLLECTION): Hooks<T> => ({
     tryCatch(async () => await db(collection).insertOne(document), writeError(entity)),
   readOne: (db: DAO, filter: Filter<T>): HTTPEither<Nullable<Saved<T>>> =>
     tryCatch(async () => await db(collection).findOne(filter), badGateway),
-  deleteOne: (db: DAO, filter: Filter<T>): HTTPEither<Del<Saved<T>>> =>
-    tryCatch(async () => db(collection).findOneAndDelete(filter), badGateway),
+  deleteOne: (db: DAO, filter: Filter<T>): HTTPEither<Modify<Saved<T>>> =>
+    tryCatch(async () => await db(collection).findOneAndDelete(filter), badGateway),
+  replaceOne: (db: DAO, filter: Filter<T>, replacement: object): HTTPEither<Modify<Saved<T>>> =>
+    tryCatch(
+      async () =>
+        await db(collection).findOneAndReplace(filter, replacement, { returnOriginal: false }),
+      badGateway
+    ),
   readMany: (db: DAO, filter: Filter<T>): HTTPEither<Saved<T>[]> =>
     tryCatch(
       async () =>

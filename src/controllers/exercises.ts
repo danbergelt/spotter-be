@@ -7,7 +7,7 @@ import { COLLECTIONS } from '../utils/constants';
 import { chain, fold, left, right, map, fromEither } from 'fp-ts/lib/TaskEither';
 import { hooks } from '../services/hooks';
 import { Req, RawExercise } from '../types';
-import { e, parseWrite, parseDelete, success, mongofy } from '../utils/parsers';
+import { e, parseWrite, parseModify, success, mongofy } from '../utils/parsers';
 import { of } from 'fp-ts/lib/Task';
 import { sendError } from '../utils/http';
 import { fromNullable } from 'fp-ts/lib/Either';
@@ -39,7 +39,7 @@ export const deleteExercise = resolver(async (req: Req, res) => {
   return await pipe(
     authenticate(db, req),
     chain(() => fromEither(mongofy(req.params.id))),
-    chain(_id => pipe(deleteOne(db, { _id }), map(parseDelete))),
+    chain(_id => pipe(deleteOne(db, { _id }), map(parseModify))),
     chain(exercise => fromEither(isExerciseNull(exercise))),
     fold(sendError(res), exercise => of(res.status(OK).json(success({ exercise }))))
   )();
