@@ -38,7 +38,7 @@ describe('post exercise', () => {
       .set('Authorization', `Bearer ${t}`)
       .send({ foo: 'bar' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Invalid name - must be string');
+    assert.equal(res.body.error, 'Invalid exercise name - must be non-empty string');
   });
 
   it('errors out if exercise name is too long', async () => {
@@ -47,7 +47,7 @@ describe('post exercise', () => {
       .set('Authorization', `Bearer ${t}`)
       .send({ name: 'fjwifehwofheiuwfhweofewjfowefweofjeowifjeowfjeiowfjowifjiowj' });
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Name too long (25 char max)');
+    assert.equal(res.body.error, 'Exercise name too long (25 char max)');
   });
 
   it('errors out if exercise already exists', async () => {

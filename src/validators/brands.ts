@@ -70,3 +70,17 @@ export const Tag = t.brand(
   (tag): tag is t.Branded<string, { readonly Tag: unique symbol }> => tag.length < 21,
   'Tag'
 );
+
+// a string representation of a workout title
+export const WorkoutTitle = t.brand(
+  str,
+  (w): w is t.Branded<string, { readonly Title: unique symbol }> => w.length < 26,
+  'Title'
+);
+
+// a number representation of a workout stat
+export const WorkoutStat = t.brand(
+  t.number,
+  (s): s is t.Branded<number, { readonly Stat: unique symbol }> => s < 2001,
+  'Stat'
+);
