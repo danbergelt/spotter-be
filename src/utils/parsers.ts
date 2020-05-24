@@ -1,5 +1,5 @@
 import { Write } from '../types';
-import { Del } from '../types/index';
+import { Modify } from '../types/index';
 import { ObjectId, ObjectID } from 'mongodb';
 import { left, right } from 'fp-ts/lib/Either';
 import { BAD_REQUEST } from 'http-status-codes';
@@ -24,7 +24,7 @@ export const metadata = (from: string, to: string, subject: string, html: string
 });
 
 // extracts the document from a delete result from mongodb
-export const parseDelete = <T>(del: Del<T>): T | null | undefined => del.value;
+export const parseModify = <T>(del: Modify<T>): T | null | undefined => del.value;
 
 // parses a MongoDB write and returns the inserted document
 export const parseWrite = <T>(write: Write<T>): T => write.ops[0];
