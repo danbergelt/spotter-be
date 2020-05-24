@@ -42,7 +42,7 @@ describe('post tag', () => {
       .set('Authorization', `Bearer ${t}`)
       .send({});
     assert.ok(!res.body.success);
-    assert.equal(res.body.error, 'Invalid color - must be string');
+    assert.equal(res.body.error, 'Invalid color - must be non-empty string');
   });
 
   it('errors out if tag already exists', async () => {

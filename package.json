@@ -37,7 +37,7 @@
     "yup": "^0.28.3"
   },
   "scripts": {
-    "test": "TESTING=true NODE_ENV=test ts-mocha -p tsconfig.json  src/test/**/**/*test.ts --exit",
+    "test": "TESTING=true NODE_ENV=test ts-mocha -p tsconfig.json  src/test/**/**/*.test.ts --exit",
     "coverage": "TESTING=true NODE_ENV=test nyc npm test && nyc report --reporter=text-lcov > coverage.lcov && ./node_modules/.bin/codecov",
     "start": "NODE_ENV=production ts-node --transpile-only --files src/index",
     "staging": "NODE_ENV=production STAGING=true ts-node --transpile-only --files src/index",
