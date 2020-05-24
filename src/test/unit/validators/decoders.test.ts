@@ -242,12 +242,6 @@ describe('tag decoder', () => {
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
   });
 
-  it('errors out when id is not class instantiation', () => {
-    const foo = { user: process.env.TEST_ID, color };
-    const result = tagDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
-  });
-
   it('errors out if color is missing', () => {
     const foo = { user: new ObjectId() };
     const result = tagDecoder.decode(foo);
@@ -323,12 +317,6 @@ describe('owner', () => {
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
   });
 
-  it('errors out when id is not class instantiation', () => {
-    const foo = { user: process.env.TEST_ID };
-    const result = ownerDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
-  });
-
   it('strips junk fields', () => {
     const foo = { user: new ObjectId() };
     const result = ownerDecoder.decode({ ...foo, foo: 'bar' });
@@ -351,12 +339,6 @@ describe('saved', () => {
 
   it('errors out when id is invalid object id', () => {
     const foo = { _id: 'foo' };
-    const result = savedDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid id');
-  });
-
-  it('errors out when id is not class instantiation', () => {
-    const foo = { _id: process.env.TEST_ID };
     const result = savedDecoder.decode(foo);
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid id');
   });
@@ -442,12 +424,6 @@ describe('workout decoder', () => {
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
   });
 
-  it('errors out if user id is not object id instance', () => {
-    const foo = { date: 'Jan 01 2000', title: 'foo', user: process.env.TEST_ID };
-    const result = workoutDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
-  });
-
   it('errors out if notes is not a string', () => {
     const foo = { date: 'Jan 01 2000', title: 'foo', user: new ObjectId(), notes: 1 };
     const result = workoutDecoder.decode(foo);
@@ -507,34 +483,12 @@ describe('workout decoder', () => {
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
   });
 
-  it('errors out if tag user id is not object id instance', () => {
-    const foo = {
-      date: 'Jan 01 2000',
-      title: 'foo',
-      user: new ObjectId(),
-      tags: [{ _id: new ObjectId(), user: process.env.TEST_ID, color: '#4287f5' }]
-    };
-    const result = workoutDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid user id');
-  });
-
-  it('errors out if tag primary key is undefined', () => {
+  it('errors out if tag primary key is invalid', () => {
     const foo = {
       date: 'Jan 01 2000',
       title: 'foo',
       user: new ObjectId(),
       tags: [{ user: new ObjectId(), color: '#4287f5' }]
-    };
-    const result = workoutDecoder.decode(foo);
-    assert.equal(isLeft(result) && result.left[0].message, 'Invalid id');
-  });
-
-  it('errors out if tag primary key is not object id instance', () => {
-    const foo = {
-      date: 'Jan 01 2000',
-      title: 'foo',
-      user: new ObjectId(),
-      tags: [{ _id: process.env.TEST_ID, user: new ObjectId(), color: '#4287f5' }]
     };
     const result = workoutDecoder.decode(foo);
     assert.equal(isLeft(result) && result.left[0].message, 'Invalid id');
@@ -702,7 +656,7 @@ describe('workout decoder', () => {
       notes: 'foo',
       tags: [{ color: '#4287f5', content: 'bar', _id: new ObjectId(), user: new ObjectId() }]
     };
-    const result = workoutDecoder.decode({ ...foo, foo: 'bar' });
+    const result = workoutDecoder.decode(foo);
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
 });
