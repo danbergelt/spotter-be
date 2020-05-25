@@ -1,9 +1,8 @@
 import { mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { SyncEither } from '../types';
-import { ExactC, TypeC } from 'io-ts';
+import { Sync } from '../types';
+import { Mixed } from 'io-ts';
 import { parseValidationError } from '../utils/parsers';
 
-// TODO --> need to fix the generic decoder type
-export const validate = (decoder: ExactC<TypeC<any>>) => <T>(object: T): SyncEither<T> =>
+export const validate = (decoder: Mixed) => <T>(object: T): Sync<T> =>
   pipe(decoder.decode(object), mapLeft(parseValidationError));

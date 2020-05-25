@@ -1,30 +1,28 @@
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 import { E } from '../utils/parsers';
+import { QueryResult } from 'pg';
 import { Request } from 'express';
 import { Either } from 'fp-ts/lib/Either';
-import { InsertOneWriteOpResult, FindAndModifyWriteOpResultObject } from 'mongodb';
 import { Saved, Exercise, User, Tag, Workout } from '../validators/decoders';
 
-export type SyncEither<T> = Either<E, T>;
+export type Sync<T> = Either<E, T>;
 
-export type HTTPEither<T> = TaskEither<E, T>;
+export type Async<T> = TaskEither<E, T>;
 
 export interface Req<T = {}> extends Request {
   body: T;
 }
 
 export interface Token {
-  _id: string;
+  id: number;
 }
 
 export type Nullable<T> = T | null;
 
-export type Write<T> = InsertOneWriteOpResult<Saved<T>>;
-
-export type Modify<T> = FindAndModifyWriteOpResultObject<Saved<T>>;
-
-export type Raw<T> = Omit<T, '_id' | 'user'>;
+export type Raw<T> = Omit<T, 'id' | 'user'>;
 export type RawExercise = Raw<Exercise>;
 export type RawUser = Raw<User>;
 export type RawTag = Raw<Tag>;
 export type RawWorkout = Raw<Workout>;
+
+export type Query<T> = QueryResult<Saved<T>>;

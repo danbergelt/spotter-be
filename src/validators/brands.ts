@@ -30,7 +30,8 @@ export const _id = new t.Type<ObjectId, ObjectId, unknown>(
 export const str = new t.Type<string, string, unknown>(
   'string',
   (i: unknown): i is string => typeof i === 'string',
-  (i, context) => (typeof i === 'string' ? t.success(i.trim()) : t.failure(i, context)),
+  (i, context) =>
+    typeof i === 'string' && i.length < 255 ? t.success(i.trim()) : t.failure(i, context),
   t.identity
 );
 
@@ -56,7 +57,7 @@ export const Email = t.brand(
 );
 
 // a string representation of a password that must be at least 6 characters
-export const Password = t.brand(
+export const Pw = t.brand(
   str,
   (p): p is t.Branded<string, { readonly PW: unique symbol }> => p.length > 5,
   'PW'

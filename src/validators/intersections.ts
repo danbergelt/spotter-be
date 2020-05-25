@@ -33,9 +33,9 @@ export const EmailString = t.intersection([
 ]);
 
 // intersects isValidString with a min length check
-export const PasswordString = t.intersection([
-  isValidString('password'),
-  withMessage(b.Password, () => 'Password too short (6 char min)')
+export const PwString = t.intersection([
+  isValidString('pw'),
+  withMessage(b.Pw, () => 'Password too short (6 char min)')
 ]);
 
 // intersects isValidString with a max length check
