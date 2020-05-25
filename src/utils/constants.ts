@@ -44,4 +44,10 @@ export const COOKIE_OPTIONS = {
 
 export const COOKIE_NAME = 'ref';
 
+export const SQL = {
+  REGISTER: 'insert into users (email, pw) values ($1, $2) returning id',
+  LOGIN: 'select * from users where email = $1',
+  AUTHENTICATE: 'select * from users where id = $1'
+} as const;
+
 export type COLLECTION = typeof COLLECTIONS[keyof typeof COLLECTIONS];

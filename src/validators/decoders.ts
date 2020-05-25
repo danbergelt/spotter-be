@@ -6,7 +6,7 @@ import * as i from './intersections';
 export const userDecoder = t.exact(
   t.type({
     email: i.EmailString,
-    password: i.PasswordString
+    pw: i.PwString
   })
 );
 
@@ -46,10 +46,10 @@ export const workoutDecoder = t.exact(
 );
 
 // foreign key
-export const ownerDecoder = t.exact(t.type({ user: i.UserId }));
+export const ownerDecoder = t.exact(t.type({ user: i.isValidNum('user id') }));
 
 // primary key
-export const savedDecoder = t.exact(t.type({ _id: i.PrimaryKey }));
+export const savedDecoder = t.exact(t.type({ id: i.isValidNum('id') }));
 
 // statically inferred types
 export type User = t.TypeOf<typeof userDecoder>;

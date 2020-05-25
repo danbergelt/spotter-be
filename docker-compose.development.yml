@@ -17,8 +17,10 @@ services:
       - db
   db:
     container_name: db
-    logging:
-      driver: none
-    image: mongo
+    env_file:
+      - .env
+    image: postgres
+    volumes:
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
     ports:
-      - '27017:27017'
+      - '5432:5432'
