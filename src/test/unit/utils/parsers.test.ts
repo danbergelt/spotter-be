@@ -1,6 +1,8 @@
-import { e, metadata, success, failure } from '../../../utils/parsers';
+import { e, metadata, success, failure, parseRows, join, ternary } from '../../../utils/parsers';
 import assert from 'assert';
 import { expect } from 'chai';
+import { right, left } from 'fp-ts/lib/Either';
+import { right as r } from 'fp-ts/lib/TaskEither';
 
 describe('success and failure messages', () => {
   it('returns a success message', () => {
@@ -25,5 +27,36 @@ describe('error object', () => {
   it('returns an error', () => {
     const error = e('foo', 500);
     assert.deepStrictEqual(error, { message: 'foo', status: 500 });
+  });
+});
+
+describe('parse rows', () => {
+  it('parses rows from a db query', () => {
+    const foo = parseRows({ message: 'foo', status: 500 })(['foo']);
+    assert.deepStrictEqual(foo, right(['foo']));
+  });
+
+  it('returns the pre-loaded error if array is empty', () => {
+    const foo = parseRows({ message: 'foo', status: 500 })([]);
+    assert.deepStrictEqual(foo, left({ message: 'foo', status: 500 }));
+  });
+});
+
+describe('join', () => {
+  it('joins a task either with an either', async () => {
+    const foo = await join(r('foo'))(() => right('bar'))();
+    assert.deepStrictEqual(foo, await r('bar')());
+  });
+});
+
+describe('ternary', () => {
+  it('returns a if b is true', () => {
+    const foo = ternary({ message: 'foo', status: 500 })('bar')(true);
+    assert.deepStrictEqual(foo, right('bar'));
+  });
+
+  it('returns c if b is false', () => {
+    const foo = ternary({ message: 'foo', status: 500 })('bar')(false);
+    assert.deepStrictEqual(foo, left({ message: 'foo', status: 500 }));
   });
 });
