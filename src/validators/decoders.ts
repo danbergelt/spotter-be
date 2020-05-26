@@ -26,7 +26,7 @@ export const exerciseDecoder = t.exact(
     name: i.ExerciseString,
     pr: optional(i.isValidNum('pr')),
     prDate: optional(i.DateString),
-    user: i.UserId
+    user: i.isValidNum('user id')
   })
 );
 
@@ -40,7 +40,7 @@ export const workoutDecoder = t.exact(
     title: i.WorkoutTitleString,
     tags: optional(t.array(i.WorkoutTag)),
     notes: optional(i.isValidString('notes')),
-    user: i.UserId,
+    user: i.isValidNum('user id'),
     exercises: optional(t.array(i.WorkoutExercise))
   })
 );

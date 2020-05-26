@@ -31,7 +31,10 @@ describe('authenticator', () => {
       headers: { authorization: 'Bearer foobar' }
     } as any;
     const foo = l(unauthorized());
-    const deps = { verifyJwt: Sinon.stub().returns(foo), query: Sinon.stub() };
+    const deps = {
+      verifyJwt: Sinon.stub().returns(Sinon.stub().returns(foo)),
+      query: Sinon.stub()
+    };
     const result = await authenticate(req, deps)();
     assert.deepStrictEqual(result, foo);
   });
@@ -43,7 +46,10 @@ describe('authenticator', () => {
     } as any;
     const foo = left(unauthorized());
     const bar = r({ id: 1 });
-    const deps = { verifyJwt: Sinon.stub().returns(bar), query: Sinon.stub().returns(foo) };
+    const deps = {
+      verifyJwt: () => () => bar,
+      query: Sinon.stub().returns(foo)
+    };
     const result = await authenticate(req, deps)();
     assert.deepStrictEqual(result, await foo());
   });
@@ -54,7 +60,10 @@ describe('authenticator', () => {
       headers: { authorization: 'Bearer foobar' }
     } as any;
     const bar = r({ id: 1 });
-    const deps = { verifyJwt: Sinon.stub().returns(bar), query: Sinon.stub().returns(right([])) };
+    const deps = {
+      verifyJwt: Sinon.stub().returns(Sinon.stub().returns(bar)),
+      query: Sinon.stub().returns(right([]))
+    };
     const result = await authenticate(req, deps)();
     assert.deepStrictEqual(result, l(unauthorized()));
   });
@@ -66,7 +75,7 @@ describe('authenticator', () => {
       body: { foo: 'bar' }
     } as any;
     const deps = {
-      verifyJwt: Sinon.stub().returns(r({ id: 1 })),
+      verifyJwt: Sinon.stub().returns(Sinon.stub().returns(r({ id: 1 }))),
       query: Sinon.stub().returns(right([{ id: 1 }]))
     };
     const result = await authenticate(req, deps)();

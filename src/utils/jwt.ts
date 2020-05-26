@@ -8,7 +8,7 @@ import { tryCatch } from 'fp-ts/lib/Either';
 const { REF_SECRET, REF_EXPIRE, JWT_SECRET, JWT_EXPIRE } = process.env;
 
 // verifies a JWT with the passed-in secret
-export const verifyJwt = (token: string, sec: string, verify = jwt.verify): Sync<Token> =>
+export const verifyJwt = (sec: string, verify = jwt.verify) => (token: string): Sync<Token> =>
   tryCatch(() => verify(token, sec) as Token, unauthorized);
 
 // generates an auth token

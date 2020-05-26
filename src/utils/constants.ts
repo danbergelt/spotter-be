@@ -1,12 +1,3 @@
-// all schema names
-export const SCHEMAS = {
-  USERS: 'USERS',
-  CONTACT: 'CONTACT',
-  RANGE: 'RANGE',
-  WORKOUTS: 'WORKOUTS',
-  EXERCISES: 'EXERCISES'
-} as const;
-
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const HEX_COLOR = /^#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b$/i;
@@ -20,21 +11,7 @@ export const EMAILS = {
   TEAM: 'team@getspotter.io'
 } as const;
 
-export const URI = 'spotter';
-
-export const CONFIG = {
-  useUnifiedTopology: true
-} as const;
-
-export const COLLECTIONS = {
-  USERS: 'users',
-  TEMPLATES: 'templates',
-  WORKOUTS: 'workouts',
-  TAGS: 'tags',
-  EXERCISES: 'exercises',
-  PASSWORDS: 'passwords'
-} as const;
-
+// TODO --> confirm these are optimal for production
 export const COOKIE_OPTIONS = {
   expires: new Date(Number(new Date()) + 604800000),
   httpOnly: process.env.NODE_ENV === 'development' ? false : true,
@@ -49,5 +26,3 @@ export const SQL = {
   LOGIN: 'select * from users where email = $1',
   AUTHENTICATE: 'select * from users where id = $1'
 } as const;
-
-export type COLLECTION = typeof COLLECTIONS[keyof typeof COLLECTIONS];

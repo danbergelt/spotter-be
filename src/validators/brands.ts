@@ -1,6 +1,5 @@
 import * as t from 'io-ts';
 import { DATE_REGEX, EMAIL_REGEX, HEX_COLOR } from '../utils/constants';
-import { ObjectId } from 'mongodb';
 
 /*== Branded types =====================================================
 
@@ -12,19 +11,6 @@ e.g., a password is not just a string, it's a specific type of string
 that must pass certain tests in order to be checked
 
 */
-
-const { isValid } = ObjectId;
-
-// mongo object id --> checks if id is stringifed ObjectId or literal ObjectId instance
-export const _id = new t.Type<ObjectId, ObjectId, unknown>(
-  '_id',
-  (i: unknown): i is ObjectId => (typeof i === 'string' || i instanceof ObjectId) && isValid(i),
-  (i, context) =>
-    (typeof i === 'string' || i instanceof ObjectId) && isValid(i)
-      ? t.success(new ObjectId(i))
-      : t.failure(i, context),
-  t.identity
-);
 
 // custom string type that trims the input
 export const str = new t.Type<string, string, unknown>(
