@@ -12,7 +12,7 @@ import { sendError, sendAuth } from '../utils/http';
 import { validate } from '../services/validate';
 import { fromNullable } from 'fp-ts/lib/Either';
 import { hash, compareHash } from '../utils/bcrypt';
-import { metadata, success, parseRows, ternary, couple } from '../utils/parsers';
+import { metadata, success, parseRows, ternary, join } from '../utils/parsers';
 import { Response } from 'express';
 import { userDecoder, contactDecoder, User, Contact } from '../validators/decoders';
 import { loadQuery } from '../utils/pg';
@@ -26,8 +26,6 @@ const { TEAM, NO_REPLY, CONTACT } = EMAILS;
 const parser = parseRows(invalidCredentials());
 const maybe = ternary(invalidCredentials());
 const isCookieNull = fromNullable(_());
-const decodeUser = validate(userDecoder);
-const decodeContact = validate(contactDecoder);
 const query = loadQuery<User>();
 
 // send a contact email to the spotter team
@@ -35,7 +33,7 @@ export const contact = resolver(async (req: Req<Contact>, res) => {
   const { name, email, subject, message } = req.body;
 
   return await pipe(
-    fromEither(decodeContact(req.body)),
+    fromEither(validate(contactDecoder.decode(req.body))),
     chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
     chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
     fold(sendError(res), () => of(res.status(OK).json(success({ message: 'Message sent' }))))
@@ -46,7 +44,7 @@ export const contact = resolver(async (req: Req<Contact>, res) => {
 export const registration = resolver(
   async (req: Req<RawUser>, res) =>
     await pipe(
-      fromEither(decodeUser(req.body)),
+      fromEither(validate(userDecoder.decode(req.body))),
       chain(({ pw }) => hash(pw)),
       chain(pw => query(SQL.REGISTER, [req.body.email, pw])),
       fold(sendError(res), ([{ id }]) => sendAuth(id, res))
@@ -55,11 +53,11 @@ export const registration = resolver(
 
 // log in a user
 export const login = resolver(
-  async (req: Req<User>, res) =>
+  async (req: Req<RawUser>, res) =>
     await pipe(
-      fromEither(decodeUser(req.body)),
-      chain(({ email }) => couple(query(SQL.LOGIN, [email]))(parser)),
-      chain(([user]) => couple(compareHash(req.body.pw, user.pw))(maybe(user))),
+      fromEither(validate(userDecoder.decode(req.body))),
+      chain(({ email }) => join(query(SQL.LOGIN, [email]))(parser)),
+      chain(([user]) => join(compareHash(req.body.pw, user.pw))(maybe(user))),
       fold(sendError(res), ({ id }) => sendAuth(id, res))
     )()
 );
@@ -70,7 +68,7 @@ export const refresh = resolver(
     await pipe(
       fromEither(isCookieNull(req.cookies.ref)),
       chainEitherK(verifyJwt(String(REF_SECRET))),
-      chain(({ id }) => couple(query(SQL.AUTHENTICATE, [id]))(parser)),
+      chain(({ id }) => join(query(SQL.AUTHENTICATE, [id]))(parser)),
       fold(
         ({ status }) => of(res.status(status).json(success({ token: null }))),
         ([{ id }]) => sendAuth(id, res)

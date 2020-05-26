@@ -28,8 +28,8 @@ export const e = (message: string, status: number): E => ({ message, status });
 // parses rows from a db query
 export const parseRows = (e: E) => <T>(a: T[]): Sync<T[]> => (isEmpty(a) ? left(e) : right(a));
 
-// couple a task either with an either
-export const couple = <T>(te: Async<T>) => <U>(tail: (a: T) => Sync<U>): Async<U> =>
+// join a task either with an either
+export const join = <T>(te: Async<T>) => <U>(tail: (a: T) => Sync<U>): Async<U> =>
   pipe(te, chainEitherK(tail));
 
 // a is true, return b, else return an error

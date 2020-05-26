@@ -7,6 +7,10 @@ describe('path factory', () => {
   it('builds a path', () => {
     expect(path('/foo')('/bar')).to.equal('/api/auth/foo/bar');
   });
+
+  it('uses an empty string as default', () => {
+    expect(path('/foo')()).to.equal('/api/auth/foo');
+  });
 });
 
 const utils = () => {
