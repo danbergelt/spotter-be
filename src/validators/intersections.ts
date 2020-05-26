@@ -20,12 +20,6 @@ export const isValidString = (x: string): t.IntersectionC<[typeof b.str, NonEmpt
 export const isValidNum = (x: string): typeof t.number =>
   withMessage(t.number, () => `Invalid ${x} - must be number`);
 
-// checks that the user foreign key is a valid Object Id
-export const UserId = withMessage(b._id, () => 'Invalid user id');
-
-// checks that a primary key is a valid Object Id
-export const PrimaryKey = withMessage(b._id, () => 'Invalid id');
-
 // intersects isValidString with an email regex
 export const EmailString = t.intersection([
   isValidString('email'),
@@ -89,12 +83,12 @@ export const WorkoutSets = t.intersection([
 // template for a tag (need to be able perform intersections later)
 export const Tag = t.type({
   color: HexString,
-  user: UserId,
+  user: isValidNum('user id'),
   content: optional(TagString)
 });
 
 // tag as it exists on a workout (includes a primary key)
-export const WorkoutTag = t.exact(t.intersection([Tag, t.type({ _id: PrimaryKey })]));
+export const WorkoutTag = t.exact(t.intersection([Tag, t.type({ id: isValidNum('id') })]));
 
 // exercise as it exists on a workout
 export const WorkoutExercise = t.exact(
