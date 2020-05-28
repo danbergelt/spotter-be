@@ -19,7 +19,7 @@ export const contactDecoder = t.exact(
 export const exerciseDecoder = t.exact(
   t.type({
     name: b.exercise,
-    pr: b.workoutStat,
+    pr: optional(b.workoutStat),
     prDate: optional(b.strDate),
     user: b.userId
   })
