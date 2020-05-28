@@ -1,55 +1,44 @@
 import * as t from 'io-ts';
+import * as b from './brands';
 import { optional } from 'io-ts-extra';
-import * as i from './intersections';
 
-// raw user type
-export const userDecoder = t.exact(
-  t.type({
-    email: i.EmailString,
-    pw: i.PwString
-  })
-);
+// user type
+export const userDecoder = t.exact(t.type({ email: b.email, pw: b.pw }));
 
-// raw contact type
+// contact type
 export const contactDecoder = t.exact(
   t.type({
-    name: i.isValidString('name'),
-    email: i.EmailString,
-    subject: i.isValidString('subject'),
-    message: i.isValidString('message')
+    name: b.isStr('Name'),
+    email: b.email,
+    subject: b.isStr('Subject'),
+    message: b.isStr('Message')
   })
 );
 
-// raw exercise type
+// exercise type
 export const exerciseDecoder = t.exact(
   t.type({
-    name: i.ExerciseString,
-    pr: optional(i.isValidNum('pr')),
-    prDate: optional(i.DateString),
-    user: i.isValidNum('user id')
+    name: b.exercise,
+    pr: b.workoutStat,
+    prDate: optional(b.strDate),
+    user: b.userId
   })
 );
 
-// raw tag type
-export const tagDecoder = t.exact(i.Tag);
+// tag type
+export const tagDecoder = t.exact(b.tag);
 
 // raw workout type
 export const workoutDecoder = t.exact(
   t.type({
-    date: i.DateString,
-    title: i.WorkoutTitleString,
-    tags: optional(t.array(i.WorkoutTag)),
-    notes: optional(i.isValidString('notes')),
-    user: i.isValidNum('user id'),
-    exercises: optional(t.array(i.WorkoutExercise))
+    date: b.strDate,
+    title: b.workoutTitle,
+    tags: optional(t.array(b.savedTag)),
+    notes: optional(b.isStr('Notes')),
+    user: b.userId,
+    exercises: optional(t.array(b.workoutExercise))
   })
 );
-
-// foreign key
-export const ownerDecoder = t.exact(t.type({ user: i.isValidNum('user id') }));
-
-// primary key
-export const savedDecoder = t.exact(t.type({ id: i.isValidNum('id') }));
 
 // statically inferred types
 export type User = t.TypeOf<typeof userDecoder>;
@@ -57,5 +46,5 @@ export type Contact = t.TypeOf<typeof contactDecoder>;
 export type Exercise = t.TypeOf<typeof exerciseDecoder>;
 export type Tag = t.TypeOf<typeof tagDecoder>;
 export type Workout = t.TypeOf<typeof workoutDecoder>;
-export type Owned<T = {}> = t.TypeOf<typeof ownerDecoder> & T;
-export type Saved<T = {}> = t.TypeOf<typeof savedDecoder> & T;
+export type Owned<T = {}> = { user: t.TypeOf<typeof b.userId> } & T;
+export type Saved<T = {}> = { id: t.TypeOf<typeof b.id> } & T;

@@ -3116,6 +3116,11 @@ mongoose@^5.7.4:
     sift "7.0.1"
     sliced "1.0.1"
 
+monocle-ts@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-2.1.0.tgz#5c1bbade7952b57e33f2179866467e87d9ed5977"
+  integrity sha512-YWH8TDcZSEeCaxp0ZjgccLChnaDvTiUHILpuI0DSZeASYSCgwdz+h6+uEG4QCwYreGsn1oI18ysrcUPv6xWK7w==
+
 morgan@^1.9.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/morgan/-/morgan-1.9.1.tgz#0a8d16734a1d9afbc824b99df87e738e58e2da59"
@@ -3177,6 +3182,11 @@ netmask@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-1.0.6.tgz#20297e89d86f6f6400f250d9f4f6b4c1945fcd35"
   integrity sha1-ICl+idhvb2QA8lDZ9Pa0wZRfzTU=
+
+newtype-ts@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/newtype-ts/-/newtype-ts-0.3.4.tgz#65c74b7d5195edaa9abfcdba6549a33a5c0e298d"
+  integrity sha512-lFJnWAt0oXX1j1ErNy9RU5+FPNtVyzugHW2MchaaMiOeeS9LEmqAAOqyHPFQ0Uw895jStSYGSCslrByzYxFJYQ==
 
 nice-try@^1.0.4:
   version "1.0.5"
