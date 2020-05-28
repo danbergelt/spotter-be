@@ -3,7 +3,11 @@ du:
 dd:
 	docker-compose -f docker-compose.development.yml down
 dt:
+	docker exec -it db psql -U admin -d spotter -c "drop table if exists users;"
+	docker exec -it db psql -U admin -d spotter -f docker-entrypoint-initdb.d/seed.sql
 	docker-compose -f docker-compose.development.yml run --rm dev_api yarn test
+	docker exec -it db psql -U admin -d spotter -c "drop table if exists users;"
+	docker exec -it db psql -U admin -d spotter -f docker-entrypoint-initdb.d/seed.sql
 dciu:
 	docker-compose -f docker-compose.development.yml run --rm dev_api yarn coverage
 dcid:
