@@ -1,8 +1,6 @@
-import { Sync, Async } from '../types';
+import { Sync } from '../types';
 import { right, left } from 'fp-ts/lib/Either';
 import { isEmpty } from 'fp-ts/lib/Array';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { chainEitherK } from 'fp-ts/lib/TaskEither';
 
 // http success template
 type Success<T> = { success: true } & T;
@@ -27,10 +25,6 @@ export const e = (message: string, status: number): E => ({ message, status });
 
 // parses rows from a db query
 export const parseRows = (e: E) => <T>(a: T[]): Sync<T[]> => (isEmpty(a) ? left(e) : right(a));
-
-// join a task either with an either
-export const join = <T>(te: Async<T>) => <U>(tail: (a: T) => Sync<U>): Async<U> =>
-  pipe(te, chainEitherK(tail));
 
 // a is true, return b, else return an error
 export const ternary = (e: E) => <T>(a: T) => <U>(b: U): Sync<T> => (b ? right(a) : left(e));

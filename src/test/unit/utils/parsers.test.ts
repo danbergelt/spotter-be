@@ -1,8 +1,7 @@
-import { e, metadata, success, failure, parseRows, join, ternary } from '../../../utils/parsers';
+import { e, metadata, success, failure, parseRows, ternary } from '../../../utils/parsers';
 import assert from 'assert';
 import { expect } from 'chai';
 import { right, left } from 'fp-ts/lib/Either';
-import { right as r } from 'fp-ts/lib/TaskEither';
 
 describe('success and failure messages', () => {
   it('returns a success message', () => {
@@ -39,13 +38,6 @@ describe('parse rows', () => {
   it('returns the pre-loaded error if array is empty', () => {
     const foo = parseRows({ message: 'foo', status: 500 })([]);
     assert.deepStrictEqual(foo, left({ message: 'foo', status: 500 }));
-  });
-});
-
-describe('join', () => {
-  it('joins a task either with an either', async () => {
-    const foo = await join(r('foo'))(() => right('bar'))();
-    assert.deepStrictEqual(foo, await r('bar')());
   });
 });
 
