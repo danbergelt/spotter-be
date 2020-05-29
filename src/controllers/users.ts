@@ -13,8 +13,8 @@ import { fromNullable } from 'fp-ts/lib/Either';
 import { hash, compareHash } from '../utils/bcrypt';
 import { metadata, success, parseRows, ternary, failure } from '../utils/parsers';
 import { Response, Request } from 'express';
-import { userDecoder, contactDecoder, User } from '../validators/decoders';
-import { loadQuery } from '../utils/pg';
+import { userDecoder, contactDecoder } from '../validators/decoders';
+import { userQuery } from '../utils/pg';
 import { verifyJwt } from '../utils/jwt';
 
 // destructured constants
@@ -26,29 +26,33 @@ const verify = verifyJwt(String(REF_SECRET));
 const parser = parseRows(invalidCredentials());
 const maybe = ternary(invalidCredentials());
 const isCookieNull = fromNullable(_());
-const query = loadQuery<User>();
 
 // send a contact email to the spotter team
-export const contact = resolver(async (req, res) => {
-  const { name, email, subject, message } = req.body;
-
-  return await pipe(
-    io(contactDecoder, req.body),
-    chain(() => sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email)))),
-    chain(() => sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))),
-    fold(sendError(res), () => of(res.status(OK).json(success({ message: 'Message sent' }))))
-  )();
-});
+export const contact = resolver(
+  async (req, res) =>
+    await pipe(
+      io(contactDecoder, req.body),
+      chain(({ name, email, subject, message }) =>
+        pipe(
+          sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email))),
+          chain(() =>
+            sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))
+          )
+        )
+      ),
+      fold(sendError(res), () => of(res.status(OK).json(success({ message: 'Message sent' }))))
+    )()
+);
 
 // register a new user
 export const registration = resolver(
   async (req, res) =>
     await pipe(
       io(userDecoder, req.body),
-      chain(user =>
+      chain(({ email, pw }) =>
         pipe(
-          hash(user.pw),
-          chain(hash => query(SQL.REGISTER, [user.email, hash]))
+          hash(pw),
+          chain(hash => userQuery(SQL.REGISTER, [email, hash]))
         )
       ),
       fold(sendError(res), ([{ id }]) => sendAuth(id, res))
@@ -62,7 +66,7 @@ export const login = resolver(
       io(userDecoder, req.body),
       chain(({ email, pw }) =>
         pipe(
-          pipe(query(SQL.LOGIN, [email]), chainEitherK(parser)),
+          pipe(userQuery(SQL.LOGIN, [email]), chainEitherK(parser)),
           chain(([user]) => pipe(compareHash(pw, user.pw), chainEitherK(maybe(user))))
         )
       ),
@@ -76,7 +80,7 @@ export const refresh = resolver(
     await pipe(
       fromEither(isCookieNull(req.cookies.ref)),
       chainEitherK(verify),
-      chain(({ id }) => pipe(query(SQL.AUTHENTICATE, [id]), chainEitherK(parser))),
+      chain(({ id }) => pipe(userQuery(SQL.AUTHENTICATE, [id]), chainEitherK(parser))),
       fold(
         ({ status }) => of(res.status(status).json(failure({ token: null }))),
         ([{ id }]) => sendAuth(id, res)
