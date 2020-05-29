@@ -28,32 +28,6 @@ export const isStr = (x: string): typeof str => withMessage(str, () => `${x} mus
 // checks a number, returns an error message
 export const isNum = (x: string): t.NumberC => withMessage(t.number, () => `${x} must be number`);
 
-// a string representation of a date that must match a certain format
-export const strDate = t.intersection([
-  isStr('Date'),
-  withMessage(
-    t.brand(
-      str,
-      (d): d is t.Branded<string, { readonly Date: unique symbol }> => DATE_REGEX.test(d),
-      'Date'
-    ),
-    () => 'Invalid date'
-  )
-]);
-
-// a string representation of an exercise name that must be less than 26 chars
-export const exercise = t.intersection([
-  isStr('Exercise name'),
-  withMessage(
-    t.brand(
-      str,
-      (e): e is t.Branded<string, { readonly Exercise: unique symbol }> => e.length < 26,
-      'Exercise'
-    ),
-    () => 'Exercise name too long (25 char max)'
-  )
-]);
-
 // a string representation of an email address that must pass an email regex
 export const email = t.intersection([
   isStr('Email'),
@@ -73,6 +47,32 @@ export const pw = t.intersection([
   withMessage(
     t.brand(str, (p): p is t.Branded<string, { readonly PW: unique symbol }> => p.length > 5, 'PW'),
     () => 'Password too short (6 char min)'
+  )
+]);
+
+// a string representation of an exercise name that must be less than 26 chars
+export const exercise = t.intersection([
+  isStr('Exercise name'),
+  withMessage(
+    t.brand(
+      str,
+      (e): e is t.Branded<string, { readonly Exercise: unique symbol }> => e.length < 26,
+      'Exercise'
+    ),
+    () => 'Exercise name too long (25 char max)'
+  )
+]);
+
+// a string representation of a date that must match a certain format
+export const strDate = t.intersection([
+  isStr('Date'),
+  withMessage(
+    t.brand(
+      str,
+      (d): d is t.Branded<string, { readonly Date: unique symbol }> => DATE_REGEX.test(d),
+      'Date'
+    ),
+    () => 'Invalid date'
   )
 ]);
 

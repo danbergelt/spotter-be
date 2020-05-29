@@ -1,4 +1,4 @@
-import { handler, loadQuery } from '../../../utils/pg';
+import { handler, query } from '../../../utils/pg';
 import assert from 'assert';
 import { badGateway } from '../../../utils/errors';
 import Sinon from 'sinon';
@@ -19,13 +19,13 @@ describe('error handler', () => {
 describe('query', () => {
   it('queries and returns rows', async () => {
     const pool = { query: Sinon.stub().returns({ rows: ['foo'] }) };
-    const foo = await loadQuery(pool as any)('some sql', ['foo'])();
+    const foo = await query('some sql', ['foo'], pool as any)();
     assert.deepStrictEqual(foo, right(['foo']));
   });
 
   it('returns an error if query fails', async () => {
     const pool = { query: Sinon.stub().throws('foo') };
-    const foo = await loadQuery(pool as any)('some sql', ['foo'])();
+    const foo = await query('some sql', ['foo'], pool as any)();
     assert.deepStrictEqual(foo, left(badGateway()));
   });
 });

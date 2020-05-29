@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { tryCatch } from 'fp-ts/lib/TaskEither';
 import { badGateway, duplicate } from '../utils/errors';
 import { Async } from '../types';
-import { Saved } from '../validators/decoders';
+import { Saved, User } from '../validators/decoders';
 import { match } from 'io-ts-extra';
 import { literal } from 'io-ts';
 import { E } from './parsers';
@@ -18,15 +18,16 @@ const pool = new Pool({
 });
 
 // intercepts PG error codes and provides an appropriate response
-// TODO --> need to make this safer, check that error has the code field first
-export const handler = (error: any): E =>
-  match(error.code)
+export const handler = (error: unknown): E =>
+  match((error as { code: string }).code)
     //  TODO --> find a way to handle this generically
     .case(literal('23505'), () => duplicate('User'))
     .default(badGateway)
     .get();
 
-// load a DB query with the provided type, and return the rows
-// TODO --> find a way to accept the return type without a type argument
-export const loadQuery = <T>(p = pool) => <U>(sql: string, args: U[]): Async<Saved<T>[]> =>
+type Query<T> = <U>(sql: string, args: U[], p?: Pool) => Async<Saved<T>[]>;
+
+export const query: Query<unknown> = (sql, args, p = pool) =>
   tryCatch(async () => (await p.query(sql, args)).rows, handler);
+
+export const userQuery = query as Query<User>;
