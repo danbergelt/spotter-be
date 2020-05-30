@@ -1,30 +1,29 @@
 import { pipe } from 'fp-ts/lib/pipeable';
-import { chain, map, fromEither, chainEitherK } from 'fp-ts/lib/TaskEither';
+import * as TE from 'fp-ts/lib/TaskEither';
+import * as E from 'fp-ts/lib/Either';
 import { unauthorized } from '../utils/errors';
-import { Async, Sync } from '../types';
-import { fromNullable, left, right } from 'fp-ts/lib/Either';
+import { Async } from '../types';
 import { verifyJwt } from '../utils/jwt';
-import { userQuery } from '../utils/pg';
 import { SQL } from '../utils/constants';
 import { parseRows } from '../utils/parsers';
 import { Request } from 'express';
+import { userQuery } from 'src/utils/pg';
 
-const { JWT_SECRET } = process.env;
-const authSecret = String(JWT_SECRET);
+const sec = String(process.env.JWT_SECRET);
 
-// compositions
-const parser = parseRows(unauthorized());
-const isTokenNull = fromNullable(unauthorized());
-const deps = { verifyJwt, query: userQuery };
-const stripToken = (a: string): Sync<string> =>
-  a.startsWith('Bearer ') ? right(a.split(' ')[1]) : left(unauthorized());
+const parse = parseRows(unauthorized());
+const read = (x: string | undefined): Async<string> =>
+  pipe(E.fromNullable(unauthorized())(x), TE.fromEither);
+const strip = (x: string): Async<string> =>
+  pipe(x.startsWith('Bearer ') ? E.right(x.split(' ')[1]) : E.left(unauthorized()), TE.fromEither);
 
-// auth helper used to protect private endpoints
-export const authenticate = <T>(req: Request, { verifyJwt, query } = deps): Async<T> =>
+// authenticate a json web token from a request header
+export const authenticate = <T>(req: Request, v = verifyJwt, q = userQuery): Async<T> =>
   pipe(
-    fromEither(isTokenNull(req.headers.authorization)),
-    chainEitherK(stripToken),
-    chainEitherK(verifyJwt(authSecret)),
-    chain(({ id }) => pipe(query(SQL.AUTHENTICATE, [id]), chainEitherK(parser))),
-    map(([{ id }]) => ({ ...req.body, user: id }))
+    read(req.headers.authorization),
+    TE.chain(strip),
+    TE.chain(t => pipe(v(sec)(t), TE.fromEither)),
+    TE.chain(jwt => q(SQL.AUTHENTICATE, [jwt.id])),
+    TE.chain(parse),
+    TE.map(([user]) => ({ ...req.body, user: user.id }))
   );

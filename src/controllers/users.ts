@@ -1,7 +1,9 @@
 import { resolver } from '../utils/express';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { chain, fold, fromEither, chainEitherK } from 'fp-ts/lib/TaskEither';
-import { of } from 'fp-ts/lib/Task';
+import * as F from 'fp-ts/lib/function';
+import * as TE from 'fp-ts/lib/TaskEither';
+import * as T from 'fp-ts/lib/Task';
+import * as E from 'fp-ts/lib/Either';
 import { COOKIE_NAME, EMAILS, SQL } from '../utils/constants';
 import { OK } from 'http-status-codes';
 import { _, invalidCredentials } from '../utils/errors';
@@ -9,38 +11,36 @@ import { sendMail } from '../services/sendMail';
 import { confirmContactMsg, contactMsg } from '../utils/emailTemplates';
 import { sendError, sendAuth } from '../utils/http';
 import { io } from '../services/io';
-import { fromNullable } from 'fp-ts/lib/Either';
 import { hash, compareHash } from '../utils/bcrypt';
 import { metadata, success, parseRows, ternary, failure } from '../utils/parsers';
 import { Response, Request } from 'express';
 import { userDecoder, contactDecoder } from '../validators/decoders';
 import { userQuery } from '../utils/pg';
 import { verifyJwt } from '../utils/jwt';
+import { Async } from '../types';
 
 // destructured constants
-const { REF_SECRET } = process.env;
+const sec = String(process.env.REF_SECRET);
 const { TEAM, NO_REPLY, CONTACT } = EMAILS;
 
 // compositions
-const verify = verifyJwt(String(REF_SECRET));
-const parser = parseRows(invalidCredentials());
+const parse = parseRows(invalidCredentials());
 const maybe = ternary(invalidCredentials());
-const isCookieNull = fromNullable(_());
+const read = (x: string | undefined): Async<string> => pipe(E.fromNullable(_())(x), TE.fromEither);
+const lazy = <T>(x: T): F.Lazy<T> => (): T => x;
 
-// send a contact email to the spotter team
+// send a contact email to the spotter team (x) + confirmation email to the user (y)
+const message = 'Message sent';
 export const contact = resolver(
   async (req, res) =>
     await pipe(
       io(contactDecoder, req.body),
-      chain(({ name, email, subject, message }) =>
-        pipe(
-          sendMail(metadata(CONTACT, TEAM, subject, contactMsg(message, name, email))),
-          chain(() =>
-            sendMail(metadata(NO_REPLY, email, 'Greetings from Spotter', confirmContactMsg()))
-          )
-        )
-      ),
-      fold(sendError(res), () => of(res.status(OK).json(success({ message: 'Message sent' }))))
+      TE.map(a => [
+        metadata(CONTACT, TEAM, a.subject, contactMsg(a.message, name, a.email)),
+        metadata(NO_REPLY, a.email, 'Hello from Spotter', confirmContactMsg())
+      ]),
+      TE.chain(([x, y]) => pipe(sendMail(x), TE.chain(lazy(sendMail(y))))),
+      TE.fold(sendError(res), lazy(T.of(res.status(OK).json(success({ message })))))
     )()
 );
 
@@ -49,13 +49,13 @@ export const registration = resolver(
   async (req, res) =>
     await pipe(
       io(userDecoder, req.body),
-      chain(({ email, pw }) =>
+      TE.chain(a =>
         pipe(
-          hash(pw),
-          chain(hash => userQuery(SQL.REGISTER, [email, hash]))
+          hash(a.pw),
+          TE.chain(hash => userQuery(SQL.REGISTER, [a.email, hash]))
         )
       ),
-      fold(sendError(res), ([{ id }]) => sendAuth(id, res))
+      TE.fold(sendError(res), ([user]) => sendAuth(user.id, res))
     )()
 );
 
@@ -64,26 +64,29 @@ export const login = resolver(
   async (req, res) =>
     await pipe(
       io(userDecoder, req.body),
-      chain(({ email, pw }) =>
+      TE.chain(a =>
         pipe(
-          pipe(userQuery(SQL.LOGIN, [email]), chainEitherK(parser)),
-          chain(([user]) => pipe(compareHash(pw, user.pw), chainEitherK(maybe(user))))
+          userQuery(SQL.LOGIN, [a.email]),
+          TE.chain(parse),
+          TE.chain(([user]) => pipe(compareHash(a.pw, user.pw), TE.chain(maybe(user))))
         )
       ),
-      fold(sendError(res), ({ id }) => sendAuth(id, res))
+      TE.fold(sendError(res), user => sendAuth(user.id, res))
     )()
 );
 
 // submit a refresh request --> validate the refresh token, return a new auth token
+const token = null;
 export const refresh = resolver(
   async (req, res) =>
     await pipe(
-      fromEither(isCookieNull(req.cookies.ref)),
-      chainEitherK(verify),
-      chain(({ id }) => pipe(userQuery(SQL.AUTHENTICATE, [id]), chainEitherK(parser))),
-      fold(
-        ({ status }) => of(res.status(status).json(failure({ token: null }))),
-        ([{ id }]) => sendAuth(id, res)
+      read(req.cookies.ref),
+      TE.chain(t => pipe(verifyJwt(sec)(t), TE.fromEither)),
+      TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
+      TE.chain(parse),
+      TE.fold(
+        err => T.of(res.status(err.status).json(failure({ token }))),
+        ([user]) => sendAuth(user.id, res)
       )
     )()
 );
