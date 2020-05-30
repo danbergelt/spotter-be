@@ -17,6 +17,8 @@ const pool = new Pool({
   port: Number(DB_PORT)
 });
 
+const cap = (s: string): string => `${s.charAt(0).toUpperCase()}${s.slice(1)}`;
+
 // intercepts PG error codes and provides an appropriate response
 export const handler = (error: unknown): E =>
   match((error as { code: string }).code)
@@ -25,9 +27,10 @@ export const handler = (error: unknown): E =>
     .default(badGateway)
     .get();
 
-type Query<T> = <U>(sql: string, args: U[], p?: Pool) => Async<Saved<T>[]>;
+type Query<T> = <U>(sql: string, args: U[], p?: Pool) => Async<Saved<T>[] | never[]>;
 
-export const query: Query<unknown> = (sql, args, p = pool) =>
+// eslint-disable-next-line
+export const query: Query<any> = (sql, args, p = pool) =>
   tryCatch(async () => (await p.query(sql, args)).rows, handler);
 
-export const userQuery = query as Query<User>;
+export const userQuery: Query<User> = query;

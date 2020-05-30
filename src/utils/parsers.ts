@@ -1,5 +1,5 @@
-import { Sync } from '../types';
-import { right, left } from 'fp-ts/lib/Either';
+import { Async } from '../types';
+import { right, left } from 'fp-ts/lib/TaskEither';
 import { isEmpty } from 'fp-ts/lib/Array';
 
 // http success template
@@ -24,7 +24,7 @@ export type E = { message: string; status: number };
 export const e = (message: string, status: number): E => ({ message, status });
 
 // parses rows from a db query
-export const parseRows = (e: E) => <T>(a: T[]): Sync<T[]> => (isEmpty(a) ? left(e) : right(a));
+export const parseRows = (e: E) => <T>(a: T[]): Async<T[]> => (isEmpty(a) ? left(e) : right(a));
 
 // a is true, return b, else return an error
-export const ternary = (e: E) => <T>(a: T) => <U>(b: U): Sync<T> => (b ? right(a) : left(e));
+export const ternary = (e: E) => <T>(a: T) => <U>(b: U): Async<T> => (b ? right(a) : left(e));

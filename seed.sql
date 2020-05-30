@@ -15,3 +15,5 @@ create table exercises
   pr int,
   prDate text
 );
+
+create unique index exercise_name_idx on exercises (user, exercise_name);
