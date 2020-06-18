@@ -1,18 +1,35 @@
 import { Async } from '../types';
-import { right, left } from 'fp-ts/lib/TaskEither';
-import { isEmpty } from 'fp-ts/lib/Array';
+import * as ROA from 'fp-ts/lib/ReadonlyArray';
+import * as TE from 'fp-ts/lib/TaskEither';
+import { ReadonlyNonEmptyArray } from 'fp-ts/lib/ReadonlyNonEmptyArray';
+import { Lazy } from 'fp-ts/lib/function';
 
-// http success template
-type Success<T> = { success: true } & T;
-export const success = <T>(data = {} as T): Success<T> => ({ success: true, ...data });
+type Message = string;
+type Status = number;
+type Payload = { [key: string]: unknown };
+export type E = { message: Message; status: Status };
 
-// http error template
-type Failure<T> = { success: false } & T;
-export const failure = <T>(data = {} as T): Failure<T> => ({ success: false, ...data });
+// object for returning a successful HTTP response
+type Success = (payload: Payload) => { success: true } & Payload;
+export const success: Success = payload => ({ success: true, ...payload });
+
+// object for returning a failed HTTP response
+type Failure = (payload: Payload) => { success: false } & Payload;
+export const failure: Failure = payload => ({ success: false, ...payload });
 
 // build a metadata object to be used when sending emails with mailgun
-export type MetaData = { from: string; to: string; subject: string; html: string };
-export const metadata = (from: string, to: string, subject: string, html: string): MetaData => ({
+export type MetaData = {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+};
+export const metadata = (
+  from: string,
+  to: string,
+  subject: string,
+  html: string
+): MetaData => ({
   from,
   to,
   subject,
@@ -20,11 +37,11 @@ export const metadata = (from: string, to: string, subject: string, html: string
 });
 
 // default error object
-export type E = { message: string; status: number };
-export const e = (message: string, status: number): E => ({ message, status });
+type BuilderE = (message: Message, status: Status) => E;
+export const e: BuilderE = (message, status) => ({ message, status });
 
-// parses rows from a db query
-export const parseRows = (e: E) => <T>(a: T[]): Async<T[]> => (isEmpty(a) ? left(e) : right(a));
-
-// a is true, return b, else return an error
-export const ternary = (e: E) => <T>(a: T) => <U>(b: U): Async<T> => (b ? right(a) : left(e));
+// array length predicate
+type IsNonEmpty = (
+  e: Lazy<E>
+) => <T>(a: ReadonlyArray<T>) => Async<ReadonlyNonEmptyArray<T>>;
+export const isNonEmpty: IsNonEmpty = e => TE.fromPredicate(ROA.isNonEmpty, e);

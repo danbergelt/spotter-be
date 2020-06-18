@@ -16,7 +16,9 @@
   "rules": {
     "prettier/prettier": "error",
     "@typescript-eslint/unbound-method": "off",
-    "max-len": "off"
+    "max-len": "off",
+    // NOTE --> Rule turned off, otherwise must type downstream return for HOFs, see: https://github.com/typescript-eslint/typescript-eslint/issues/758
+    "@typescript-eslint/explicit-function-return-type": "off"
   },
   "parserOptions": {
     "ecmaVersion": 2020,

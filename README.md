@@ -32,9 +32,9 @@ this app relies on certain environment variables. after pulling down to your loc
 
 `NODE_ENV=development`
 
-`JWT_SECRET=<your jsonwebtoken secret`
+`AUTH_SECRET=<your jsonwebtoken secret`
 
-`JWT_EXPIRE=<your jsonwebtoken expiration time (e.g. 1d)`
+`AUTH_EXPIRE=<your jsonwebtoken expiration time (e.g. 1d)`
 
 `REF_SECRET=<your refresh cookie secret>`
 

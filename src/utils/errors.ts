@@ -1,10 +1,9 @@
-import { e, E } from './parsers';
-import { BAD_REQUEST, BAD_GATEWAY, INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
+import { e } from './parsers';
+import * as E from 'http-status-codes';
 
 // reusable error responses
-export const invalidCredentials = (): E => e('Invalid credentials', BAD_REQUEST);
-export const badGateway = (): E => e('Bad gateway', BAD_GATEWAY);
-export const _ = (): E => e('_', BAD_REQUEST);
-export const serverError = (): E => e('Server error', INTERNAL_SERVER_ERROR);
-export const unauthorized = (): E => e('Unauthorized', UNAUTHORIZED);
-export const duplicate = (entity: string): E => e(`${entity} already exists`, BAD_REQUEST);
+export const invalidCredentials = e('Invalid credentials', E.BAD_REQUEST);
+export const badGateway = e('Bad gateway', E.BAD_GATEWAY);
+export const _ = e('_', E.BAD_REQUEST);
+export const serverError = e('Server error', E.INTERNAL_SERVER_ERROR);
+export const unauthorized = e('Unauthorized', E.UNAUTHORIZED);

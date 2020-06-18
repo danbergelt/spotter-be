@@ -10,10 +10,10 @@ create table users
 create table exercises 
 (
   id serial primary key,
-  user int references users(id) not null,
+  user_id int references users(id) not null on delete cascade,
   exercise_name citext not null,
   pr int,
-  prDate text
+  pr_date text
 );
 
-create unique index exercise_name_idx on exercises (user, exercise_name);
+alter table exercises add constraint no_dup_exercises unique(user_id, exercise_name)

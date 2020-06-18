@@ -1,12 +1,26 @@
-import { mapLeft } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { Async } from '../types';
-import { Errors, Decoder } from 'io-ts';
+import { Errors, Decoder, ValidationError } from 'io-ts';
 import { BAD_REQUEST } from 'http-status-codes';
 import { e, E } from '../utils/parsers';
-import { fromEither } from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as O from 'fp-ts/lib/Option';
+import * as RA from 'fp-ts/lib/ReadonlyArray';
+import * as EI from 'fp-ts/lib/Either';
+import * as TE from 'fp-ts/lib/TaskEither';
 
-// accepts any decoder, performs validation, and either returns the object as a right or maps into a validation error
-const parse = ([{ message }]: Errors): E => e(message ? message : 'Validation error', BAD_REQUEST);
-export const io = <O, I>(d: Decoder<unknown, O>, I: I): Async<O> =>
-  pipe(d.decode(I), mapLeft(parse), fromEither);
+type ParsedValidationError = E;
+
+type FoldError = (v?: ValidationError) => ParsedValidationError;
+const foldError: FoldError = v =>
+  e(v?.message ? v.message : 'Validation error', BAD_REQUEST);
+
+type ParseErrors = (errors: Errors) => ParsedValidationError;
+const parseErrors: ParseErrors = errors =>
+  pipe(RA.head(errors), O.fold(foldError, foldError));
+
+// decode a request --> map into a task either, and parse errors into a standard error object
+type IO = <T>(d: Decoder<unknown, T>, input: unknown) => Async<T>;
+const io: IO = (d, input) =>
+  pipe(d.decode(input), EI.mapLeft(parseErrors), TE.fromEither);
+
+export { foldError, parseErrors, io };

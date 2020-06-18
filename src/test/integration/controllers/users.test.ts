@@ -9,7 +9,12 @@ const p = path('/users');
 
 use(http);
 
-const body = { message: 'foo', subject: 'bar', email: 'foo@bar.com', name: 'baz' };
+const body = {
+  message: 'foo',
+  subject: 'bar',
+  email: 'foo@bar.com',
+  name: 'baz'
+};
 
 // TODO --> need to figure out how to throw mailgun in test mode to test catching
 
@@ -111,7 +116,9 @@ describe('refresh', () => {
       .post(p('/registration'))
       .send({ email: 'refresh@refresh.com', pw: 'refresh' });
 
-    const cookie = (header['set-cookie'][0] as string).split('=')[1].split(';')[0];
+    const cookie = (header['set-cookie'][0] as string)
+      .split('=')[1]
+      .split(';')[0];
 
     const res = await request(server)
       .post(p('/refresh'))
@@ -143,7 +150,11 @@ describe('refresh', () => {
       .post(p('/refresh'))
       .set(
         'Cookie',
-        `ref=${token(-1, String(process.env.JWT_SECRET), String(process.env.JWT_EXPIRE))}`
+        `ref=${token(
+          -1,
+          String(process.env.AUTH_SECRET),
+          String(process.env.AUTH_EXPIRE)
+        )}`
       );
 
     assert.ok(!res.body.success);
