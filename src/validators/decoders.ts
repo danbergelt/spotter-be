@@ -3,15 +3,17 @@ import * as b from './brands';
 import { optional } from 'io-ts-extra';
 
 // user type
-export const userDecoder = t.exact(t.type({ email: b.email, pw: b.pw }));
+export const userDecoder = t.exact(
+  t.type({ email: b.email, password: b.password })
+);
 
 // contact type
 export const contactDecoder = t.exact(
   t.type({
-    name: b.isStr('Name'),
+    name: b.str('Name'),
     email: b.email,
-    subject: b.isStr('Subject'),
-    message: b.isStr('Message')
+    subject: b.str('Subject'),
+    message: b.str('Message')
   })
 );
 
@@ -34,7 +36,7 @@ export const workoutDecoder = t.exact(
     date: b.strDate,
     title: b.workoutTitle,
     tags: optional(t.array(b.savedTag)),
-    notes: optional(b.isStr('Notes')),
+    notes: optional(b.str('Notes')),
     user: b.userId,
     exercises: optional(t.array(b.workoutExercise))
   })
@@ -46,5 +48,4 @@ export type Contact = t.TypeOf<typeof contactDecoder>;
 export type Exercise = t.TypeOf<typeof exerciseDecoder>;
 export type Tag = t.TypeOf<typeof tagDecoder>;
 export type Workout = t.TypeOf<typeof workoutDecoder>;
-export type Owned<T = {}> = { user: t.TypeOf<typeof b.userId> } & T;
 export type Saved<T = {}> = { id: t.TypeOf<typeof b.id> } & T;

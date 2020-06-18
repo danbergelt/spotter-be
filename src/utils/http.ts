@@ -4,17 +4,17 @@ import { OK } from 'http-status-codes';
 import { COOKIE_OPTIONS, COOKIE_NAME } from './constants';
 import { success } from './parsers';
 import { token } from './jwt';
-import { of, Task } from 'fp-ts/lib/Task';
+import { Task, of } from 'fp-ts/lib/Task';
 
-const { REF_SECRET, REF_EXPIRE, JWT_SECRET, JWT_EXPIRE } = process.env;
+type UserId = number;
 
-const refreshSecret = String(REF_SECRET);
-const refreshExp = String(REF_EXPIRE);
-const authSecret = String(JWT_SECRET);
-const authExp = String(JWT_EXPIRE);
+const refreshSecret = String(process.env.REF_SECRET);
+const refreshExp = String(process.env.REF_EXPIRE);
+const authSecret = String(process.env.AUTH_SECRET);
+const authExp = String(process.env.AUTH_EXPIRE);
 
 // http response that sends back a refresh token and an auth token
-export const sendAuth = (id: number, res: Response): Task<Response> =>
+export const sendAuth = (id: UserId, res: Response): Task<Response> =>
   of(
     res
       .cookie(COOKIE_NAME, token(id, refreshSecret, refreshExp), COOKIE_OPTIONS)
@@ -23,5 +23,5 @@ export const sendAuth = (id: number, res: Response): Task<Response> =>
   );
 
 // http error response
-export const sendError = (res: Response) => ({ status, message }: E): Task<Response> =>
-  of(res.status(status).json(failure({ error: message })));
+export const sendError = (res: Response) => (e: E): Task<Response> =>
+  of(res.status(e.status).json(failure({ error: e.message })));

@@ -14,8 +14,8 @@ before_script:
   - echo DB=$DB >> .env
   - echo PORT=$PORT >> .env
   - echo NODE_ENV=$NODE_ENV >> .env
-  - echo JWT_SECRET=$JWT_SECRET >> .env
-  - echo JWT_EXPIRE=$JWT_EXPIRE >> .env
+  - echo AUTH_SECRET=$AUTH_SECRET >> .env
+  - echo AUTH_EXPIRE=$AUTH_EXPIRE >> .env
   - echo REF_SECRET=$REF_SECRET >> .env
   - echo REF_EXPIRE=$REF_EXPIRE >> .env
   - echo MG_DOMAIN=$MG_DOMAIN >> .env

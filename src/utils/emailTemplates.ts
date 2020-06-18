@@ -8,18 +8,17 @@ export const forgotPw = (url: string): string =>
   <a href="${url}">${url}</a>
   </html>`;
 
-export const contactMsg = (message: string, name: string, email: string): string =>
+export const contactMsg = (msg: string, name: string, email: string): string =>
   `
   <html>
   <div>Name: ${name}</div>
   <br />
   <div>Email: ${email}</div>
   <br />
-  <div>Message: ${message}</div>
+  <div>Message: ${msg}</div>
   </html>`;
 
-export const confirmContactMsg = (): string =>
-  `<html>
+export const confirmContactMsg = `<html>
   <div>Hi there! This is a confirmation that we've received your inquiry. We'll get back to you as soon as possible.</div>
   <br />
   <div>Thanks for your patience!</div>

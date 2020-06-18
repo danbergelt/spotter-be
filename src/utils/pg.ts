@@ -1,36 +1,47 @@
-import { Pool } from 'pg';
-import { tryCatch } from 'fp-ts/lib/TaskEither';
-import { badGateway, duplicate } from '../utils/errors';
+import { Pool, QueryResult } from 'pg';
+import * as TE from 'fp-ts/lib/TaskEither';
+import * as F from 'fp-ts/lib/function';
+import { badGateway } from '../utils/errors';
 import { Async } from '../types';
-import { Saved, User } from '../validators/decoders';
+import { Saved, User, Exercise, Tag, Workout } from '../validators/decoders';
 import { match } from 'io-ts-extra';
 import { literal } from 'io-ts';
 import { E } from './parsers';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { DB_CONFIG } from './constants';
 
-const { POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, DB, DB_PORT } = process.env;
+type Result<T> = ReadonlyArray<
+  Saved<
+    T extends User
+      ? User
+      : T extends Exercise
+      ? Exercise
+      : T extends Tag
+      ? Tag
+      : T extends Workout
+      ? Workout
+      : unknown
+  >
+>;
 
-const pool = new Pool({
-  user: POSTGRES_USER,
-  host: DB,
-  database: POSTGRES_DB,
-  password: POSTGRES_PASSWORD,
-  port: Number(DB_PORT)
-});
+const pool = new Pool(DB_CONFIG);
 
-const cap = (s: string): string => `${s.charAt(0).toUpperCase()}${s.slice(1)}`;
-
-// intercepts PG error codes and provides an appropriate response
+// maps PG errors
 export const handler = (error: unknown): E =>
   match((error as { code: string }).code)
     //  TODO --> find a way to handle this generically
-    .case(literal('23505'), () => duplicate('User'))
-    .default(badGateway)
+    .case(literal('23505'), () => badGateway)
+    .default(F.constant(badGateway))
     .get();
 
-type Query<T> = <U>(sql: string, args: U[], p?: Pool) => Async<Saved<T>[] | never[]>;
+type GetRows = <T>(q: QueryResult<T>) => Array<T>;
+const getRows: GetRows = q => q.rows;
 
-// eslint-disable-next-line
-export const query: Query<any> = (sql, args, p = pool) =>
-  tryCatch(async () => (await p.query(sql, args)).rows, handler);
+type Query<T> = <U>(sql: string, args: U[], p?: Pool) => Async<Result<T>>;
+export const query: Query<unknown> = (sql, args, p = pool) =>
+  pipe(
+    TE.tryCatch(async () => await p.query(sql, args), handler),
+    TE.map(getRows)
+  );
 
 export const userQuery: Query<User> = query;
