@@ -3,53 +3,49 @@ import * as E from 'fp-ts/lib/Either';
 import { TypeOf } from 'io-ts';
 import { userId } from '../validators/brands';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ReadonlyNonEmptyArray, head } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 import { unauthorized } from '../utils/errors';
 import { Async, Sync } from '../types';
 import { verifyJwt } from '../utils/jwt';
 import { Request } from 'express';
-import { userQuery } from '../utils/pg';
-import { isNonEmpty } from '../utils/parsers';
+import { query } from '../utils/pg';
+import { pluck } from '../utils/parsers';
+import { SQL } from '../utils/constants';
 import { User, Saved } from '../validators/decoders';
-import { SQL } from 'src/utils/constants';
-import { lookup } from 'fp-ts/lib/ReadonlyArray';
-import { constant } from 'fp-ts/lib/function';
+import { flow, constant, tuple } from 'fp-ts/lib/function';
+import { split, startsWith, prop, nth, toString } from 'ramda';
 
 type Header = string;
-type Bearer = string;
 type Token = string;
-type Rows = ReadonlyNonEmptyArray<Saved<User>>;
 type Authorized = { user: TypeOf<typeof userId> } & { [key: string]: unknown };
 
 const secret = String(process.env.AUTH_SECRET);
-const error = constant(unauthorized);
+const userQuery = query<User>();
 
-type IsBearer = (h: Header) => Sync<Bearer>;
-const isBearer: IsBearer = E.fromPredicate(h => h.startsWith('Bearer '), error);
+// strip an auth token from it's header
+type Strip = (h: Header | undefined) => Sync<Token>;
+const strip: Strip = flow(
+  E.fromNullable(unauthorized),
+  E.chain(E.fromPredicate(startsWith('Bearer '), constant(unauthorized))),
+  E.map(split(' ')),
+  E.map(nth(1)),
+  E.map(toString)
+);
 
-type Strip = (b: Bearer) => Sync<Token>;
-const strip: Strip = b => pipe(lookup(1, b.split(' ')), E.fromOption(error));
+// inject the user id associated with the request into the request body
+type Inject = (req: Request) => (user: Saved<User>) => Authorized;
+const inject: Inject = req => user => ({ ...req.body, user: user.id });
 
-type GetHeader = (h: Header | undefined) => Sync<Header>;
-const getHeader: GetHeader = h => pipe(h, E.fromNullable(unauthorized));
-
-type InjectUser = (req: Request) => (rows: Rows) => Authorized;
-const injectUser: InjectUser = req => rows => ({
-  ...req.body,
-  user: head(rows).id
-});
-
-// authenticate a json web token from an authorization header, and inject the user id into the request
+// authorize a request
 type Authorize = (req: Request) => Async<Authorized>;
 const authorize: Authorize = req =>
   pipe(
-    TE.fromEither(getHeader(req.headers.authorization)),
-    TE.chainEitherK(isBearer),
-    TE.chainEitherK(strip),
+    TE.fromEither(strip(req.headers.authorization)),
     TE.chainEitherK(verifyJwt(secret)),
-    TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
-    TE.chain(isNonEmpty(error)),
-    TE.map(injectUser(req))
+    TE.map(prop('id')),
+    TE.map(tuple),
+    TE.chain(userQuery(SQL.AUTHENTICATE)),
+    TE.chainEitherK(pluck(unauthorized)),
+    TE.map(inject(req))
   );
 
-export { authorize, isBearer, strip, getHeader, injectUser };
+export { strip, inject, authorize };

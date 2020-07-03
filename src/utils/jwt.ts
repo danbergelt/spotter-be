@@ -2,25 +2,27 @@ import jwt from 'jsonwebtoken';
 import { Sync, JWT } from '../types';
 import { unauthorized } from './errors';
 import { tryCatch } from 'fp-ts/lib/Either';
+import { constant } from 'fp-ts/lib/function';
 
-type JWTSecret = string;
+type Verifier = typeof jwt.verify;
+type Signer = typeof jwt.sign;
+type Secret = string;
 type Token = string;
-type UserId = number;
-type TokenExpiration = string;
+
+interface TokenConfig {
+  id: number;
+  secret: Secret;
+  exp: string;
+}
+
+const error = constant(unauthorized);
 
 // verifies a JWT with the passed-in secret
-export const verifyJwt = (sec: JWTSecret, v = jwt.verify) => (
-  token: Token
-): Sync<JWT> =>
-  tryCatch(
-    () => v(token, sec) as JWT,
-    () => unauthorized
-  );
+type VerifyJwt = (s: Secret, v?: Verifier) => (t: Token) => Sync<JWT>;
+export const verifyJwt: VerifyJwt = (s, v = jwt.verify) => t =>
+  tryCatch(() => v(t, s) as JWT, error);
 
 // generates an auth token
-export const token = (
-  id: UserId,
-  sec: JWTSecret,
-  exp: TokenExpiration,
-  s = jwt.sign
-): Token => s({ id }, sec, { expiresIn: exp });
+type TokenFactory = (tc: TokenConfig, s?: Signer) => Token;
+export const tokenFactory: TokenFactory = (tc, s = jwt.sign) =>
+  s({ id: tc.id }, tc.secret, { expiresIn: tc.exp });

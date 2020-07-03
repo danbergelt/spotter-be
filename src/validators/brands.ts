@@ -6,18 +6,20 @@ import { withMessage } from 'io-ts-types/lib/withMessage';
 import { withValidate } from 'io-ts-types/lib/withValidate';
 import { optional } from 'io-ts-extra';
 
-type Str = (x: string) => t.StringC;
-export const str: Str = x =>
+type Entity = string;
+
+type Str = (en: Entity) => t.StringC;
+export const str: Str = en =>
   withMessage(
     withValidate(t.string, (u, c) =>
       either.map(t.string.validate(u, c), s => s.trim())
     ),
-    constant(`${x} must be a string`)
+    constant(`${en} must be a string`)
   );
 
-type Num = (x: string) => t.NumberC;
-export const num: Num = x =>
-  withMessage(t.number, constant(`${x} must be number`));
+type Num = (en: Entity) => t.NumberC;
+export const num: Num = en =>
+  withMessage(t.number, constant(`${en} must be number`));
 
 // a string representation of an email address that must pass an email regex
 export const email = withMessage(
@@ -34,8 +36,9 @@ export const email = withMessage(
 export const password = withMessage(
   t.brand(
     str('Password'),
-    (p): p is t.Branded<string, { readonly PW: unique symbol }> => p.length > 5,
-    'PW'
+    (p): p is t.Branded<string, { readonly Password: unique symbol }> =>
+      p.length > 5,
+    'Password'
   ),
   constant('Password too short (6 char min)')
 );

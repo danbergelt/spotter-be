@@ -1,26 +1,31 @@
 import { Async } from '../types';
-import { Errors, Decoder, ValidationError } from 'io-ts';
+import { Decoder, Errors } from 'io-ts';
 import { BAD_REQUEST } from 'http-status-codes';
 import { e, E } from '../utils/parsers';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as O from 'fp-ts/lib/Option';
-import * as RA from 'fp-ts/lib/ReadonlyArray';
 import * as EI from 'fp-ts/lib/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
+import { flow, constant } from 'fp-ts/lib/function';
+import { head, fromArray } from 'fp-ts/lib/ReadonlyNonEmptyArray';
+import * as O from 'fp-ts/lib/Option';
+import { flip, curry } from 'ramda';
+import { pipe } from 'fp-ts/lib/pipeable';
 
-type ParsedValidationError = E;
+type ValidationError = E;
 
-type FoldError = (v?: ValidationError) => ParsedValidationError;
-const foldError: FoldError = v =>
-  e(v?.message ? v.message : 'Validation error', BAD_REQUEST);
+const genericError = constant(e('Validation error', BAD_REQUEST));
+const withMessage = pipe(e, flip, curry);
 
-type ParseErrors = (errors: Errors) => ParsedValidationError;
-const parseErrors: ParseErrors = errors =>
-  pipe(RA.head(errors), O.fold(foldError, foldError));
+// map decoder errors into an error object
+type MapError = (errors: Errors) => ValidationError;
+const mapError: MapError = flow(
+  fromArray,
+  O.map(head),
+  O.chain(error => O.fromNullable(error.message)),
+  O.fold(genericError, withMessage)
+);
 
-// decode a request --> map into a task either, and parse errors into a standard error object
-type IO = <T>(d: Decoder<unknown, T>, input: unknown) => Async<T>;
-const io: IO = (d, input) =>
-  pipe(d.decode(input), EI.mapLeft(parseErrors), TE.fromEither);
+// decode a request
+type IO = <T>(d: Decoder<unknown, T>) => (input: unknown) => Async<T>;
+const io: IO = d => flow(d.decode, EI.mapLeft(mapError), TE.fromEither);
 
-export { foldError, parseErrors, io };
+export { mapError, io };
