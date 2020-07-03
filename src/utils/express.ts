@@ -1,21 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
-import { semigroupString } from 'fp-ts/lib/Semigroup';
 
+type Result = Promise<Response | void> | Response | void;
 type Table = string;
 type Rest = string;
 type Endpoint = string;
-type Controller = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => Promise<Response | void>;
-
-const base = '/api/auth';
+type Controller = (req: Request, res: Response, next: NextFunction) => Result;
 
 // builds a path with the format --> baseurl/table/...rest
-export const path = (table: Table) => (rest = '' as Rest): Endpoint =>
-  semigroupString.concat(semigroupString.concat(base, table), rest);
+type Path = (t: Table) => (r?: Rest) => Endpoint;
+const path: Path = t => (r = '') => `/api/auth${t}${r}`;
 
-// automatically send uncaught errors into the express error handler
-export const resolver = (c: Controller): Controller => async (req, res, next) =>
+// Resolves async Express controllers, pass uncaught errors into error-handling middleware
+type Resolver = (c: Controller) => Controller;
+const resolver: Resolver = c => async (req, res, next) =>
   Promise.resolve(c(req, res, next)).catch(next); // eslint-disable-line
+
+export { Controller, path, resolver };

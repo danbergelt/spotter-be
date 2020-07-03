@@ -1,62 +1,42 @@
-import { resolver } from '../utils/express';
+import { resolver, Controller } from '../utils/express';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as AP from 'fp-ts/lib/Apply';
-import * as F from 'fp-ts/lib/function';
-import * as TE from 'fp-ts/lib/TaskEither';
-import * as T from 'fp-ts/lib/Task';
+import { sequenceT } from 'fp-ts/lib/Apply';
 import * as E from 'fp-ts/lib/Either';
-import { COOKIE_NAME, EMAILS, SQL } from '../utils/constants';
+import * as TE from 'fp-ts/lib/TaskEither';
+import { of } from 'fp-ts/lib/Task';
+import { COOKIE_NAME, SQL } from '../utils/constants';
 import { OK } from 'http-status-codes';
-import { _, invalidCredentials } from '../utils/errors';
+import { invalidCredentials } from '../utils/errors';
 import { sendMail } from '../services/sendMail';
-import { confirmContactMsg, contactMsg } from '../utils/emailTemplates';
 import { sendError, sendAuth } from '../utils/http';
 import { io } from '../services/io';
 import { hashingFunction, compareHash } from '../utils/bcrypt';
-import {
-  metadata,
-  success,
-  isNonEmpty,
-  failure,
-  MetaData
-} from '../utils/parsers';
-import { Response, Request } from 'express';
-import {
-  userDecoder,
-  contactDecoder,
-  User,
-  Saved,
-  Contact
-} from '../validators/decoders';
-import { userQuery } from '../utils/pg';
+import * as P from '../utils/parsers';
+import { userDecoder, contactDecoder, User } from '../validators/decoders';
+import { query } from '../utils/pg';
 import { verifyJwt } from '../utils/jwt';
-import { Async, Sync } from '../types';
+import { toSpotter, toUser } from '../utils/metadata';
+import { prop } from 'ramda';
+import { tuple, flow } from 'fp-ts/lib/function';
 
-type Cookie = string;
-type MdTuple = [MetaData, MetaData];
-
-const error = F.constant(invalidCredentials);
+const error = invalidCredentials;
 const secret = String(process.env.REF_SECRET);
-const { TEAM, NO_REPLY, CONTACT } = EMAILS;
 
-// send a contact email to the spotter team (x) + confirmation email to the user (y)
-type MdTupleBuilder = (c: Contact) => MdTuple;
-const mdTupleBuilder: MdTupleBuilder = c =>
-  F.tuple(
-    metadata(CONTACT, TEAM, c.subject, contactMsg(c.message, c.name, c.email)),
-    metadata(NO_REPLY, c.email, 'Hello from Spotter', confirmContactMsg)
-  );
+const validateContact = io(contactDecoder);
+const validateUser = io(userDecoder);
+const userQuery = query<User>();
+const getHead = P.pluck(error);
 
+// send a contact email to the spotter team (a) + confirmation email to the user (b)
 export const contact = resolver(
   async (req, res) =>
     await pipe(
-      io(contactDecoder, req.body),
-      TE.map(mdTupleBuilder),
-      TE.chain(([x, y]) =>
-        AP.sequenceT(TE.taskEither)(sendMail(x), sendMail(y))
+      validateContact(req.body),
+      TE.chain(c =>
+        sequenceT(TE.taskEither)(sendMail(toSpotter(c)), sendMail(toUser(c)))
       ),
       TE.fold(sendError(res), () =>
-        T.of(res.status(OK).json(success({ message: 'Message sent' })))
+        of(res.status(OK).json(P.success({ message: 'Message sent' })))
       )
     )()
 );
@@ -65,32 +45,34 @@ export const contact = resolver(
 export const registration = resolver(
   async (req, res) =>
     await pipe(
-      io(userDecoder, req.body),
+      validateUser(req.body),
       TE.chain(u =>
         pipe(
           hashingFunction(u.password),
-          TE.chain(hashed => userQuery(SQL.REGISTER, [u.email, hashed]))
+          TE.map(hash => [u.email, hash])
         )
       ),
-      TE.fold(sendError(res), ([user]) => sendAuth(user.id, res))
+      TE.chain(userQuery(SQL.REGISTER)),
+      TE.chainEitherK(getHead),
+      TE.fold(sendError(res), user => sendAuth(user.id, res))
     )()
 );
 
 // log in a user
-type IsUser = (user: Saved<User>) => (bool: boolean) => Async<Saved<User>>;
-const isUser: IsUser = user => bool =>
-  bool ? TE.right(user) : TE.left(invalidCredentials);
-
 export const login = resolver(
   async (req, res) =>
     await pipe(
-      io(userDecoder, req.body),
-      TE.chain(a =>
+      validateUser(req.body),
+      TE.chain(attempt =>
         pipe(
-          userQuery(SQL.LOGIN, [a.email]),
-          TE.chain(isNonEmpty(error)),
-          TE.chain(([user]) =>
-            pipe(compareHash(a.password, user.password), TE.chain(isUser(user)))
+          TE.right([attempt.email]),
+          TE.chain(userQuery(SQL.LOGIN)),
+          TE.chainEitherK(getHead),
+          TE.chain(user =>
+            pipe(
+              compareHash(attempt.password, user.password),
+              TE.chain(isHash => (isHash ? TE.right(user) : TE.left(error)))
+            )
           )
         )
       ),
@@ -99,27 +81,25 @@ export const login = resolver(
 );
 
 // submit a refresh request --> validate the refresh token, return a new auth token
-type ReadC = (cookie: Cookie | undefined) => Sync<Cookie>;
-const readC: ReadC = cookie => pipe(cookie, E.fromNullable(_));
-
 export const refresh = resolver(
   async (req, res) =>
     await pipe(
-      TE.fromEither(readC(req.cookies.ref)),
+      TE.right(req.cookies.ref),
+      TE.chainEitherK(E.fromNullable(error)),
       TE.chainEitherK(verifyJwt(secret)),
-      TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
-      TE.chain(isNonEmpty(error)),
+      TE.map(flow(prop('id'), tuple)),
+      TE.chain(userQuery(SQL.AUTHENTICATE)),
+      TE.chainEitherK(getHead),
       TE.fold(
-        ({ status }) => T.of(res.status(status).json(failure({ token: null }))),
-        ([user]) => sendAuth(user.id, res)
+        err => of(res.status(err.status).json(P.failure({ token: null }))),
+        user => sendAuth(user.id, res)
       )
     )()
 );
 
 // log out a user by clearing the refresh token
-type Logout = (_: Request, res: Response) => Response;
-export const logout: Logout = (_, res) =>
+export const logout: Controller = (_, res) =>
   res
     .clearCookie(COOKIE_NAME)
     .status(OK)
-    .json(success({}));
+    .json(P.success({}));

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { path } from '../utils/express';
-import { postExercise, deleteExercise, readExercises } from './exercises';
+// import { postExercise, deleteExercise, readExercises } from './exercises';
 import { contact, login, registration, refresh, logout } from './users';
-import { postTag, readTags } from './tags';
-import { postWorkout, deleteWorkout, putWorkout } from './workouts';
+// import { postTag, readTags } from './tags';
+// import { postWorkout, deleteWorkout, putWorkout } from './workouts';
 
 const router = Router();
 

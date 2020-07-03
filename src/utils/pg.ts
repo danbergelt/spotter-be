@@ -1,47 +1,31 @@
-import { Pool, QueryResult } from 'pg';
+import { Pool } from 'pg';
 import * as TE from 'fp-ts/lib/TaskEither';
-import * as F from 'fp-ts/lib/function';
 import { badGateway } from '../utils/errors';
 import { Async } from '../types';
-import { Saved, User, Exercise, Tag, Workout } from '../validators/decoders';
+import { Saved } from '../validators/decoders';
 import { match } from 'io-ts-extra';
 import { literal } from 'io-ts';
 import { E } from './parsers';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { DB_CONFIG } from './constants';
+import { prop } from 'ramda';
 
-type Result<T> = ReadonlyArray<
-  Saved<
-    T extends User
-      ? User
-      : T extends Exercise
-      ? Exercise
-      : T extends Tag
-      ? Tag
-      : T extends Workout
-      ? Workout
-      : unknown
-  >
->;
+export type Data<T> = ReadonlyArray<Saved<T>>;
 
 const pool = new Pool(DB_CONFIG);
 
 // maps PG errors
-export const handler = (error: unknown): E =>
+type Handler = (error: unknown) => E;
+export const handler: Handler = error =>
   match((error as { code: string }).code)
     //  TODO --> find a way to handle this generically
     .case(literal('23505'), () => badGateway)
-    .default(F.constant(badGateway))
+    .default(() => badGateway)
     .get();
 
-type GetRows = <T>(q: QueryResult<T>) => Array<T>;
-const getRows: GetRows = q => q.rows;
-
-type Query<T> = <U>(sql: string, args: U[], p?: Pool) => Async<Result<T>>;
-export const query: Query<unknown> = (sql, args, p = pool) =>
+type Query = <T>(p?: Pool) => (sql: string) => <U>(args: U[]) => Async<Data<T>>;
+export const query: Query = (p = pool) => sql => args =>
   pipe(
     TE.tryCatch(async () => await p.query(sql, args), handler),
-    TE.map(getRows)
+    TE.map(prop('rows'))
   );
-
-export const userQuery: Query<User> = query;
