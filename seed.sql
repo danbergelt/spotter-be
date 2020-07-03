@@ -3,15 +3,12 @@ create extension if not exists citext;
 drop domain if exists ts;
 create domain ts as timestamptz not null default now();
 
-create or replace function set_timestamp() returns trigger as $
+create or replace function set_timestamp() returns trigger as $$
 begin
   new.updated_at = now();
   return new;
 end;
-$ language plpgsql;
-
-create trigger if not exists users_set_timestamp
-before update on users for each row execute procedure set_timestamp();
+$$ language plpgsql;
 
 create table users
 (
@@ -21,6 +18,10 @@ create table users
   created_at ts,
   updated_at ts
 );
+
+drop trigger if exists users_set_timestamp on users;
+create trigger users_set_timestamp
+before update on users for each row execute procedure set_timestamp();
 
 -- create trigger if not exists exercises_set_timestamp
 -- before update on exercises for each row execute procedure set_timestamp();

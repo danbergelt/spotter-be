@@ -12,39 +12,37 @@ import { pluck } from '../utils/parsers';
 import { SQL } from '../utils/constants';
 import { User, Saved } from '../validators/decoders';
 import { flow, constant, tuple } from 'fp-ts/lib/function';
-import { split, startsWith, prop, nth, toString } from 'ramda';
+import { split, startsWith, prop, nth } from 'ramda';
 
 type Header = string;
 type Token = string;
-type Authorized = { user: TypeOf<typeof userId> } & { [key: string]: unknown };
+type Body = { user: TypeOf<typeof userId> } & { [key: string]: unknown };
 
 const secret = String(process.env.AUTH_SECRET);
+const error = unauthorized;
 const userQuery = query<User>();
 
-// strip an auth token from it's header
+// strip an auth token from its header
 type Strip = (h: Header | undefined) => Sync<Token>;
 const strip: Strip = flow(
-  E.fromNullable(unauthorized),
-  E.chain(E.fromPredicate(startsWith('Bearer '), constant(unauthorized))),
-  E.map(split(' ')),
-  E.map(nth(1)),
-  E.map(toString)
+  E.fromNullable(error),
+  E.chain(E.fromPredicate(startsWith('Bearer '), constant(error))),
+  E.map(flow(split(' '), nth(1), String))
 );
 
-// inject the user id associated with the request into the request body
-type Inject = (req: Request) => (user: Saved<User>) => Authorized;
+// inject a user id into the request body as foreign key
+type Inject = (req: Request) => (user: Saved<User>) => Body;
 const inject: Inject = req => user => ({ ...req.body, user: user.id });
 
-// authorize a request
-type Authorize = (req: Request) => Async<Authorized>;
+// authorize an incoming http request
+type Authorize = (req: Request) => Async<Body>;
 const authorize: Authorize = req =>
   pipe(
     TE.fromEither(strip(req.headers.authorization)),
     TE.chainEitherK(verifyJwt(secret)),
-    TE.map(prop('id')),
-    TE.map(tuple),
+    TE.map(flow(prop('id'), tuple)),
     TE.chain(userQuery(SQL.AUTHENTICATE)),
-    TE.chainEitherK(pluck(unauthorized)),
+    TE.chainEitherK(pluck(error)),
     TE.map(inject(req))
   );
 

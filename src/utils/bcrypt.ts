@@ -20,8 +20,8 @@ const hashingFunction: HashingFunction = (raw, bc = bcrypt) =>
   );
 
 // compares a string against a hash
-type CompHash = (raw: string, h: Hash, bc?: Hasher) => Async<boolean>;
-const compareHash: CompHash = (raw, h, bc = bcrypt) =>
+type CompareHash = (raw: string, h: Hash, bc?: Hasher) => Async<boolean>;
+const compareHash: CompareHash = (raw, h, bc = bcrypt) =>
   TE.tryCatch(async () => await bc.compare(raw, h), error);
 
 export { hashingFunction, compareHash };

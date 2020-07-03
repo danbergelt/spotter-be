@@ -15,13 +15,17 @@ import * as P from '../utils/parsers';
 import { userDecoder, contactDecoder, User } from '../validators/decoders';
 import { query } from '../utils/pg';
 import { verifyJwt } from '../utils/jwt';
-import { toSpotter, toUser } from 'src/utils/metadata';
+import { toSpotter, toUser } from '../utils/metadata';
+import { prop } from 'ramda';
+import { tuple, flow } from 'fp-ts/lib/function';
 
 const error = invalidCredentials;
 const secret = String(process.env.REF_SECRET);
+
 const validateContact = io(contactDecoder);
 const validateUser = io(userDecoder);
 const userQuery = query<User>();
+const getHead = P.pluck(error);
 
 // send a contact email to the spotter team (a) + confirmation email to the user (b)
 export const contact = resolver(
@@ -45,11 +49,11 @@ export const registration = resolver(
       TE.chain(u =>
         pipe(
           hashingFunction(u.password),
-          TE.map(hash => [u.email, hash]),
-          TE.chain(userQuery(SQL.REGISTER))
+          TE.map(hash => [u.email, hash])
         )
       ),
-      TE.chainEitherK(P.pluck(error)),
+      TE.chain(userQuery(SQL.REGISTER)),
+      TE.chainEitherK(getHead),
       TE.fold(sendError(res), user => sendAuth(user.id, res))
     )()
 );
@@ -63,7 +67,7 @@ export const login = resolver(
         pipe(
           TE.right([attempt.email]),
           TE.chain(userQuery(SQL.LOGIN)),
-          TE.chainEitherK(P.pluck(error)),
+          TE.chainEitherK(getHead),
           TE.chain(user =>
             pipe(
               compareHash(attempt.password, user.password),
@@ -83,9 +87,9 @@ export const refresh = resolver(
       TE.right(req.cookies.ref),
       TE.chainEitherK(E.fromNullable(error)),
       TE.chainEitherK(verifyJwt(secret)),
-      TE.map(jwt => [jwt.id]),
+      TE.map(flow(prop('id'), tuple)),
       TE.chain(userQuery(SQL.AUTHENTICATE)),
-      TE.chainEitherK(P.pluck(error)),
+      TE.chainEitherK(getHead),
       TE.fold(
         err => of(res.status(err.status).json(P.failure({ token: null }))),
         user => sendAuth(user.id, res)

@@ -2,7 +2,9 @@ import { Sync } from '../types';
 import { isNonEmpty } from 'fp-ts/lib/ReadonlyArray';
 import * as E from 'fp-ts/lib/Either';
 import { head } from 'fp-ts/lib/ReadonlyNonEmptyArray';
-import { constant, flow } from 'fp-ts/lib/function';
+import { constant, flow, tuple } from 'fp-ts/lib/function';
+import { ReadonlyRecord } from 'fp-ts/lib/ReadonlyRecord';
+import { prop } from 'ramda';
 
 type Payload = { [key: string]: unknown };
 type E = { message: string; status: number };
