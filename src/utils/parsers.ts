@@ -1,10 +1,9 @@
 import { Sync } from '../types';
+import { prop } from 'ramda';
 import { isNonEmpty } from 'fp-ts/lib/ReadonlyArray';
 import * as E from 'fp-ts/lib/Either';
 import { head } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 import { constant, flow, tuple } from 'fp-ts/lib/function';
-import { ReadonlyRecord } from 'fp-ts/lib/ReadonlyRecord';
-import { prop } from 'ramda';
 
 type Payload = { [key: string]: unknown };
 type E = { message: string; status: number };
@@ -26,4 +25,8 @@ type Pluck = (error: E) => <T>(a: ReadonlyArray<T>) => Sync<T>;
 const pluck: Pluck = error =>
   flow(E.fromPredicate(isNonEmpty, constant(error)), E.map(head));
 
-export { E, success, failure, e, pluck };
+// extract an object property and map it into a tuple
+type ToTuple = <K extends string>(key: K) => <V>(obj: Record<K, V>) => [V];
+const toTuple: ToTuple = key => flow(prop(key), tuple);
+
+export { E, success, failure, e, pluck, toTuple };

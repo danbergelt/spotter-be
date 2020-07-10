@@ -16,8 +16,6 @@ import { userDecoder, contactDecoder, User } from '../validators/decoders';
 import { query } from '../utils/pg';
 import { verifyJwt } from '../utils/jwt';
 import { toSpotter, toUser } from '../utils/metadata';
-import { prop } from 'ramda';
-import { tuple, flow } from 'fp-ts/lib/function';
 
 const error = invalidCredentials;
 const secret = String(process.env.REF_SECRET);
@@ -49,11 +47,10 @@ export const registration = resolver(
       TE.chain(u =>
         pipe(
           hashingFunction(u.password),
-          TE.map(hash => [u.email, hash])
+          TE.chain(hash => userQuery(SQL.REGISTER)([u.email, hash])),
+          TE.chainEitherK(getHead)
         )
       ),
-      TE.chain(userQuery(SQL.REGISTER)),
-      TE.chainEitherK(getHead),
       TE.fold(sendError(res), user => sendAuth(user.id, res))
     )()
 );
@@ -65,8 +62,7 @@ export const login = resolver(
       validateUser(req.body),
       TE.chain(attempt =>
         pipe(
-          TE.right([attempt.email]),
-          TE.chain(userQuery(SQL.LOGIN)),
+          userQuery(SQL.LOGIN)([attempt.email]),
           TE.chainEitherK(getHead),
           TE.chain(user =>
             pipe(
@@ -84,10 +80,9 @@ export const login = resolver(
 export const refresh = resolver(
   async (req, res) =>
     await pipe(
-      TE.right(req.cookies.ref),
-      TE.chainEitherK(E.fromNullable(error)),
+      TE.fromEither(E.fromNullable(error)(req.cookies.ref)),
       TE.chainEitherK(verifyJwt(secret)),
-      TE.map(flow(prop('id'), tuple)),
+      TE.map(P.toTuple('id')),
       TE.chain(userQuery(SQL.AUTHENTICATE)),
       TE.chainEitherK(getHead),
       TE.fold(

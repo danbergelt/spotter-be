@@ -20,4 +20,4 @@ type SendMail = (md: MetaData, mg?: MG) => Async<MGResponse>;
 const sendMail: SendMail = (md, mg = mailgunInstance) =>
   TE.tryCatch(async () => await mg.messages().send(md), constant(serverError));
 
-export { sendMail };
+export { sendMail, MGResponse };

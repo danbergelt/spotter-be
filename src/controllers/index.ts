@@ -8,12 +8,12 @@ import { contact, login, registration, refresh, logout } from './users';
 const router = Router();
 
 // all user endpoints
-const usersPath = path('/users');
-router.post(usersPath('/contact'), contact);
-router.post(usersPath('/login'), login);
-router.post(usersPath('/registration'), registration);
-router.post(usersPath('/refresh'), refresh);
-router.post(usersPath('/logout'), logout);
+const users = '/users';
+router.post(path([users, '/contact']), contact);
+router.post(path([users, '/login']), login);
+router.post(path([users, '/registration']), registration);
+router.post(path([users, '/refresh']), refresh);
+router.post(path([users, '/logout']), logout);
 
 // // all exercise endpoints
 // const exercisesPath = path('/exercises');
