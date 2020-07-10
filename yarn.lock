@@ -474,13 +474,6 @@
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.3.tgz#b755a0934564a200d3efdf88546ec93c369abd03"
   integrity sha512-7s9EQWupR1fTc2pSMtXRQ9w9gLOcrJn+h7HOXw4evxyvVqMi4f+q7d2tnFe3ng3SNHjtK+0EzGMGFUQX4/AQRA==
 
-"@types/ramda@^0.27.3":
-  version "0.27.7"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.27.7.tgz#9079faf78a41c25eb59deb46d59deb88a7949358"
-  integrity sha512-qt8hYaKfgWE84S6elC8MokRza8sEVkmJqPUbKcl4qVhzryK4eya5ykucgNzzHFJt9hwDYpjtA8h7w2/VT/Gnqg==
-  dependencies:
-    ts-toolbelt "^6.3.3"
-
 "@types/range-parser@*":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
@@ -4516,11 +4509,6 @@ ts-node@^8.10.2, ts-node@^8.5.4:
     source-map-support "^0.5.17"
     yn "3.1.1"
 
-ts-toolbelt@^6.3.3:
-  version "6.9.9"
-  resolved "https://registry.yarnpkg.com/ts-toolbelt/-/ts-toolbelt-6.9.9.tgz#e6cfd8ec7d425d2a06bda3b4fe9577ceaf2abda8"
-  integrity sha512-5a8k6qfbrL54N4Dw+i7M6kldrbjgDWb5Vit8DnT+gwThhvqMg8KtxLE5Vmnft+geIgaSOfNJyAcnmmlflS+Vdg==
-
 tsconfig-paths@^3.5.0:
   version "3.9.0"
   resolved "https://registry.yarnpkg.com/tsconfig-paths/-/tsconfig-paths-3.9.0.tgz#098547a6c4448807e8fcb8eae081064ee9a3c90b"
@@ -4595,7 +4583,7 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@^3.7.4:
+typescript@^3.9.6:
   version "3.9.6"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
   integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==

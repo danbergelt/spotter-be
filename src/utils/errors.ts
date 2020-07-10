@@ -7,3 +7,4 @@ export const badGateway = e('Bad gateway', E.BAD_GATEWAY);
 export const _ = e('_', E.BAD_REQUEST);
 export const serverError = e('Server error', E.INTERNAL_SERVER_ERROR);
 export const unauthorized = e('Unauthorized', E.UNAUTHORIZED);
+export const validationError = e('Validation error', E.BAD_REQUEST);
