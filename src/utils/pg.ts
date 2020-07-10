@@ -8,7 +8,6 @@ import { literal } from 'io-ts';
 import { E } from './parsers';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { DB_CONFIG } from './constants';
-import { prop } from 'ramda';
 
 export type Data<T> = ReadonlyArray<Saved<T>>;
 
@@ -27,5 +26,5 @@ type Query = <T>(p?: Pool) => (sql: string) => <U>(args: U[]) => Async<Data<T>>;
 export const query: Query = (p = pool) => sql => args =>
   pipe(
     TE.tryCatch(async () => await p.query(sql, args), handler),
-    TE.map(prop('rows'))
+    TE.map(q => q.rows)
   );

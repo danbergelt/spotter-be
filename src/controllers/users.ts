@@ -82,7 +82,7 @@ export const refresh = resolver(
     await pipe(
       TE.fromEither(E.fromNullable(error)(req.cookies.ref)),
       TE.chainEitherK(verifyJwt(secret)),
-      TE.map(P.toTuple('id')),
+      TE.map(jwt => [jwt.id]),
       TE.chain(userQuery(SQL.AUTHENTICATE)),
       TE.chainEitherK(getHead),
       TE.fold(

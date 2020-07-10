@@ -1,20 +1,34 @@
-import { io } from '../../../services/io';
-import { right, left } from 'fp-ts/lib/Either';
+import { mapError, io } from '../../../services/io';
 import assert from 'assert';
-import { Errors } from 'io-ts';
-import Sinon from 'sinon';
+import { Errors, string } from 'io-ts';
+import { validationError } from '../../../utils/errors';
+import { e } from '../../../utils/parsers';
+import { left, right } from 'fp-ts/lib/Either';
 
-describe('validator', () => {
-  it('returns the original object on validation', async () => {
-    const object = { foo: 'bar' };
-    const decoder = { decode: Sinon.stub().returns(right(object)) };
-    const result = await io(decoder as any, object)();
-    assert.deepStrictEqual(result, right(object));
+describe('error mapper', () => {
+  it('returns a generic error if no error message exists', () => {
+    const result = mapError([{}] as Errors);
+    const expected = validationError;
+    assert.deepStrictEqual(result, expected);
   });
 
-  it('returns a validation error on failed validation', async () => {
-    const decoder = { decode: Sinon.stub().returns(left([{ message: 'foo' }] as Errors)) };
-    const result = await io(decoder as any, 'foo')();
-    assert.deepStrictEqual(result, left({ message: 'foo', status: 400 }));
+  it('returns an error with the error message if provided', () => {
+    const result = mapError([{ message: 'foo' }] as Errors);
+    const expected = e('foo', 400);
+    assert.deepStrictEqual(result, expected);
+  });
+});
+
+describe('decoder', () => {
+  it('returns an error if decoder fails', async () => {
+    const result = await io(string)(1)();
+    const expected = left(validationError);
+    assert.deepStrictEqual(result, expected);
+  });
+
+  it('returns the data as a right if decoder succeeds', async () => {
+    const result = await io(string)('foo')();
+    const expected = right('foo');
+    assert.deepStrictEqual(result, expected);
   });
 });

@@ -8,11 +8,10 @@ import { Async, Sync } from '../types';
 import { verifyJwt } from '../utils/jwt';
 import { Request } from 'express';
 import { query } from '../utils/pg';
-import { pluck, toTuple } from '../utils/parsers';
+import { pluck } from '../utils/parsers';
 import { SQL } from '../utils/constants';
 import { User, Saved } from '../validators/decoders';
-import { flow, constant } from 'fp-ts/lib/function';
-import { split, startsWith, nth } from 'ramda';
+import { flow } from 'fp-ts/lib/function';
 
 type Header = string;
 type Token = string;
@@ -21,13 +20,14 @@ type Body = { user: TypeOf<typeof userId> } & { [key: string]: unknown };
 const secret = String(process.env.AUTH_SECRET);
 const error = unauthorized;
 const userQuery = query<User>();
+const getHead = pluck(error);
 
 // strip an auth token from its header
 type Strip = (h: Header | undefined) => Sync<Token>;
 const strip: Strip = flow(
-  E.fromNullable(error),
-  E.chain(E.fromPredicate(startsWith('Bearer '), constant(error))),
-  E.map(flow(split(' '), nth(1), String))
+  b => (!!b && b.startsWith('Bearer ') ? E.right(b) : E.left(error)),
+  E.map(b => b.split(' ')),
+  E.map(a => a[1])
 );
 
 // inject a user id into the request body as foreign key
@@ -40,9 +40,9 @@ const authorize: Authorize = req =>
   pipe(
     TE.fromEither(strip(req.headers.authorization)),
     TE.chainEitherK(verifyJwt(secret)),
-    TE.map(toTuple('id')),
+    TE.map(jwt => [jwt.id]),
     TE.chain(userQuery(SQL.AUTHENTICATE)),
-    TE.chainEitherK(pluck(error)),
+    TE.chainEitherK(getHead),
     TE.map(inject(req))
   );
 
