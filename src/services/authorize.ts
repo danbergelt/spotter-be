@@ -8,11 +8,11 @@ import { Async, Sync } from '../types';
 import { verifyJwt } from '../utils/jwt';
 import { Request } from 'express';
 import { query } from '../utils/pg';
-import { pluck } from '../utils/parsers';
+import { pluck, toTuple } from '../utils/parsers';
 import { SQL } from '../utils/constants';
 import { User, Saved } from '../validators/decoders';
-import { flow, constant, tuple } from 'fp-ts/lib/function';
-import { split, startsWith, prop, nth } from 'ramda';
+import { flow, constant } from 'fp-ts/lib/function';
+import { split, startsWith, nth } from 'ramda';
 
 type Header = string;
 type Token = string;
@@ -40,7 +40,7 @@ const authorize: Authorize = req =>
   pipe(
     TE.fromEither(strip(req.headers.authorization)),
     TE.chainEitherK(verifyJwt(secret)),
-    TE.map(flow(prop('id'), tuple)),
+    TE.map(toTuple('id')),
     TE.chain(userQuery(SQL.AUTHENTICATE)),
     TE.chainEitherK(pluck(error)),
     TE.map(inject(req))
