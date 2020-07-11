@@ -7,7 +7,7 @@ import { unauthorized } from '../utils/errors';
 import { Async } from '../types';
 import { verifyJwt } from '../utils/jwt';
 import { Request } from 'express';
-import { query } from '../utils/pg';
+import { query, hasRows } from '../utils/pg';
 import { SQL } from '../utils/constants';
 import { User, Saved } from '../validators/decoders';
 import { head } from 'fp-ts/lib/ReadonlyNonEmptyArray';
@@ -17,7 +17,7 @@ type Token = string;
 type Body = { user: TypeOf<typeof userId> } & { [key: string]: unknown };
 
 const secret = String(process.env.AUTH_SECRET);
-const userQuery = query<User>(unauthorized);
+const userQuery = query<User>();
 
 // strip an auth token from its header
 type Strip = (h: Header | undefined) => Async<Token>;
@@ -39,6 +39,7 @@ const authorize: Authorize = req =>
     strip(req.headers.authorization),
     TE.chainEitherK(verifyJwt(secret)),
     TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
+    TE.chain(hasRows(unauthorized)),
     TE.map(head),
     TE.map(inject(req))
   );
