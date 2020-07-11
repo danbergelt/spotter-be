@@ -14,12 +14,13 @@ interface TokenConfig {
   exp: string;
 }
 
-const error = () => unauthorized;
-
-// verifies a JWT with the passed-in secret
+// verifies a JWT with the provided secret
 type VerifyJwt = (s: Secret, v?: Verifier) => (t: Token) => Sync<JWT>;
 export const verifyJwt: VerifyJwt = (s, v = jwt.verify) => t =>
-  tryCatch(() => v(t, s) as JWT, error);
+  tryCatch(
+    () => v(t, s) as JWT,
+    () => unauthorized
+  );
 
 // generates an auth token
 type TokenFactory = (tc: TokenConfig, s?: Signer) => Token;
