@@ -1,15 +1,20 @@
 import Sinon from 'sinon';
 import { expect } from 'chai';
+import assert from 'assert';
 import { mockReq, mockRes } from 'sinon-express-mock';
 import { resolver, path } from '../../../utils/express';
 
 describe('path factory', () => {
-  it('builds a path', () => {
-    expect(path('/foo')('/bar')).to.equal('/api/auth/foo/bar');
+  it('builds a path with one component', () => {
+    const result = path(['/foo']);
+    const expected = '/api/auth/foo';
+    assert.equal(result, expected);
   });
 
-  it('uses an empty string as default', () => {
-    expect(path('/foo')()).to.equal('/api/auth/foo');
+  it('builds a path with multiple components', () => {
+    const result = path(['/foo', '/bar']);
+    const expected = '/api/auth/foo/bar';
+    assert.equal(result, expected);
   });
 });
 

@@ -22,8 +22,7 @@ const secret = String(process.env.REF_SECRET);
 
 const validateContact = io(contactDecoder);
 const validateUser = io(userDecoder);
-const userQuery = query<User>();
-const getHead = P.pluck(error);
+const userQuery = query<User>(error);
 
 // send a contact email to the spotter team (a) + confirmation email to the user (b)
 export const contact = resolver(
@@ -47,11 +46,10 @@ export const registration = resolver(
       TE.chain(u =>
         pipe(
           hashingFunction(u.password),
-          TE.chain(hash => userQuery(SQL.REGISTER)([u.email, hash])),
-          TE.chainEitherK(getHead)
+          TE.chain(hash => userQuery(SQL.REGISTER, [u.email, hash]))
         )
       ),
-      TE.fold(sendError(res), user => sendAuth(user.id, res))
+      TE.fold(sendError(res), ([user]) => sendAuth(user.id, res))
     )()
 );
 
@@ -62,9 +60,8 @@ export const login = resolver(
       validateUser(req.body),
       TE.chain(attempt =>
         pipe(
-          userQuery(SQL.LOGIN)([attempt.email]),
-          TE.chainEitherK(getHead),
-          TE.chain(user =>
+          userQuery(SQL.LOGIN, [attempt.email]),
+          TE.chain(([user]) =>
             pipe(
               compareHash(attempt.password, user.password),
               TE.chain(isHash => (isHash ? TE.right(user) : TE.left(error)))
@@ -82,12 +79,10 @@ export const refresh = resolver(
     await pipe(
       TE.fromEither(E.fromNullable(error)(req.cookies.ref)),
       TE.chainEitherK(verifyJwt(secret)),
-      TE.map(jwt => [jwt.id]),
-      TE.chain(userQuery(SQL.AUTHENTICATE)),
-      TE.chainEitherK(getHead),
+      TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
       TE.fold(
         err => of(res.status(err.status).json(P.failure({ token: null }))),
-        user => sendAuth(user.id, res)
+        ([user]) => sendAuth(user.id, res)
       )
     )()
 );

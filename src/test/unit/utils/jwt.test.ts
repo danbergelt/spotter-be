@@ -1,4 +1,4 @@
-import { token, verifyJwt } from '../../../utils/jwt';
+import { tokenFactory, verifyJwt } from '../../../utils/jwt';
 import Sinon from 'sinon';
 import assert from 'assert';
 import { right, left } from 'fp-ts/lib/Either';
@@ -25,7 +25,8 @@ describe('verifies a JWT', () => {
 
 describe('token factory', () =>
   it('creates an auth token', () => {
-    const jwt = { sign: Sinon.stub().returns('bar') };
-    const result = token(1, 'foo', 'bar', jwt as any);
+    const tc = { id: 1, sec: 'foo', exp: '1d' };
+    const sign = Sinon.stub().returns('bar');
+    const result = tokenFactory(tc, sign as any);
     assert.equal(result, 'bar');
   }));

@@ -4,31 +4,29 @@ import { TypeOf } from 'io-ts';
 import { userId } from '../validators/brands';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { unauthorized } from '../utils/errors';
-import { Async, Sync } from '../types';
+import { Async } from '../types';
 import { verifyJwt } from '../utils/jwt';
 import { Request } from 'express';
 import { query } from '../utils/pg';
-import { pluck } from '../utils/parsers';
 import { SQL } from '../utils/constants';
 import { User, Saved } from '../validators/decoders';
-import { flow } from 'fp-ts/lib/function';
+import { head } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 type Header = string;
 type Token = string;
 type Body = { user: TypeOf<typeof userId> } & { [key: string]: unknown };
 
 const secret = String(process.env.AUTH_SECRET);
-const error = unauthorized;
-const userQuery = query<User>();
-const getHead = pluck(error);
+const userQuery = query<User>(unauthorized);
 
 // strip an auth token from its header
-type Strip = (h: Header | undefined) => Sync<Token>;
-const strip: Strip = flow(
-  b => (!!b && b.startsWith('Bearer ') ? E.right(b) : E.left(error)),
-  E.map(b => b.split(' ')),
-  E.map(a => a[1])
-);
+type Strip = (h: Header | undefined) => Async<Token>;
+const strip: Strip = h =>
+  pipe(
+    h && h.startsWith('Bearer ') ? E.right(h) : E.left(unauthorized),
+    E.map(b => b.split(' ')[1]),
+    TE.fromEither
+  );
 
 // inject a user id into the request body as foreign key
 type Inject = (req: Request) => (user: Saved<User>) => Body;
@@ -38,11 +36,10 @@ const inject: Inject = req => user => ({ ...req.body, user: user.id });
 type Authorize = (req: Request) => Async<Body>;
 const authorize: Authorize = req =>
   pipe(
-    TE.fromEither(strip(req.headers.authorization)),
+    strip(req.headers.authorization),
     TE.chainEitherK(verifyJwt(secret)),
-    TE.map(jwt => [jwt.id]),
-    TE.chain(userQuery(SQL.AUTHENTICATE)),
-    TE.chainEitherK(getHead),
+    TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
+    TE.map(head),
     TE.map(inject(req))
   );
 

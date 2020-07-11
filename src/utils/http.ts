@@ -14,13 +14,13 @@ const refreshExp = String(process.env.REF_EXPIRE);
 const authSecret = String(process.env.AUTH_SECRET);
 const authExp = String(process.env.AUTH_EXPIRE);
 
-type EncodeToken = (id: UserId) => Token;
+type Encode = (id: UserId) => Token;
 
-const refreshToken: EncodeToken = id =>
-  tokenFactory({ id, secret: refreshSecret, exp: refreshExp });
+const refreshToken: Encode = id =>
+  tokenFactory({ id, sec: refreshSecret, exp: refreshExp });
 
-const authToken: EncodeToken = id =>
-  tokenFactory({ id, secret: authSecret, exp: authExp });
+const authToken: Encode = id =>
+  tokenFactory({ id, sec: authSecret, exp: authExp });
 
 // taskified http response that sends back a refresh token and an auth token
 type SendAuth = (id: UserId, res: Response) => Task<Response>;

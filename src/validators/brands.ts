@@ -1,25 +1,23 @@
 import * as t from 'io-ts';
-import { constant } from 'fp-ts/lib/function';
 import { either } from 'fp-ts/lib/Either';
 import { DATE_REGEX, EMAIL_REGEX, HEX_COLOR_REGEX } from '../utils/constants';
 import { withMessage } from 'io-ts-types/lib/withMessage';
 import { withValidate } from 'io-ts-types/lib/withValidate';
 import { optional } from 'io-ts-extra';
 
-type Entity = string;
+type Name = string;
 
-type Str = (en: Entity) => t.StringC;
-export const str: Str = en =>
+type Str = (n: Name) => t.StringC;
+export const str: Str = n =>
   withMessage(
     withValidate(t.string, (u, c) =>
       either.map(t.string.validate(u, c), s => s.trim())
     ),
-    constant(`${en} must be a string`)
+    () => `${n} must be a string`
   );
 
-type Num = (en: Entity) => t.NumberC;
-export const num: Num = en =>
-  withMessage(t.number, constant(`${en} must be number`));
+type Num = (n: Name) => t.NumberC;
+export const num: Num = n => withMessage(t.number, () => `${n} must be number`);
 
 // a string representation of an email address that must pass an email regex
 export const email = withMessage(
@@ -29,7 +27,7 @@ export const email = withMessage(
       EMAIL_REGEX.test(e),
     'Email'
   ),
-  constant('Invalid email')
+  () => 'Invalid email'
 );
 
 // a string representation of a password that must be at least 6 characters
@@ -40,7 +38,7 @@ export const password = withMessage(
       p.length > 5,
     'Password'
   ),
-  constant('Password too short (6 char min)')
+  () => 'Password too short (6 char min)'
 );
 
 // a string representation of an exercise name that must be less than 26 chars
@@ -51,7 +49,7 @@ export const exercise = withMessage(
       e.length < 26,
     'Exercise'
   ),
-  constant('Exercise name too long (25 char max)')
+  () => 'Exercise name too long (25 char max)'
 );
 
 // a string representation of a date that must match a certain format
@@ -62,7 +60,7 @@ export const strDate = withMessage(
       DATE_REGEX.test(d),
     'Date'
   ),
-  constant('Invalid date')
+  () => 'Invalid date'
 );
 
 // a string representation of a valid hex color
@@ -73,7 +71,7 @@ export const hex = withMessage(
       HEX_COLOR_REGEX.test(h),
     'Hex'
   ),
-  constant('Invalid hex color')
+  () => 'Invalid hex color'
 );
 
 // a string representation of a tag's content
@@ -84,7 +82,7 @@ export const tagContent = withMessage(
       tag.length < 21,
     'Tag'
   ),
-  constant('Tag content too long (20 char max)')
+  () => 'Tag content too long (20 char max)'
 );
 
 // a string representation of a workout title
@@ -95,7 +93,7 @@ export const workoutTitle = withMessage(
       w.length < 26,
     'Title'
   ),
-  constant('Workout title too long (25 char max)')
+  () => 'Workout title too long (25 char max)'
 );
 
 // a number representation of a workout stat
@@ -105,7 +103,7 @@ export const workoutStat = withMessage(
     (s): s is t.Branded<number, { readonly Stat: unique symbol }> => s < 2001,
     'Stat'
   ),
-  constant('Stat too large (2000 sets/reps/weight max)')
+  () => 'Stat too large (2000 sets/reps/weight max)'
 );
 
 // user foreign key

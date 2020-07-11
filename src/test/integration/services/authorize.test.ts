@@ -7,8 +7,8 @@ import { tokenFactory } from '../../../utils/jwt';
 const authSecret = String(process.env.AUTH_SECRET);
 const authExp = String(process.env.AUTH_EXPIRE);
 
-const bad = tokenFactory({ id: 100, secret: authSecret, exp: authExp });
-const good = tokenFactory({ id: 1, secret: authSecret, exp: authExp });
+const bad = tokenFactory({ id: 100, sec: authSecret, exp: authExp });
+const good = tokenFactory({ id: 1, sec: authSecret, exp: authExp });
 
 describe('authorizer', () => {
   it('errors out if invalid jwt', async () => {

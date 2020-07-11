@@ -1,4 +1,4 @@
-import { constNull, constant } from 'fp-ts/lib/function';
+import { constNull } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { serverError } from '../utils/errors';
 import { Async } from '../types';
@@ -18,6 +18,9 @@ const mailgunInstance = new Mailgun({
 // send an email with the information from the provided metadata
 type SendMail = (md: MetaData, mg?: MG) => Async<MGResponse>;
 const sendMail: SendMail = (md, mg = mailgunInstance) =>
-  TE.tryCatch(async () => await mg.messages().send(md), constant(serverError));
+  TE.tryCatch(
+    async () => await mg.messages().send(md),
+    () => serverError
+  );
 
 export { sendMail, MGResponse };
