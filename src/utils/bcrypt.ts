@@ -3,12 +3,11 @@ import bcrypt from 'bcryptjs';
 import { Async } from '../types';
 import { serverError } from './errors';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { constant } from 'fp-ts/lib/function';
 
 type Hasher = typeof bcrypt;
 type Hash = string;
 
-const error = constant(serverError);
+const error = () => serverError;
 const rounds = 10;
 
 // hashes a string (10 salt rounds, can be bumped if needed)

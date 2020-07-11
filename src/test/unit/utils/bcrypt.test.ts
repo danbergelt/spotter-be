@@ -1,21 +1,34 @@
 import Sinon from 'sinon';
-import { hash, compareHash } from '../../../utils/bcrypt';
+import { hashingFunction, compareHash } from '../../../utils/bcrypt';
 import assert from 'assert';
 import { right, left } from 'fp-ts/lib/TaskEither';
 
-describe('hash a string', () => {
+describe('hashing function', () => {
   it('successfully hash a string', async () => {
-    const bc = { genSalt: Sinon.stub().returns('SALT'), hash: Sinon.stub().returns('ENCRYPTED') };
-    const result = await hash('foo', bc as any)();
+    const bc = {
+      genSalt: Sinon.stub().returns('SALT'),
+      hash: Sinon.stub().returns('ENCRYPTED')
+    };
+    const result = await hashingFunction('foo', bc as any)();
     const expected = await right('ENCRYPTED')();
+    assert.deepStrictEqual(result, expected);
+  });
+
+  it('returns an error when salt fails', async () => {
+    const bc = {
+      genSalt: Sinon.stub().throws('foo')
+    };
+    const result = await hashingFunction('foo', bc as any)();
+    const expected = await left({ message: 'Server error', status: 500 })();
     assert.deepStrictEqual(result, expected);
   });
 
   it('returns an error when hash fails', async () => {
     const bc = {
-      genSalt: Sinon.stub().throws('foo')
+      genSalt: Sinon.stub().returns('SALT'),
+      hash: Sinon.stub().throws('foo')
     };
-    const result = await hash('foo', bc as any)();
+    const result = await hashingFunction('foo', bc as any)();
     const expected = await left({ message: 'Server error', status: 500 })();
     assert.deepStrictEqual(result, expected);
   });

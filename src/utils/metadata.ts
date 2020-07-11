@@ -12,6 +12,7 @@ export interface MetaData {
   html: string;
 }
 
+// build a metadata object out of args (matches format expected by mailgun)
 type MetaDataBuilder = (...args: [string, string, string, string]) => MetaData;
 const metadata: MetaDataBuilder = (...args) =>
   pipe(args, ([from, to, subject, html]) => ({ from, to, subject, html }));

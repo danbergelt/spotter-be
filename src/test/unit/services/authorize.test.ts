@@ -4,20 +4,20 @@ import { left, right } from 'fp-ts/lib/Either';
 import { unauthorized } from '../../../utils/errors';
 
 describe('token stripper', () => {
-  it('returns an error if no header exists', () => {
-    const result = strip(undefined);
+  it('returns an error if no header exists', async () => {
+    const result = await strip(undefined)();
     const expected = left(unauthorized);
     assert.deepStrictEqual(result, expected);
   });
 
-  it('returns an error if the header is not a bearer', () => {
-    const result = strip('foo');
+  it('returns an error if the header is not a bearer', async () => {
+    const result = await strip('foo')();
     const expected = left(unauthorized);
     assert.deepStrictEqual(result, expected);
   });
 
-  it('strips the token', () => {
-    const result = strip('Bearer foo');
+  it('strips the token', async () => {
+    const result = await strip('Bearer foo')();
     const expected = right('foo');
     assert.deepStrictEqual(result, expected);
   });

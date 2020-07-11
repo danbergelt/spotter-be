@@ -1,17 +1,17 @@
 import { Async } from '../types';
 import { Decoder, Errors } from 'io-ts';
 import { BAD_REQUEST } from 'http-status-codes';
-import { e, E } from '../utils/parsers';
+import { e } from '../utils/parsers';
 import * as EI from 'fp-ts/lib/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
-import { constant, flow } from 'fp-ts/lib/function';
+import { flow } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import { validationError } from '../utils/errors';
 import { head } from 'fp-ts/lib/ReadonlyArray';
 
-type ValidationError = E;
+type ValidationError = typeof validationError;
 
-const genericError = constant(validationError);
+const genericError = () => validationError;
 
 // map decoder errors into an error object
 type MapError = (errors: Errors) => ValidationError;

@@ -1,5 +1,3 @@
-const isDevEnv = process.env.NODE_ENV === 'development';
-
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const HEX_COLOR_REGEX = /^#([a-f0-9]{3,4}|[a-f0-9]{4}(?:[a-f0-9]{2}){1,2})\b$/i;
 // TODO --> tighten up this regex, rely on a third party for "mmm dd yyyy", or store as a timestamp and manipulate on FE
@@ -8,6 +6,7 @@ export const DATE_REGEX = /[A-Z][a-z]{2} \d{2} \d{4}$/;
 export const COOKIE_NAME = 'ref';
 
 // TODO --> confirm these are optimal for production
+const isDevEnv = process.env.NODE_ENV === 'development';
 export const COOKIE_OPTIONS = {
   expires: new Date(Number(new Date()) + 604800000),
   httpOnly: !isDevEnv,

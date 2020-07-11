@@ -1,4 +1,4 @@
-import { forgotPw, confirmContactMsg, contactMsg } from '../../../utils/emailTemplates';
+import { forgotPw, contactMsg } from '../../../utils/emailTemplates';
 import assert from 'assert';
 
 describe('email templates', () => {
@@ -12,10 +12,5 @@ describe('email templates', () => {
     assert.ok(result.includes(`<div>Name: bar</div>`));
     assert.ok(result.includes(`<div>Email: baz</div>`));
     assert.ok(result.includes(`<div>Message: foo</div>`));
-  });
-
-  it('confirm contact message template', () => {
-    const result = confirmContactMsg();
-    assert.ok(result);
   });
 });
