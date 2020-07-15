@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { DB_CONFIG, CODES } from './constants';
 import { Eq } from 'fp-ts/lib/Eq';
 import { BAD_REQUEST, FORBIDDEN } from 'http-status-codes';
+import { semigroupString } from 'fp-ts/lib/Semigroup';
 
 type SQL = string;
 type Code = keyof typeof CODES;
@@ -22,17 +23,22 @@ const eqCode: Eq<Code> = {
   equals: (x, y) => x === y
 };
 
+// format a table name as received from PG, e.g. from 'users' to 'User'
+type Format = (t: string) => string;
+const format: Format = s =>
+  semigroupString.concat(s.slice(0, 1).toUpperCase(), s.slice(1, -1));
+
 // handles PG errors
 type Handler = (error: unknown) => E;
 const handler: Handler = error =>
-  pipe(error as PGError, pgErr =>
+  pipe(error as PGError, pg =>
     pipe(
-      O.fromNullable(pgErr.code),
+      O.fromNullable(pg.code),
       O.fold(
         () => badGateway,
         code =>
           eqCode.equals(code, '23505')
-            ? e(`This ${pgErr.table || 'resource'} already exists`, BAD_REQUEST)
+            ? e(`${format(pg.table) || 'resource'} already exists`, BAD_REQUEST)
             : code in CODES
             ? e(CODES[code], FORBIDDEN)
             : badGateway
@@ -55,4 +61,4 @@ const hasRows: HasRows = e => q =>
     TE.fromOption(() => e)
   );
 
-export { Data, handler, hasRows, query };
+export { Data, handler, format, hasRows, query };

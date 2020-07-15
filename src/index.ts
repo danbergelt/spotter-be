@@ -6,14 +6,13 @@ import { log } from 'fp-ts/lib/Console';
 import { fallback } from './middleware/fallback';
 
 require('dotenv').config();
+
 const PORT = Number(process.env.PORT);
 const ENV = String(process.env.NODE_ENV);
 
 const server = ((): Server => {
   const app = express();
-
   [cookies(), json(), router, fallback].forEach(mw => app.use(mw));
-
   return app.listen(PORT, log(`Port: ${PORT}\nEnv: ${ENV}`));
 })();
 

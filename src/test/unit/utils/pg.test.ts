@@ -1,4 +1,4 @@
-import { hasRows, query, handler } from '../../../utils/pg';
+import { hasRows, query, handler, format } from '../../../utils/pg';
 import { e } from '../../../utils/parsers';
 import assert from 'assert';
 import { right, left } from 'fp-ts/lib/TaskEither';
@@ -30,6 +30,13 @@ describe('query', () => {
       query: Sinon.stub().throws('foo')
     } as any)('bar', ['baz'])();
     assert.deepStrictEqual(result, await left(badGateway)());
+  });
+});
+
+describe('format', () => {
+  it('formats a postgres table name', () => {
+    const result = format('users');
+    assert.equal(result, 'User');
   });
 });
 

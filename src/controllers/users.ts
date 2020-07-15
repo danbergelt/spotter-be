@@ -23,7 +23,6 @@ const secret = String(process.env.REF_SECRET);
 const validateContact = io(contactDecoder);
 const validateUser = io(userDecoder);
 const userQuery = query<User>();
-const hr = hasRows(error);
 
 // send a contact email to the spotter team (a) + confirmation email to the user (b)
 export const contact = resolver(
@@ -47,10 +46,10 @@ export const registration = resolver(
       TE.chain(u =>
         pipe(
           hashingFunction(u.password),
-          TE.chain(hash => userQuery(SQL.REGISTER, [u.email, hash])),
-          TE.chain(hr)
+          TE.chain(hash => userQuery(SQL.REGISTER, [u.email, hash]))
         )
       ),
+      TE.chain(hasRows(error)),
       TE.fold(sendError(res), ([user]) => sendAuth(user.id, res))
     )()
 );
@@ -63,7 +62,7 @@ export const login = resolver(
       TE.chain(attempt =>
         pipe(
           userQuery(SQL.LOGIN, [attempt.email]),
-          TE.chain(hr),
+          TE.chain(hasRows(error)),
           TE.chain(([user]) =>
             pipe(
               compareHash(attempt.password, user.password),
@@ -83,7 +82,7 @@ export const refresh = resolver(
       TE.fromEither(E.fromNullable(error)(req.cookies.ref)),
       TE.chainEitherK(verifyJwt(secret)),
       TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
-      TE.chain(hr),
+      TE.chain(hasRows(error)),
       TE.fold(
         err => of(res.status(err.status).json(P.failure({ token: null }))),
         ([user]) => sendAuth(user.id, res)
