@@ -10,7 +10,6 @@ import { Request } from 'express';
 import { query, hasRows } from '../utils/pg';
 import { SQL } from '../utils/constants';
 import { User, Saved } from '../validators/decoders';
-import { head } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 type Header = string;
 type Token = string;
@@ -29,8 +28,8 @@ const strip: Strip = h =>
   );
 
 // inject a user id into the request body as foreign key
-type Inject = (req: Request) => (user: Saved<User>) => Body;
-const inject: Inject = req => user => ({ ...req.body, user: user.id });
+type Inject = (req: Request, user: Saved<User>) => Body;
+const inject: Inject = (req, user) => ({ ...req.body, user: user.id });
 
 // authorize an incoming http request
 type Authorize = (req: Request) => Async<Body>;
@@ -40,8 +39,7 @@ const authorize: Authorize = req =>
     TE.chainEitherK(verifyJwt(secret)),
     TE.chain(jwt => userQuery(SQL.AUTHENTICATE, [jwt.id])),
     TE.chain(hasRows(unauthorized)),
-    TE.map(head),
-    TE.map(inject(req))
+    TE.map(([user]) => inject(req, user))
   );
 
 export { strip, inject, authorize };
