@@ -8,13 +8,12 @@ type Hasher = typeof bcrypt;
 type Hash = string;
 
 const error = () => serverError;
-const rounds = 10;
 
 // hashes a string (10 salt rounds, can be bumped if needed)
 type HashingFunction = (raw: string, bc?: Hasher) => Async<Hash>;
 const hashingFunction: HashingFunction = (raw, bc = bcrypt) =>
   pipe(
-    TE.tryCatch(async () => await bc.genSalt(rounds), error),
+    TE.tryCatch(async () => await bc.genSalt(10), error),
     TE.chain(salt => TE.tryCatch(async () => await bc.hash(raw, salt), error))
   );
 

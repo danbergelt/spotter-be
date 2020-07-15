@@ -23,12 +23,6 @@ export const DB_CONFIG = {
   port: Number(process.env.DB_PORT)
 } as const;
 
-export enum EMAILS {
-  CONTACT = 'contact@getspotter.io',
-  NO_REPLY = 'no-reply@getspotter.io',
-  TEAM = 'team@getspotter.io'
-}
-
 export const CODES = {
   '23505': 'duplicate',
   '08003': 'connection_does_not_exist',
@@ -45,6 +39,12 @@ export const CODES = {
   '42P01': 'undefined_table',
   '42P02': 'undefined_parameter'
 } as const;
+
+export enum EMAILS {
+  CONTACT = 'contact@getspotter.io',
+  NO_REPLY = 'no-reply@getspotter.io',
+  TEAM = 'team@getspotter.io'
+}
 
 export enum SQL {
   REGISTER = 'insert into users (email, password) values ($1, $2) returning id',

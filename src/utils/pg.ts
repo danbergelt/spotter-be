@@ -9,13 +9,12 @@ import { E, e } from './parsers';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { DB_CONFIG, CODES } from './constants';
 import { Eq } from 'fp-ts/lib/Eq';
-import { BAD_REQUEST } from 'http-status-codes';
-import { flow } from 'fp-ts/lib/function';
+import { BAD_REQUEST, FORBIDDEN } from 'http-status-codes';
 
 type SQL = string;
 type Code = keyof typeof CODES;
 type PGError = { code: Code; table: string };
-type Chunk<T> = QueryResult<Saved<T>>;
+type QueryRes<T> = QueryResult<Saved<T>>;
 type Data<T> = NEA.ReadonlyNonEmptyArray<Saved<T>>;
 
 // test equality between pg codes
@@ -23,11 +22,10 @@ const eqCode: Eq<Code> = {
   equals: (x, y) => x === y
 };
 
-// maps PG errors
+// handles PG errors
 type Handler = (error: unknown) => E;
-const handler: Handler = flow(
-  error => error as PGError,
-  pgErr =>
+const handler: Handler = error =>
+  pipe(error as PGError, pgErr =>
     pipe(
       O.fromNullable(pgErr.code),
       O.fold(
@@ -35,24 +33,26 @@ const handler: Handler = flow(
         code =>
           eqCode.equals(code, '23505')
             ? e(`This ${pgErr.table || 'resource'} already exists`, BAD_REQUEST)
+            : code in CODES
+            ? e(CODES[code], FORBIDDEN)
             : badGateway
       )
     )
-);
-
-// checks if the query returned rows
-type HasRows = (e: E) => <T>(c: Chunk<T>) => Async<Data<T>>;
-const hasRows: HasRows = e => c =>
-  pipe(
-    NEA.fromArray(c.rows),
-    TE.fromOption(() => e)
   );
 
 const pool = new Pool(DB_CONFIG);
 
 // postgres query
-type Query = <T>(p?: Pool) => <U>(s: SQL, args: U[]) => Async<Chunk<T>>;
+type Query = <T>(p?: Pool) => <U>(s: SQL, args: U[]) => Async<QueryRes<T>>;
 const query: Query = (p = pool) => (s, args) =>
   TE.tryCatch(async () => await p.query(s, args), handler);
+
+// checks if the query returned rows
+type HasRows = (e: E) => <T>(q: QueryRes<T>) => Async<Data<T>>;
+const hasRows: HasRows = e => q =>
+  pipe(
+    NEA.fromArray(q.rows),
+    TE.fromOption(() => e)
+  );
 
 export { Data, handler, hasRows, query };

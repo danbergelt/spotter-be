@@ -1,26 +1,19 @@
-import {
-  userDecoder,
-  contactDecoder,
-  exerciseDecoder,
-  tagDecoder,
-  workoutDecoder
-} from '../../../validators/decoders';
+import { userDecoder, contactDecoder } from '../../../validators/decoders';
 import assert from 'assert';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
-import { ObjectId } from 'mongodb';
 
 describe('user decoder', () => {
   it('errors out when email is missing', () => {
     const foo = { pw: 'password' };
     const result = userDecoder.decode(foo);
-    const expected = 'Email must be string';
+    const expected = 'Email must be a string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
   it('errors out when email is not a string', () => {
     const foo = { email: 1, pw: 'password' };
     const result = userDecoder.decode(foo);
-    const expected = 'Email must be string';
+    const expected = 'Email must be a string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
@@ -34,32 +27,32 @@ describe('user decoder', () => {
   it('errors out when password is missing', () => {
     const foo = { email: 'foo@bar.com' };
     const result = userDecoder.decode(foo);
-    const expected = 'Password must be string';
+    const expected = 'Password must be a string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
   it('errors out when password is not a string', () => {
-    const foo = { email: 'foo@bar.com', pw: 1 };
+    const foo = { email: 'foo@bar.com', password: 1 };
     const result = userDecoder.decode(foo);
-    const expected = 'Password must be string';
+    const expected = 'Password must be a string';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
   it('errors out when password is too short', () => {
-    const foo = { email: 'foo@bar.com', pw: 'foo' };
+    const foo = { email: 'foo@bar.com', password: 'foo' };
     const result = userDecoder.decode(foo);
     const expected = 'Password too short (6 char min)';
     assert.ok(isLeft(result) && result.left[0].message === expected);
   });
 
   it('strips junk fields', () => {
-    const foo = { email: 'foo@bar.com', pw: 'foobar' };
+    const foo = { email: 'foo@bar.com', password: 'foobar' };
     const result = userDecoder.decode({ ...foo, foo: 'bar' });
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
 
   it('returns right on successful validation', () => {
-    const foo = { email: 'foo@bar.com', pw: 'foobar' };
+    const foo = { email: 'foo@bar.com', password: 'foobar' };
     const result = userDecoder.decode(foo);
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
@@ -69,25 +62,38 @@ describe('contact decoder', () => {
   it('errors out when name is missing', () => {
     const foo = { email: 'foo@bar.com', subject: 'foo', message: 'bar' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Name must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Name must be a string'
+    );
   });
 
   it('errors out when name is not a string', () => {
-    const foo = { name: 1, email: 'foo@bar.com', subject: 'foo', message: 'bar' };
+    const foo = {
+      name: 1,
+      email: 'foo@bar.com',
+      subject: 'foo',
+      message: 'bar'
+    };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Name must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Name must be a string'
+    );
   });
 
   it('errors out when email is missing', () => {
     const foo = { name: 'foo', subject: 'foo', message: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Email must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Email must be a string'
+    );
   });
 
   it('errors out when email is not a string', () => {
     const foo = { email: 1, name: 'foo', subject: 'foo', message: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Email must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Email must be a string'
+    );
   });
 
   it('errors out when email is invalid format', () => {
@@ -99,35 +105,63 @@ describe('contact decoder', () => {
   it('errors out when subject is missing', () => {
     const foo = { email: 'foo@bar.com', name: 'foo', message: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Subject must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Subject must be a string'
+    );
   });
 
   it('errors out when subject is not a string', () => {
-    const foo = { email: 'foo@bar.com', name: 'foo', message: 'foo', subject: 1 };
+    const foo = {
+      email: 'foo@bar.com',
+      name: 'foo',
+      message: 'foo',
+      subject: 1
+    };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Subject must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Subject must be a string'
+    );
   });
 
   it('errors out when message is missing', () => {
     const foo = { email: 'foo@bar.com', name: 'foo', subject: 'foo' };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Message must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Message must be a string'
+    );
   });
 
   it('errors out when message is not a string', () => {
-    const foo = { email: 'foo@bar.com', name: 'foo', subject: 'foo', message: 1 };
+    const foo = {
+      email: 'foo@bar.com',
+      name: 'foo',
+      subject: 'foo',
+      message: 1
+    };
     const result = contactDecoder.decode(foo);
-    assert.ok(isLeft(result) && result.left[0].message === 'Message must be string');
+    assert.ok(
+      isLeft(result) && result.left[0].message === 'Message must be a string'
+    );
   });
 
   it('strips junk fields', () => {
-    const foo = { email: 'foo@bar.com', name: 'foo', subject: 'foo', message: 'foo' };
+    const foo = {
+      email: 'foo@bar.com',
+      name: 'foo',
+      subject: 'foo',
+      message: 'foo'
+    };
     const result = contactDecoder.decode({ ...foo, foo: 'bar' });
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
 
   it('validates and returns the object as a right', () => {
-    const foo = { email: 'foo@bar.com', name: 'foo', subject: 'foo', message: 'foo' };
+    const foo = {
+      email: 'foo@bar.com',
+      name: 'foo',
+      subject: 'foo',
+      message: 'foo'
+    };
     const result = contactDecoder.decode(foo);
     assert.deepStrictEqual(isRight(result) && result.right, foo);
   });
